@@ -1,0 +1,5 @@
+question_id,response,quadrant,domaine_sensoriel,label,pour_calcul
+1,2,EV,Traitement de l'information AUDITIVE,Réagit vivement au bruit inattendu ou fort. (Par exemple Sirène chien qui aboie sèche cheveux).,oui
+34,5,EN,Traitement de l'information relative au MOUVEMENT,"Se cogne aux choses ou aux gens, ne remarque pas ce qui se trouve sur son chemin.",oui
+85,2,EN,Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle,"Éprouve des difficultés à trouver des objets dans un endroit encombré (par exemple, des chaussures dans une chambre en désordre, un crayon dans un tiroir de « bric-à-brac »).",oui
+86,0,EN,Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle,Semble ne pas remarquer des personnes qui entrent dans la pièce.,non

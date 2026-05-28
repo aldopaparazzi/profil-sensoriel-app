@@ -1,0 +1,5 @@
+question_id,response,quadrant,domaine_sensoriel,label,pour_calcul
+1,3.0,SE,Traitement GLOBAL de l’information,a besoin d’une routine pour rester apaisé(e) ou calme.,oui
+34,0.0,SE,Traitement de l’information TACTILE,"devient anxieux(se) lorsqu’il/elle marche ou rampe ou se déplace à quatre pattes sur certaines surfaces (par exemple, herbe, sable, tapis, carrelage).*",non
+85,2.0,,,,
+86,4.0,,,,

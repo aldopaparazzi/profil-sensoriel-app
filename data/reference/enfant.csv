@@ -1,0 +1,87 @@
+quadrant;domaine_sensoriel;question_id;label;pour_calcul
+EV;Traitement de l'information AUDITIVE;1;Réagit vivement au bruit inattendu ou fort. (Par exemple Sirène chien qui aboie sèche cheveux).;oui
+EV;Traitement de l'information AUDITIVE;2;Se couvre les oreilles des mains pour se protéger du bruit.;oui
+SE;Traitement de l'information AUDITIVE;3;Éprouve des difficultés à accomplir ou terminer des tâches lorsqu'il y a de la musique ou que la télévision est allumée.;oui
+SE;Traitement de l'information AUDITIVE;4;Est distrait·e dans un environnement bruyant.;oui
+EV;Traitement de l'information AUDITIVE;5;Ne peut pas réaliser des tâches lorsqu'il a un bruit de fond. (par exemple ventilateur réfrigérateur).;oui
+SE;Traitement de l'information AUDITIVE;6;Fais la sourde oreille ou semble m'ignorer.;oui
+SE;Traitement de l'information AUDITIVE;7;Semble ne pas entendre lorsque je l'appelle par son prénom. (alors que son audition est bonne).;oui
+EN;Traitement de l'information AUDITIVE;8;Aime les bruits étranges ou fait du(des) bruit(s) par plaisir.;oui
+SE;Traitement de l'information VISUELLE;9;Préfère jouer ou travailler dans des conditions de faible luminosité.;oui
+NA;Traitement de l'information VISUELLE;10;Préfère |es vêtements aux couleurs et aux motifs vifs.;oui
+NA;Traitement de l'information VISUELLE;11;Aime regarder les détails visuels des objets.;oui
+EN;Traitement de l'information VISUELLE;12;A besoin d'aide pour trouver des objets qui sont facilement repérables par les autres.;oui
+SE;Traitement de l'information VISUELLE;13;Est davantage incommodé·e par des lumières vives que les enfants de son âge.;oui
+RE;Traitement de l'information VISUELLE;14;Regarde les gens qui se déplacent dans la pièce.;oui
+EV;Traitement de l'information VISUELLE;15;Est gêné par les lumières vives (par exemple, se cache de la lumière du soleil qui passe par la fenêtre de la voiture).;non
+SE;Traitement de l'information TACTILE;16;Montre des signes d'anxiété et/ou de détresse lors de la toilette ou des soins du corps qui lui sont dispensés (par exemple, se débat ou pleure) lorsqu'on lui coupe les cheveux ou les ongles ou qu'on lui lave le visage).;oui
+NA;Traitement de l'information TACTILE;17;Devient agacé·e ou contrarié·e par les chaussures ou les chaussettes qu'il/elle porte.;oui
+EV;Traitement de l'information TACTILE;18;Réagit avec émotion ou agressivité lorsqu'on le/la touche.;oui
+SE;Traitement de l'information TACTILE;19;Devient anxieux(se) lorsqu'il/elle se trouve proche des autres (par exemple, dans une file d’attente).;oui
+SE;Traitement de l'information TACTILE;20;Frotte où gratte une partie de son corps qui vient d'être touchée.;oui
+RE;Traitement de l'information TACTILE;21;Touche les personnes ou les objets au point d'agacer les autres.;oui
+RE;Traitement de l'information TACTILE;22;Manifeste un besoin de toucher des jouets, des surfaces ou des textures (par exemple, veut ressentir les sensations Traitement de l'information TACTILEs provoquées par tout ce qui l'entoure, veut toucher à tout).;oui
+EN;Traitement de l'information TACTILE;23;Semble peu ou pas conscient·e de la douleur.;oui
+EN;Traitement de l'information TACTILE;24;Semble peu ou pas conscient·e des changements de température.;oui
+RE;Traitement de l'information TACTILE;25;Touche les objet et les personnes et les objets plus fréquemment que es enfants de son âge.;oui
+EN;Traitement de l'information TACTILE;26;Semble ne pas remarquer que son visage ou ses mains sont sales.;oui
+RE;Traitement de l'information relative au MOUVEMENT;27;Recherche le mouvement au point que cela perturbe les activités quotidiennes (par exemple ne peut pas rester assis·e·, gigote).;oui
+RE;Traitement de l'information relative au MOUVEMENT;28;Se balance sur sa chaise, au sol ou debout.;oui
+NA;Traitement de l'information relative au MOUVEMENT;29;Hésite à monter ou descendre d'un trottoir ou les marches d'un escalier (Par exemple, et prudent·e, s'arrête avant de se déplacer).;oui
+RE;Traitement de l'information relative au MOUVEMENT;30;Devient tout excité·e et très actif·ve au cours de tâches impliquant des mouvements.;oui
+RE;Traitement de l'information relative au MOUVEMENT;31;Se met en danger ou prend des risques en bougeant ou en grimpant.;oui
+RE;Traitement de l'information relative au MOUVEMENT;32;Recherche des occasions de tomber, sans prêter attention à se propre sécurité (par exemple, tombe intentionnellement).;oui
+EN;Traitement de l'information relative au MOUVEMENT;33;Perd l'équilibre de manière inattendue ou soudaine en marchant sur Une surface irrégulière.;oui
+EN;Traitement de l'information relative au MOUVEMENT;34;Se cogne aux choses ou aux gens, ne remarque pas ce qui se trouve sur son chemin.;oui
+EN;Traitement de l'information relative à la POSITION DU CORPS;35;Bouge avec raideur.;oui
+EN;Traitement de l'information relative à la POSITION DU CORPS;36;Se fatigue facilement, surtout lorsqu'il·elle est debout ou lorsqu'il·elle reste dans la même position.;oui
+EN;Traitement de l'information relative à la POSITION DU CORPS;37;Semble avoir une faiblesse musculaire.;oui
+EN;Traitement de l'information relative à la POSITION DU CORPS;38;Prend appui ou cherche des supports pour se tenir (par exemple, se tient la tête avec les mains, s'appuie contre un mur).;oui
+EN;Traitement de l'information relative à la POSITION DU CORPS;39;S'agrippe davantage aux objets, aux Murs ou aux rampes que les enfants de son âge.;oui
+EN;Traitement de l'information relative à la POSITION DU CORPS;40;Marche lourdement comme si ses pieds étaient pesants.;oui
+RE;Traitement de l'information relative à la POSITION DU CORPS;41;Se couche sur les meubles ou sur les personnes comme si il/elle s'affalait dessus ou les enveloppait.;oui
+NA;Traitement de l'information relative à la POSITION DU CORPS;42;A besoin de couvertures lourdes/épaisses pour dormir.;oui
+NA;Traitement de l'information SENSORIELLE ORALE;43;A facilement des haut-le-cœur avec certaines textures d'aliments ou avec certains couverts dans la bouche.;oui
+SE;Traitement de l'information SENSORIELLE ORALE;44;Rejette où évite certains goûts et odeurs de nourriture qui font partie de l'alimentation habituelle d'un enfant.;oui
+SE;Traitement de l'information SENSORIELLE ORALE;45;Ne mange que des aliments d'un certain goût (par exemple, sucré, salé) ou se limite à certaines textures d'aliments.;oui
+SE;Traitement de l'information SENSORIELLE ORALE;46;Se limite à certaines textures d'aliments.;oui
+SE;Traitement de l'information SENSORIELLE ORALE;47;Est un·e mangeu·euse sélectif·ive, particulièrement en ce qui concerne la texture des aliments,.;oui
+RE;Traitement de l'information SENSORIELLE ORALE;48;Sent ou renifle des objets non comestibles.;oui
+RE;Traitement de l'information SENSORIELLE ORALE;49;Manifeste une préférence très marquée pour Certains goûts.;oui
+RE;Traitement de l'information SENSORIELLE ORALE;50;Est avide de certains aliments, goûts ou odeurs.;oui
+RE;Traitement de l'information SENSORIELLE ORALE;51;Porte ses Mains où des objets à la bouche (par exemple, des crayons).;oui
+SE;Traitement de l'information SENSORIELLE ORALE;52;Se mord davantage la langue ou les fièvres que les enfants de son âge.;oui
+EN;CONDUITES relatives au traitement de l'information sensorielle;53;Semble sujet aux accidents.;oui
+EN;CONDUITES relatives au traitement de l'information sensorielle;54;Colorie, écrit ou dessine avec précipitation ou sans application.;oui
+RE;CONDUITES relatives au traitement de l'information sensorielle;55;Prend des risques excessifs (par exemple, grimpe haut dans un arbre, saute d'un meuble haut), compromettant sa propre sécurité.;oui
+RE;CONDUITES relatives au traitement de l'information sensorielle;56;Semble plus actif·ve que autres enfants de son âge.;oui
+EN;CONDUITES relatives au traitement de l'information sensorielle;57;Réalise des tâches de manière plus compliquée que nécessaire (par exemple perd du temps, se déplace lentement).;oui
+EV;CONDUITES relatives au traitement de l'information sensorielle;58;Peut être tétu·e et peu coopératif·ve.;oui
+EV;CONDUITES relatives au traitement de l'information sensorielle;59;Fait des crises de colère,.;oui
+RE;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;60;Semble prendre plaisir à tomber.;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;61;Évite le contact visuel avec moi ou avec d’autres personnes.;oui
+EN;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;62;Semble avoir une faible estime de soi (par exemple, difficulté à s’aimer).;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;63;À besoin d'encouragements dans une situation exigeante ou pour reprendre une tâche difficile.;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;64;Est sensible aux critique&.;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;65;A es peurs prévisibles et claquement identifiées.;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;66;Dit qu'il/elle se sent nul(le).;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;67;Est trop sérieux(se).;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;68;A des réactions émotionnelles violentes quand il/elle n'arrive pas à l'accomplir ou à terminer une tâche.;oui
+SE;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;69;A des difficultés à interpréter le langage corporel ou les expressions faciales.;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;70;Est facilement frustré·e.;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;71;A des peurs qui perturbent les routines quotidiennes.;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;72;Montre des signes d'anxiété et/ou de détresse lors de changements de plans et de routines ou lors des modifications survenues par rapport à ses attentes.;oui
+SE;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;73;A un besoin de protection plus important que les enfants de son âge (pare exemple, est sans défense sur le plan physique ou fonctionnel).;oui
+EV;Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle;74;Interagit ou participe moins au sein d'un groupe que les € enfants de son âge.;oui
+EV;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;75;Éprouve des difficultés avec les relations amicales (par exemple à du mal à se faire des ami·e·s où à les garder).;oui
+EN;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;76;Manque les occasions de contact visuel avec moi au cours des interactions de tous les jours.;oui
+SE;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;77;A des difficultés à être attentif·ve.;oui
+SE;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;78;Détourne le regard de ses tâches pour observer tout ce qui se passe dans la pièce.;oui
+EN;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;79;Semble ne pas être conscient·e de ce qui se passe dans un environnement actif (par exemple, semble ne pas remarquer qu'il y a eu de l'activité).;oui
+EN;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;80;Fixe intensément les objets.;oui
+EV;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;81;Fixe intensément les gens.;oui
+RE;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;82;Regarde chaque personne qui se déplace dans la pièce.;oui
+RE;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;83;Passe d'une chose à une autre, ce qui perturbe ses activités.;oui
+SE;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;84;Se perd facilement.;oui
+EN;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;85;Éprouve des difficultés à trouver des objets dans un endroit encombré (par exemple, des chaussures dans une chambre en désordre, un crayon dans un tiroir de « bric-à-brac »).;oui
+EN;Réponses ATTENTIONNELLE relatives au traitement de l'information sensorielle;86;Semble ne pas remarquer des personnes qui entrent dans la pièce.;non

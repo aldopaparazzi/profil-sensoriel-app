@@ -1,0 +1,17 @@
+{
+  "enfant": {
+    "url": "https://docs.google.com/spreadsheets/d/1JEekxASmtY_A9zAHnPQau9cu3et3RTiGqV3gezKrKFs/export?format=csv",
+    "type": "tally_wide",
+    "active": true
+  },
+  "jeune_enfant": {
+    "url": "https://docs.google.com/spreadsheets/d/1gfENCpzUc-8g6veU4EzTtscvyy430QHpxtKTCUY0cOA/export?format=csv",
+    "type": "tally_wide",
+    "active": true
+  },
+  "scolaire": {
+    "url": "https://docs.google.com/spreadsheets/d/1nOPZAJAqWuH5d1zPtjzXgw5N2THgIudCwEzocvRQfwo/export?format=csv",
+    "type": "tally_wide",
+    "active": true
+  }
+}
