@@ -1,141 +1,78 @@
-# 🧠 Profil Sensoriel App
+# 🧠 Sensorial Tool
 
-API backend permettant de calculer et analyser un profil sensoriel à partir de réponses utilisateur.
-
----
-
-## 🎯 Objectif du projet
-
-Cette application a pour but de :
-
-- Collecter des réponses à un questionnaire sensoriel
-- Calculer un score global et des sous-scores
-- Déterminer un profil sensoriel associé
-- Fournir une API simple pour exploitation (web / app / outils externes)
+Outil local destiné à la collecte, au calcul et à la visualisation de profils sensoriels pour un usage en psychomotricité.
 
 ---
 
-## 🧩 Fonctionnalités prévues
+## 🎯 Objectif
 
-### 📥 Entrée de données
+Remplacer un usage Excel existant par un outil :
 
-- Réponses utilisateur sous forme de liste de valeurs numériques
-- Support futur de questionnaires structurés (JSON)
-
-### 🧠 Traitement
-
-- Calcul de score global
-- Analyse par catégories sensorielles (à définir)
-- Classification en profil
-
-### 📤 Sortie
-
-- Score global
-- Niveau ou type de profil
-- Interprétation simplifiée
-- (optionnel futur) recommandations personnalisées
+- plus lisible
+- plus rapide à utiliser
+- plus adapté à l’analyse clinique
+- accessible sans compétence technique
 
 ---
 
-## ⚙️ Stack technique
+## 👩‍⚕️ Utilisateurs
+
+Psychomotriciennes réalisant des bilans sensoriels.
+
+Contraintes utilisateurs :
+
+- pas de logique technique
+- besoin de lecture rapide
+- comparaison de bilans par patient
+- usage quotidien simple
+
+---
+
+## 🧩 Fonctionnement global
+
+1. Les réponses sont collectées via Tally.so
+2. Un script Python récupère les données
+3. Les scores et profils sont calculés
+4. Les résultats sont stockés localement
+5. Une interface permet de :
+   - sélectionner un patient
+   - visualiser ses profils
+   - comparer plusieurs bilans
+
+---
+
+## 📊 Fonctionnalités MVP
+
+- Import de réponses Tally.so
+- Calcul de score sensoriel
+- Attribution de profil
+- Stockage local des résultats
+- Visualisation simple des profils
+- Navigation par patient
+
+---
+
+## 🧠 Fonctionnalités futures
+
+- comparaison multi-bilans
+- graphiques de profils
+- export PDF simple
+- amélioration du modèle de scoring
+
+---
+
+## ⚙️ Stack technique (ouverte)
 
 - Python
-- FastAPI
-- Pydantic
-- Pandas (analyse de données)
-- Requests (extensions API externes éventuelles)
-- Uvicorn (serveur ASGI)
+- traitement de données (pandas possible)
+- stockage local (JSON / CSV / SQLite)
+- interface utilisateur locale (non définie encore)
 
 ---
 
-## 🏗️ Architecture cible
+## 📦 Philosophie
 
-````plaintext
-
-app/
-├── main.py              # point d'entrée FastAPI
-├── api/                 # routes HTTP
-├── services/            # logique métier
-├── schemas/             # validation des données
-├── core/                # config globale
-
-````
-
----
-
-## 📡 API actuelle (MVP)
-
-### POST `/profile/compute`
-
-#### Input
-
-```json
-{
-  "answers": [1, 2, 3, 4]
-}
-```
-
-#### Output
-
-```json
-{
-  "result": {
-    "score": 10,
-    "level": "modéré"
-  }
-}
-```
-
----
-
-## 🧠 Règles métier (actuelles)
-
-- Somme simple des réponses
-- Classification par seuils :
-
-  - score < 10 → faible
-  - 10–19 → modéré
-  - ≥ 20 → élevé
-
----
-
-## 🚧 Évolutions prévues
-
-### Phase 2
-
-- Segmentation des profils sensoriels
-- Ajout de dimensions (auditif, visuel, tactile…)
-
-### Phase 3
-
-- Base de données utilisateurs
-- Historique des profils
-
-### Phase 4
-
-- Interface web (frontend)
-- Visualisation des résultats
-
----
-
-## 📦 Installation
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## ▶️ Lancement
-
-```bash
-uvicorn app.main:app --reload
-```
-
----
-
-## 📌 Philosophie du projet
-
-- Code simple et lisible
-- Séparation logique métier / API
-- Évolution progressive (MVP → produit complet)
+- simplicité maximale
+- zéro complexité inutile
+- outil local rapide
+- priorité à la lisibilité clinique
