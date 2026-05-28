@@ -1,10 +1,10 @@
-# D:\Documents\@Papiers\Elo\PM\Profil sensoriel\app\.vscode\project\main.py
+# D:\Documents\CAO\VSCode\profil-sensoriel-app\main.py
 from config import DEBUG_DIR
 from ingestion.import_data import run as run_import
 from pathlib import Path
 from pipeline.split import split_patient_responses
 from pipeline.map import map_questions
-
+from config.sources import GOOGLE_SHEETS
 
 def main():
 

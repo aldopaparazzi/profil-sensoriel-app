@@ -1,78 +1,74 @@
-# 🧠 Sensorial Tool
+# Profil Sensoriel App
 
-Outil local destiné à la collecte, au calcul et à la visualisation de profils sensoriels pour un usage en psychomotricité.
+## Objectif
 
----
+Application permettant aux psychomotriciennes de visualiser facilement les profils sensoriels des patients à partir de questionnaires en ligne (Tally.so). Remplace les tableurs Excel graphiquement archaïques.
 
-## 🎯 Objectif
+- Collecte les réponses utilisateurs
+- Calcule les scores sensoriels selon règles cliniques
+- Affiche un profil sensoriel multi-dimensionnel
+- Prépare le terrain pour un historique patient et des exports éventuels
 
-Remplacer un usage Excel existant par un outil :
+## Fonctionnalités actuelles
 
-- plus lisible
-- plus rapide à utiliser
-- plus adapté à l’analyse clinique
-- accessible sans compétence technique
+1. **Import des réponses Tally.so**
+   - Scripts Python pour formater les fichiers CSV.
+   - Gestion multi-population : `enfant`, `jeune_enfant`, `scolaire`.
+2. **Pipeline de transformation**
+   - Split des données par population
+   - Mapping des réponses selon quadrants et domaines sensoriels
+   - Filtrage des réponses utilisables pour le calcul
+   - Export CSV pour debug
+3. **Stockage**
+   - Actuellement debug CSV
+   - SQLite prévu pour centraliser les patients et résultats
 
----
+## Roadmap
 
-## 👩‍⚕️ Utilisateurs
+- [ ] Calcul des scores sensoriels globaux et par dimension
+- [ ] UI simple pour consultation rapide par patient et bilan
+- [ ] API FastAPI pour intégration future
+- [ ] Historique et visualisation multi-bilan
+- [ ] Éventuel export PDF ou reporting simple
 
-Psychomotriciennes réalisant des bilans sensoriels.
+## Installation (One-click friendly)
 
-Contraintes utilisateurs :
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate
+pip install -r requirements.txt
+python main.py
+```
 
-- pas de logique technique
-- besoin de lecture rapide
-- comparaison de bilans par patient
-- usage quotidien simple
+## Structure
 
----
+```text
+app/
+├─ data/
+│  ├─ raw/
+│  ├─ debug/
+│
+├─ mapping/
+├─ scripts/
+├─ main.py
+├─ venv/
+```
 
-## 🧩 Fonctionnement global
+### future -->
 
-1. Les réponses sont collectées via Tally.so
-2. Un script Python récupère les données
-3. Les scores et profils sont calculés
-4. Les résultats sont stockés localement
-5. Une interface permet de :
-   - sélectionner un patient
-   - visualiser ses profils
-   - comparer plusieurs bilans
-
----
-
-## 📊 Fonctionnalités MVP
-
-- Import de réponses Tally.so
-- Calcul de score sensoriel
-- Attribution de profil
-- Stockage local des résultats
-- Visualisation simple des profils
-- Navigation par patient
-
----
-
-## 🧠 Fonctionnalités futures
-
-- comparaison multi-bilans
-- graphiques de profils
-- export PDF simple
-- amélioration du modèle de scoring
-
----
-
-## ⚙️ Stack technique (ouverte)
-
-- Python
-- traitement de données (pandas possible)
-- stockage local (JSON / CSV / SQLite)
-- interface utilisateur locale (non définie encore)
+```text
+app/
+├─ core/
+├─ data/
+├─ domain/
+├─ pipelines/
+├─ main.py
+```
 
 ---
 
-## 📦 Philosophie
+### Notes
 
-- simplicité maximale
-- zéro complexité inutile
-- outil local rapide
-- priorité à la lisibilité clinique
+- Les données brutes Tally.so sont transformées avant tout calcul.
+- Chaque population a sa structure propre : normalisation future nécessaire.
+- UI n’est pas encore implémentée.

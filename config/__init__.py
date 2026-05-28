@@ -1,12 +1,13 @@
 # config/__init__.py
 from pathlib import Path
-import json
 
-CONFIG_DIR = Path(__file__).resolve().parent
+# racine du projet = dossier config.py
+ROOT = Path(__file__).resolve().parent.parent
 
-def load_sources():
-    path = CONFIG_DIR / "source.json"
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+# dossiers standards
+DATA_DIR = ROOT / "data"
+DEBUG_DIR = DATA_DIR / "debug"
+RAW_DIR = DATA_DIR / "raw"
+REFERENCE_DIR = DATA_DIR / "reference"
 
-GOOGLE_SHEETS = load_sources()
+DB_PATH = ROOT / "database" / "sensory.db"

@@ -1,3 +1,4 @@
+# D:\Documents\CAO\VSCode\profil-sensoriel-app\config.py
 from pathlib import Path
 
 # racine du projet = dossier config.py

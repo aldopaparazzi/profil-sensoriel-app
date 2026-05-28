@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 from typing import Dict, Optional
 
-from config import GOOGLE_SHEETS
+from config.sources import GOOGLE_SHEETS
 from storage.io_utils import save_raw_csv
 
 logger = logging.getLogger(__name__)

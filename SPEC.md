@@ -1,131 +1,130 @@
-# 📐 Sensorial Tool — Specification produit
+
+# Profil Sensoriel App - Spécifications Techniques
+
+## Contexte
+
+Outil destiné aux psychomotriciennes pour remplacer Excel. Permet de visualiser rapidement le profil sensoriel des patients en fonction de leurs réponses à un questionnaire en ligne.
 
 ---
 
-## 1. Vision produit
+## 1. Entrées
 
-Créer un outil local permettant de remplacer un fichier Excel utilisé pour l’analyse de profils sensoriels en psychomotricité.
-
-L’objectif est de :
-
-- automatiser le calcul
-- structurer les résultats
-- améliorer la lisibilité clinique
-- faciliter la comparaison de bilans
+- CSV exporté depuis Tally.so
+- Champs clés :
+  - patient_id
+  - question_id
+  - réponse
+  - population (`enfant`, `jeune_enfant`, `scolaire`)
 
 ---
 
-## 2. Problème actuel
+## 2. Pipeline transformation (Moteur clinique)
 
-Utilisation d’Excel :
-
-- lecture difficile
-- manque de structuration patient
-- remplissage lent
-- analyse lente
-- faible visualisation des tendances
-- outil non spécialisé
-
----
-
-## 3. Objectif MVP
-
-Permettre :
-
-- import de données de questionnaire
-- calcul automatique des scores
-- génération de profils sensoriels
-- visualisation simple par patient
+1. **Split par population**
+2. **Mapping**
+   - Quadrants
+   - Domaine sensoriel
+   - Label pour calcul
+   - Composante scolaire (si applicable)
+3. **Filtrage**
+   - Sélection des réponses calculables (`pour_calcul=oui`)
+4. **Export debug**
+   - CSV pour vérification
+5. **Persistance**
+   - SQLite pour stockage structuré (patients + réponses + scores)
 
 ---
 
-## 4. Pipeline système
+## 3. Calculs (en cours)
 
-```mermaid id="p9k2sd"
+- Score par quadrant
+- Score global (optionnel)
+- A intégrer dans le futur pipeline
+
+---
+
+## 4. UI / Présentation (à définir)
+
+- Simple, “one click open”
+- Navigation rapide par patient et type de bilan
+- Visualisation graphique multi-dimensionnelle
+- Lecture intuitive pour psychomotriciennes
+
+---
+
+## 5. Backlog produit
+
+### Priorité haute
+
+- Centraliser le pipeline dans une seule logique multi-population
+- Normaliser les champs NaN entre populations
+- Mise en place de SQLite pour éviter CSV debug
+
+### Priorité moyenne
+
+- Calcul et affichage des scores sensoriels
+- Interface simple pour consultation des profils
+- API FastAPI pour intégration future
+
+### Priorité basse
+
+- Historique multi-bilan
+- Export PDF ou reporting
+- Gestion multi-utilisateurs
+
+## Pipeline système (actuel + cible)
+
+```mermaid
 flowchart TD
-    A[Tally.so - Questionnaire] --> B[Script Python import]
-    B --> C[Calcul scores]
-    C --> D[Création profil sensoriel]
-    D --> E[Stockage local]
-    E --> F[Interface utilisateur]
-    F --> G[Visualisation patient]
-    F --> H[Comparaison bilans]
-````
 
----
+%% =====================
+%% INPUT
+%% =====================
+A["Tally.so - Questionnaire patients"] --> B["Export CSV"]
 
-## 5. Modèle de données (conceptuel)
+%% =====================
+%% PREPROCESSING
+%% =====================
+B --> C["Script Python - ingestion"]
+C --> D["Split par population<br/>enfant / jeune_enfant / scolaire"]
 
-### Patient
+%% =====================
+%% CLINICAL MAPPING ENGINE
+%% =====================
+D --> E["Mapping clinique"]
+E --> E1["Quadrants"]
+E --> E2["Domaine sensoriel"]
+E --> E3["Label clinique"]
+E --> E4["Flag pour_calcul"]
 
-- id
-- nom (optionnel)
-- métadonnées simples
+%% =====================
+%% FILTERING
+%% =====================
+E --> F["Filtrage données exploitables"]
 
-### Bilan
+%% =====================
+%% STORAGE (ACTUEL + CIBLE)
+%% =====================
+F --> G1["CSV debug (actuel)"]
+F --> G2["SQLite DB (cible)"]
 
-- date
-- réponses questionnaire
-- score global
-- profil sensoriel
+%% =====================
+%% BUSINESS LOGIC
+%% =====================
+G2 --> H["Calcul scores sensoriels"]
+H --> I["Génération profil patient"]
 
-### Résultat
+%% =====================
+%% PRESENTATION LAYER
+%% =====================
+I --> J["Interface utilisateur locale"]
+J --> J1["Sélection patient"]
+J --> J2["Visualisation profil"]
+J --> J3["Comparaison bilans"]
 
-- score
-- catégorie de profil
-- interprétation
-
----
-
-## 6. Logique de calcul (MVP)
-
-- agrégation des réponses
-- score global = somme ou moyenne pondérée
-- classification en niveaux :
-
-  - faible
-  - modéré
-  - élevé
-
----
-
-## 7. Interface utilisateur (non définie encore)
-
-Fonctions nécessaires :
-
-- liste des patients
-- sélection d’un patient
-- affichage des bilans associés
-- visualisation des profils
-- comparaison entre bilans
-
-Critère clé :
-→ lisibilité clinique immédiate
-
----
-
-## 8. Contraintes produit
-
-- usage local
-- zéro complexité pour l’utilisateur final
-- rapide à ouvrir / utiliser
-- pas de dépendance serveur obligatoire
-- fonctionnement hors ligne possible
-
----
-
-## 9. Hors scope actuel
-
-- API publique
-- architecture distribuée
-- authentification complexe
-- cloud
-
----
-
-## 10. Évolution possible
-
-- visualisations graphiques avancées
-- export PDF
-- enrichissement modèle sensoriel
-- historisation avancée
+%% =====================
+%% FUTURE EXTENSIONS
+%% =====================
+I --> K["Export PDF / rapport"]
+G2 --> L["Historique multi-bilans"]
+```
