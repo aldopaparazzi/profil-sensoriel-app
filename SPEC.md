@@ -20,7 +20,9 @@ Outil destiné aux psychomotriciennes pour remplacer Excel. Permet de visualiser
 
 ## 2. Pipeline transformation (Moteur clinique)
 
-1. **Split par population**
+1. **Split du résultat de formulaire**
+   - Metadata patient
+   - Réponses questionnaire
 2. **Mapping**
    - Quadrants
    - Domaine sensoriel

@@ -101,3 +101,37 @@ Fonctions :
 * sélection patient
 * affichage bilans
 * comparaison simple
+
+## cible ?
+
+```text
+profil-sensoriel-app/
+├─ app/
+│  ├─ core/
+│  │  ├─ scoring/
+│  │  ├─ mapping/
+│  │
+│  ├─ etl/
+│  │  ├─ ingest.py
+│  │  ├─ split.py
+│  │  ├─ map.py
+│  │
+│  ├─ storage/
+│  │  ├─ sqlite.py   ← UNIQUE DB layer
+│  │
+│  ├─ config/
+│  ├─ api/ (future FastAPI)
+│
+├─ data/
+│  ├─ raw/
+│  ├─ reference/
+│  ├─ debug/ (option dev only)
+│
+├─ database/
+│  ├─ sensory.db     ← UNIQUE DB
+│
+├─ main.py           ← UNIQUE entrypoint
+├─ requirements.txt
+├─ README.md
+├─ SPEC.md
+```
