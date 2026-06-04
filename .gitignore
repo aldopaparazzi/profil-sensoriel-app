@@ -1,6 +1,9 @@
+.claude/
 __pycache__/
 *.pyc
 *.pyo
+
+resultat.json
 
 venv/
 

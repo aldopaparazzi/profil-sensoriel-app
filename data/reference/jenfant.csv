@@ -1,0 +1,55 @@
+quadrant;domaine_sensoriel;question_id;label;pour_calcul
+SE;Traitement GLOBAL de l’information;1;a besoin d’une routine pour rester apaisé(e) ou calme.;oui
+SE;Traitement GLOBAL de l’information;2;agit d’une façon qui perturbe l’emploi du temps et les projets de la famille.;oui
+EV;Traitement GLOBAL de l’information;3;ne veut pas jouer lorsqu’il/elle se trouve parmi d’autres enfants.;oui
+SE;Traitement GLOBAL de l’information;4;prend plus de temps que les enfants de son âge à répondre aux questions ou à réagir aux actions.;oui
+SE;Traitement GLOBAL de l’information;5;se retire ou isolé de certaines situations.;oui
+EN;Traitement GLOBAL de l’information;6;a des habitudes de sommeil non prévisibles.;oui
+EV;Traitement GLOBAL de l’information;7;a des habitudes alimentaires non prévisibles.;oui
+EN;Traitement GLOBAL de l’information;8;a le sommeil léger.;oui
+EN;Traitement GLOBAL de l’information;9;manque les occasions de contact visuel avec moi au cours des interactions de tous les jours.;oui
+EV;Traitement GLOBAL de l’information;10;devient anxieux(se) face aux situations nouvelles.;oui
+EN;Traitement de l’information AUDITIVE;11;n’est attentif(ve) que si je parle fort.;oui
+EN;Traitement de l’information AUDITIVE;12;n’est attentif(ve) que lorsque je le/la touche (alors que son audition est bonne).;oui
+SE;Traitement de l’information AUDITIVE;13;sursaute au moindre bruit par rapport aux enfants de son âge (par exemple, chien qui aboie, enfants qui crient).;oui
+EN;Traitement de l’information AUDITIVE;14;est distrait(e) dans un environnement bruyant.;oui
+EN;Traitement de l’information AUDITIVE;15;ignore les sons, y compris ma voix.;oui
+SE;Traitement de l’information AUDITIVE;16;devient perturbé(e) ou irritable dans des environnements bruyants ou essaie de les fuir.;oui
+EN;Traitement de l’information AUDITIVE;17;met beaucoup de temps à réagir à l’appel de son prénom.;oui
+EN;Traitement de l’information VISUELLE;18;aime regarder les objets qui bougent ou qui tournoient (par exemple, machine à laver, toupies, jouets avec des roues).;oui
+EN;Traitement de l’information VISUELLE;19;aime regarder les objets qui brillent.;oui
+EN;Traitement de l’information VISUELLE;20;est attiré(e) par les écrans (télévision, tablette ou smartphone) comportant des images aux couleurs vives et brillantes ou animées avec un rythme rapide.;oui
+EN;Traitement de l’information VISUELLE;21;réagit vivement aux lumières fortes ou inattendues (par exemple, lorsqu’elle/il sort à l’extérieur).;oui
+SE;Traitement de l’information VISUELLE;22;est gêné(e) par les lumières vives (par exemple, se cache de la lumière du soleil qui passe par la fenêtre de la voiture).;oui
+EN;Traitement de l’information VISUELLE;23;est davantage incommodé(e) par des lumières vives que les enfants de son âge.;oui
+EN;Traitement de l’information VISUELLE;24;repousse les jouets aux couleurs vives.*;non
+EN;Traitement de l’information VISUELLE;25;ne réagit pas à sa propre image/son reflet dans le miroir.*;non
+SE;Traitement de l’information TACTILE;26;devient irritable ou perturbé(e) lorsqu’on lui coupe les ongles.;oui
+EV;Traitement de l’information TACTILE;27;évite les caillns.;oui
+SE;Traitement de l’information TACTILE;28;est irritable ou perturbé(e) lorsqu’il/elle passe successivement dans des endroits comportant de grands écarts de température (par exemple, contraste chaud/froid en sortant d’un bain).;oui
+EV;Traitement de l’information TACTILE;29;évite le contact ou se dégage rapidement des surfaces rugueuses, froides ou collantes (par exemple, tapis, plan de travail).;oui
+EN;Traitement de l’information TACTILE;30;se cogne aux choses ou aux gens, ne remarquant pas ce qui se trouve sur son chemin.;oui
+SE;Traitement de l’information TACTILE;31;tire sur les vêtements qu’elle/il porte ou résiste à enfiler des vêtements.;oui
+EN;Traitement de l’information TACTILE;32;aime faire des éclaboussures dans le bain ou à la piscine.*;non
+SE;Traitement de l’information TACTILE;33;devient contrarié(e) ou irritable lorsque ses vêtements, ses mains ou son visage sont sales.;non
+SE;Traitement de l’information TACTILE;34;devient anxieux(se) lorsqu’il/elle marche ou rampe ou se déplace à quatre pattes sur certaines surfaces (par exemple, herbe, sable, tapis, carrelage).*;non
+EV;Traitement de l’information TACTILE;35;évite ou se dégage d’un contact ou d’un toucher inattendu.*;non
+RE;Traitement de l’information relative au MOUVEMENT;36;aime l’activité physique (par exemple, sautiller, être soulevé(e) en l’air).;oui
+RE;Traitement de l’information relative au MOUVEMENT;37;aime les activités rythmiques (par exemple, balancements, bercements, promenades en voiture).;oui
+RE;Traitement de l’information relative au MOUVEMENT;38;prend des risques en bougeant ou en grimpant.;oui
+SE;Traitement de l’information relative au MOUVEMENT;39;devient irritable ou perturbé(e) lorsqu’on le/la couche sur le dos (par exemple, pour changer sa couche).;oui
+EN;Traitement de l’information relative au MOUVEMENT;40;semble maladroit(e) ou sujet(te) aux accidents (par exemple, tombe ou se cogne).;oui
+SE;Traitement de l’information relative au MOUVEMENT;41;devient irritable lorsqu’on le/la déplace (par exemple, lorsqu’on le/la promène, lorsqu’il/elle passe des bras d’une personne à ceux d’une autre).* ;oui
+EV;Traitement de l’information SENSORIELLE ORALE;42;manifeste une aversion claire pour toute nourriture, à l’exception de quelques rares aliments de son choix.;oui
+NA;Traitement de l’information SENSORIELLE ORALE;43;bave.;oui
+SE;Traitement de l’information SENSORIELLE ORALE;44;préfère une certaine texture d’aliments (par exemple, moelleux, croquant).;oui
+EN;Traitement de l’information SENSORIELLE ORALE;45;boit pour se calmer.;oui
+SE;Traitement de l’information SENSORIELLE ORALE;46;a des haut-le-cœur avec de la nourriture ou des boissons.;oui
+NA;Traitement de l’information SENSORIELLE ORALE;47;garde la nourriture dans ses joues avant de l’avaler.;oui
+SE;Traitement de l’information SENSORIELLE ORALE;48;éprouve des difficultés à passer aux aliments solides (sevrage).;oui
+EV;Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle;49;fait des crises de colère.;oui
+NA;Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle;50;est « collant(e) ».;oui
+NA;Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle;51;ne reste calme que lorsqu’il/elle est pris(e) dans les bras.;oui
+SE;Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle;52;est difficile ou irritable.;oui
+EV;Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle;53;est gêné(e) ou perturbé(e) par les nouveaux environnements.;oui
+EV;Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle;54;devient si perturbé(e) ou anxieux(se) dans les nouveaux environnements qu’il est difficile de le/la calmer.;oui

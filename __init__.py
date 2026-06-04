@@ -1,1 +1,0 @@
-# D:\Documents\CAO\VSCode\profil-sensoriel-app\__init__.py
