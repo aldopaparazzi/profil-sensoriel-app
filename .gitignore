@@ -8,3 +8,4 @@ resultat.json
 venv/
 
 *.ps1
+*.~lock.*

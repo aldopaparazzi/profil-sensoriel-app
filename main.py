@@ -1,78 +1,85 @@
-# D:\Documents\CAO\VSCode\profil-sensoriel-app\main.py
-from config import DEBUG_DIR
-from ingestion.import_data import run as run_import
-from pathlib import Path
-from pipeline.split import split_patient_responses
-from pipeline.map import map_questions
-from config.sources import GOOGLE_SHEETS
+# main.py
+# raw → split → mapped → scores → report
+# 1. Fetch Tally json
+# 2. Validation
+# 3. Split
+# 4. Mapping
+# 5. Scoring
+# 6. Report
+
+from config.settings import load_config
+from utils.logger import log
+from ingestion.fetch_tally import fetch_tally, TallyAPIError
+from pipeline.validate import validate_dataset
 
 def main():
 
+    print("\n=== PROFIL SENSORIEL V1 ===\n")
+
+    config = load_config()
+
+    context = {
+        "raw": {},
+        "validated": {},
+        "split": {},
+        "mapped": {},
+        "scores": {},
+        "errors": [],
+        "debug": config.get("debug", False)
+    }
+
+    log(context, "1.📥 Fetch Tally") 
+    token = config["tally_token"]
+
+    for form_name, form_id in config["forms"].items():
+
+        try:
+            df = fetch_tally(form_id, token)
+            context["raw"][form_name] = df
+            log(context, df)
+
+        except TallyAPIError as e:
+            error_msg = f"[{form_name}] {str(e)}"
+            print("❌", error_msg)
+
+            context["errors"].append(error_msg)
+
     # =========================================================
-    # IMPORT
+    # STOP LOGIQUE SI ERREUR CRITIQUE
     # =========================================================
-
-    print("=== IMPORT ===")
-
-    datasets = run_import()
-
-    # datasets =
-    # {
-    #   "enfant": df,
-    #   "jeune_enfant": df,
-    #   "scolaire": df
-    # }
+    if not context["raw"]:
+        print("\n⛔ Aucun formulaire récupéré. Arrêt pipeline.")
+        return
 
     # =========================================================
-    # PIPELINE
+    # 2. VALIDATION
     # =========================================================
+    for form_name, df in context["raw"].items():
+        log(context, f"2.🧹 Validation {form_name} ({len(df)} lignes)")
+        context["validated"][form_name] = validate_dataset(df, context)
 
-    print("\n=== PIPELINE ===")
+    for k, df in context["validated"].items():
+        print(f"{k}: {len(df)} lignes validées")
 
-    for form_type, df in datasets.items():
+    # =========================================================
+    # NEXT STEPS (placeholders)
+    # =========================================================
+    log(context, "3.✂️ Split")
+    log(context, "4.🧠 Mapping")
+    log(context, "5.📊 Scoring")
+    log(context, "6.📄 Report")
 
-        print(f"\n--- {form_type} ---")
+    context["scores"] = {
+        "RE": 0,
+        "EV": 0,
+        "SE": 0,
+        "EN": 0
+    }
 
-        # -----------------------------------------------------
-        # SPLIT
-        # -----------------------------------------------------
+    print("\nSCORES :")
+    print(context["scores"])
 
-        patients, responses = split_patient_responses(
-            df,
-            debug=True,
-            name=form_type
-        )
-
-        print(f"patients: {len(patients)}")
-        print(f"responses: {len(responses)}")
-
-        # -----------------------------------------------------
-        # MAP
-        # -----------------------------------------------------
-
-        print(f"\n=== MAP {form_type} ===")
-
-        mapped = map_questions(
-            responses,
-            form_type=form_type,
-            debug=True
-        )
-
-        print(mapped.head())
-        # =====================================================
-        # DEBUG EXPORT (AJOUT ICI)
-        # =====================================================
-
-        debug_dir = Path("data/debug")
-        debug_dir.mkdir(parents=True, exist_ok=True)
-
-        output_path = debug_dir / f"{form_type}_mapped.csv"
-        mapped.to_csv(output_path, index=False, encoding="utf-8")
-
-        print(f"[DEBUG] mapped saved → {output_path}")
-        
-    print("\nOK pipeline terminé")
-
+    print("\n=== DONE ===")
 
 if __name__ == "__main__":
     main()
