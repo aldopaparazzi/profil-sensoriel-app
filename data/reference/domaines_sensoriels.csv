@@ -1,0 +1,11 @@
+enfant;jeune_enfant;scolaire
+Auditif;Traitement_Global;Auditif
+Visuel;Auditif;Visuel
+Tactile;Visuel;Tactile
+Mouvement;Tactile;Mouvement
+Position_corps;Mouvement;Comportemental
+Oral;Oral;
+Comportemental;Comportemental;
+Conduites;;
+Socio-émotionnel;;
+Attentionnel;;

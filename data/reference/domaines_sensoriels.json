@@ -1,0 +1,30 @@
+{
+  "enfant": [
+    "Auditif",
+    "Visuel",
+    "Tactile",
+    "Mouvement",
+    "Position_corps",
+    "Oral",
+    "Comportemental",
+    "Conduites",
+    "Socio-émotionnel",
+    "Attentionnel"
+  ],
+  "jeune_enfant": [
+    "Traitement_Global",
+    "Auditif",
+    "Visuel",
+    "Tactile",
+    "Mouvement",
+    "Oral",
+    "Comportemental"
+  ],
+  "scolaire": [
+    "Auditif",
+    "Visuel",
+    "Tactile",
+    "Mouvement",
+    "Comportemental"
+  ]
+}
