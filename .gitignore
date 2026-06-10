@@ -1,11 +1,19 @@
+.env
+
+data/raw/
+
 .claude/
+.vscode/
+.continue
+
 __pycache__/
+venv/
+
 *.pyc
 *.pyo
 
 resultat.json
 
-venv/
-
 *.ps1
 *.~lock.*
+source_code.*

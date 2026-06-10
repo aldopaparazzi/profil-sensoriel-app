@@ -1,10 +1,36 @@
 # pipeline/validate.py
 
+# Responsabilité :
+#   vérifier
+#   nettoyer
+#   garantir la cohérence minimale
+
 import pandas as pd
 from utils.logger import log
 
 
-def validate_dataset(df: pd.DataFrame, context: dict | None = None) -> pd.DataFrame:
+def validate_dataset(raw: dict, context: dict) -> dict:
+
+    if not raw:
+        raise ValueError("Dataset vide")
+
+    if "submissions" not in raw:
+        raise ValueError("Structure invalide: missing submissions")
+
+    cleaned = {
+        "submissions": []
+    }
+
+    for sub in raw["submissions"]:
+
+        if not sub.get("responses"):
+            continue
+
+        cleaned["submissions"].append(sub)
+
+    return cleaned
+
+def validate_dataset_pd(df: pd.DataFrame, context: dict | None = None) -> pd.DataFrame:
     if context is None:
         context = {"debug": True}
 

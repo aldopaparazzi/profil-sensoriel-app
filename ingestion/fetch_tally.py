@@ -1,63 +1,60 @@
 #ingestion\fetch_tally.py
+
+# Entrée :
+#   form_id
+#   token
+# 
+# Sortie :
+#   liste de soumissions Tally
+# 
+# Garanties :
+#   - aucune donnée supprimée
+#   - aucune donnée interprétée
+#   - aucune donnée convertie
+#   - structure JSON conservée
+#
+# Actions :
+#   1. appel API
+#   2. retourne raw pour clean.py - dict (JSON brut Tally)
+
+
 import requests
-import pandas as pd
-
-
-TALLY_URL = "https://api.tally.so/forms/{form_id}/submissions"
 
 
 class TallyAPIError(Exception):
-    pass
+    def __init__(self, message, status_code=None):
+        super().__init__(message)
+        self.status_code = status_code
 
 
-def extract_value(a):
-    if isinstance(a, dict):
-        return a.get("value", a.get("answer"))
-    return a
+def fetch_tally(form_id: str, token: str) -> dict:
+    """
+    Ingestion pure de l'API Tally.
 
+    Règles :
+    - aucune transformation
+    - aucune sauvegarde
+    - aucune logique métier
+    """
 
-def fetch_tally(form_id: str, token: str) -> pd.DataFrame:
-
-    url = TALLY_URL.format(form_id=form_id)
+    url = f"https://api.tally.so/forms/{form_id}/submissions"
 
     headers = {
         "Authorization": f"Bearer {token}"
     }
 
     try:
-        r = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=30)
+    except requests.RequestException as e:
+        raise TallyAPIError(f"Erreur réseau : {e}")
 
-        if r.status_code == 401:
-            raise TallyAPIError("Token Tally invalide ou expiré (401)")
+    if response.status_code == 401:
+        raise TallyAPIError("Token invalide", status_code=401)
 
-        if not r.ok:
-            raise TallyAPIError(
-                f"Erreur API Tally ({r.status_code}) : {r.text[:200]}"
-            )
+    if response.status_code != 200:
+        raise TallyAPIError(
+            f"Erreur API Tally: {response.status_code} - {response.text}",
+            status_code=response.status_code
+        )
 
-        data = r.json()
-
-    except requests.exceptions.RequestException as e:
-        raise TallyAPIError(f"Erreur réseau Tally : {str(e)}")
-
-    submissions = data.get("submissions", [])
-
-    rows = []
-
-    for sub in submissions:
-
-        base = {
-            "submissionId": sub.get("submissionId"),
-            "submittedAt": sub.get("submittedAt") or sub.get("createdAt")
-        }
-
-        answers = sub.get("answers", {})
-
-        for q, a in answers.items():
-            rows.append({
-                **base,
-                "question": q,
-                "response": extract_value(a)
-            })
-
-    return pd.DataFrame(rows)
+    return response.json()

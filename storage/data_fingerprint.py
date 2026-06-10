@@ -1,4 +1,5 @@
 import hashlib
+import json
 import pandas as pd
 
 def dataframe_hash(df: pd.DataFrame) -> str:
@@ -13,3 +14,15 @@ def dataframe_hash(df: pd.DataFrame) -> str:
     content = df_normalized.to_csv(index=False)
 
     return hashlib.md5(content.encode("utf-8")).hexdigest()
+
+def json_hash(data) -> str:
+    content = json.dumps(
+        data,
+        sort_keys=True,
+        ensure_ascii=False,
+        separators=(",", ":")
+    )
+
+    return hashlib.md5(
+        content.encode("utf-8")
+    ).hexdigest()

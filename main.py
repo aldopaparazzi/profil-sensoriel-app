@@ -6,11 +6,17 @@
 # 4. Mapping
 # 5. Scoring
 # 6. Report
+from pprint import pprint
 
-from config.settings import load_config
 from utils.logger import log
-from ingestion.fetch_tally import fetch_tally, TallyAPIError
 from pipeline.validate import validate_dataset
+from pipeline.split import split_dataset
+from pipeline.mapping import load_reference, map_questions, map_sensory_responses
+from ingestion.fetch_tally import fetch_tally, TallyAPIError
+from storage.io_utils import save_raw_json
+
+from config.settings import load_config, replace_tally_token
+
 
 def main():
 
@@ -28,25 +34,37 @@ def main():
         "debug": config.get("debug", False)
     }
 
-    log(context, "1.📥 Fetch Tally") 
     token = config["tally_token"]
 
+    log(context, "1.📥 Fetch Tally")
+
+    # =========================================================
+    # 1. INGESTION + RAW
+    # =========================================================
     for form_name, form_id in config["forms"].items():
 
         try:
-            df = fetch_tally(form_id, token)
-            context["raw"][form_name] = df
-            log(context, df)
+            raw = fetch_tally(form_id, token)
 
         except TallyAPIError as e:
-            error_msg = f"[{form_name}] {str(e)}"
-            print("❌", error_msg)
 
-            context["errors"].append(error_msg)
+            if e.status_code == 401:
+                print("\n⚠️ Token Tally invalide")
+                token = replace_tally_token()
 
-    # =========================================================
-    # STOP LOGIQUE SI ERREUR CRITIQUE
-    # =========================================================
+                raw = fetch_tally(form_id, token)
+
+            else:
+                error_msg = f"[{form_name}] {str(e)}"
+                context["errors"].append(error_msg)
+                continue
+
+        save_raw_json(raw, form_name)
+        context["raw"][form_name] = raw
+
+        print(f"{form_name}: À jour")
+
+
     if not context["raw"]:
         print("\n⛔ Aucun formulaire récupéré. Arrêt pipeline.")
         return
@@ -54,20 +72,56 @@ def main():
     # =========================================================
     # 2. VALIDATION
     # =========================================================
-    for form_name, df in context["raw"].items():
-        log(context, f"2.🧹 Validation {form_name} ({len(df)} lignes)")
-        context["validated"][form_name] = validate_dataset(df, context)
+    log(context, "\n2.🧹 Validation")
 
-    for k, df in context["validated"].items():
-        print(f"{k}: {len(df)} lignes validées")
+    for form_name, raw in context["raw"].items():
+        clean = validate_dataset(raw, context)
+        context["validated"][form_name] = clean
+        print(f"{form_name}: Données validé")
+        
 
     # =========================================================
-    # NEXT STEPS (placeholders)
+    # 3. SPLIT
     # =========================================================
-    log(context, "3.✂️ Split")
-    log(context, "4.🧠 Mapping")
-    log(context, "5.📊 Scoring")
-    log(context, "6.📄 Report")
+    log(context, "\n3.✂️ Split")
+
+    for form_name, clean in context["validated"].items():
+        split = split_dataset(clean)
+        context["split"][form_name] = split
+        print(f"{form_name}: Éléments séparés")
+
+
+    # =========================================================
+    # 4. MAPPING (IMPORTANT: PAR FORM)
+    # =========================================================
+    log(context, "\n4.🧠 Mapping")
+    for form_name, submissions in context["split"].items():
+
+    # 3.1. Exclusion des soumissions vides
+        if not submissions:
+            print(f"📭 {form_name}: aucune soumission")
+            continue
+
+        print(
+            f"📥 {form_name}: "
+            f"{len(submissions)} soumission(s)"
+        )
+        first_submission = submissions[0]
+        reference = load_reference(f"data/reference/{form_name}.csv")
+
+        mapped = map_sensory_responses(
+            first_submission["sensory_responses"],
+            reference
+        )
+
+#        pprint(mapped[:3])
+        context["mapped"][form_name] = mapped
+        print(f"{form_name}: Enrichi")
+
+    # =========================================================
+    # 5. SCORING (placeholder)
+    # =========================================================
+    log(context, "\n5.📊 Scoring")
 
     context["scores"] = {
         "RE": 0,
@@ -76,10 +130,16 @@ def main():
         "EN": 0
     }
 
+    # =========================================================
+    # 6. REPORT
+    # =========================================================
+    log(context, "\n6.📄 Report")
+
     print("\nSCORES :")
     print(context["scores"])
 
     print("\n=== DONE ===")
+
 
 if __name__ == "__main__":
     main()
