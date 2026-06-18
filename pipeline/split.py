@@ -58,7 +58,7 @@ def split_dataset(clean: dict):
         patient = {}
         respondent = {}
         sensory_responses = []
-        comments = []
+        comments = {}
         ignored_fields = []
 
         # -------------------------------------------------
@@ -99,10 +99,12 @@ def split_dataset(clean: dict):
                 # COMMENTAIRES
                 # -------------------------
                 elif key in COMMENT_KEYS and value:
-                    comments.append({
-                        "domaine": key,
-                        "commentaire": value
-                    })
+                    if key in comments:
+                        print(
+                            f"⚠️ commentaire dupliqué "
+                            f"({metadata['submission_id']}) : {key}"
+                        )
+                    comments[key] = value
 
                 # -------------------------
                 # INCONNU (debug uniquement)

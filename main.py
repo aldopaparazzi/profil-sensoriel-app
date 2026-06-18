@@ -148,6 +148,7 @@ def main():
         context["mapped"][form_name] = mapped
 
         print(f"✔ {form_name}: {len(mapped)} submission(s) mappées")
+        pprint(mapped) #full
 
     #pprint(context["mapped"]) #full
 
