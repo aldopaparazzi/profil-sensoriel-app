@@ -6,15 +6,16 @@
 # 4. Mapping
 # 5. Scoring
 # 6. Report
+
 from pprint import pprint
 import json
 
 from utils.logger import log
-from pipeline.validate import validate_dataset
+from pipeline.validate import filter_empty_submissions
 from pipeline.split import split_dataset
-from pipeline.mapping import load_reference, map_sensory_responses
-from pipeline.profiling import profile_dataset
-from pipeline.scoring import compute_scores
+from pipeline.mapping import map_all_submissions #,load_reference, map_sensory_responses
+#from pipeline.profiling import profile_dataset
+#from pipeline.scoring import compute_scores
 
 from ingestion.fetch_tally import fetch_tally, TallyAPIError
 from storage.io_utils import save_raw_json
@@ -64,10 +65,12 @@ def main():
         save_raw_json(raw, form_name)
         context["raw"][form_name] = raw
 
+        print(f"✔ {form_name}: {len(raw.get('submissions', []))} submission(s)")
+
         print(f"{form_name}: À jour")
 
     if not context["raw"]:
-        print("\n⛔ Aucun formulaire récupéré. Arrêt pipeline.")
+        print("\n⛔ Aucun formulaire récupéré.")
         return
 
     # =========================================================
@@ -76,16 +79,15 @@ def main():
     log(context, "\n2.🧹 Validation")
 
     for form_name, raw in context["raw"].items():
-        clean = validate_dataset(raw, context)
+        clean = filter_empty_submissions(raw, context)
         context["validated"][form_name] = clean
-        print(f"{form_name}: Données validé")
+        #print(f"{form_name}: Données filtrées")
+        print(f"✔ {form_name}: {len(clean['submissions'])} submission(s) valides")
 
-    print("\n==========  DEBUG  ==============")
+#    print("\n==========  DEBUG  ==============")
 
     # for r in clean["submissions"][0]["responses"]:
     # pprint(r)
-
-    print("\n==========  /DEBUG  ==============")
 
     # =========================================================
     # 2.5 PROFILING
@@ -94,6 +96,8 @@ def main():
     #
     #for form_name, clean in context["validated"].items():
     #    profile_dataset(clean, form_name)
+#    print("\n==========  /DEBUG  ==============")
+
 
     # =========================================================
     # 3. SPLIT
@@ -101,64 +105,51 @@ def main():
     log(context, "\n3.✂️ Split")
 
     for form_name, clean in context["validated"].items():
-        split = split_dataset(clean)
-        context["split"][form_name] = split
+        submissions = split_dataset(clean)
+        context["split"][form_name] = submissions
+        print(f"✔ {form_name}: {len(submissions)} submission(s) structurées\n")
         # print(f"{form_name}: Éléments séparés")
-    pprint(context["split"]["scolaire"][0])
+
+    # debug léger sur 1 élément
+    #if context["split"].get("scolaire"):
+    #    print("\n🔎 Exemple split (scolaire):")
+    #    pprint(context["split"]["scolaire"][0])
 
     # =========================================================
     # 4. MAPPING (IMPORTANT: PAR FORM)
     # =========================================================
     log(context, "\n4.🧠 Mapping")
+
+    # chargement centralisé des références
+    references = {
+        "enfant": json.load(open("data/reference/enfant.json", encoding="utf-8")),
+        "jeune_enfant": json.load(open("data/reference/jeune_enfant.json", encoding="utf-8")),
+        "scolaire": json.load(open("data/reference/scolaire.json", encoding="utf-8")),
+    }
+
     for form_name, submissions in context["split"].items():
-        # 3.1. Exclusion des soumissions vides
+
         if not submissions:
-            print(f"📭 {form_name}: aucune soumission")
+            print(f"📭 {form_name}: aucune submission")
             continue
 
-        print(f"📥 {form_name}: {len(submissions)} soumission(s)")
-        first_submission = submissions[0]
-        with open("data/reference/scolaire.json", encoding="utf-8") as f:
-            reference = json.load(f)
-        mapped = map_sensory_responses(first_submission["sensory_responses"], reference)
+        reference = references.get(form_name)
 
-        #        pprint(mapped[:3])
-        #context["mapped"][form_name] = mapped
+        if not reference:
+            print(f"⚠️ {form_name}: pas de référence trouvée")
+            continue
 
-        all_scored = []
+        mapped = map_all_submissions(
+            submissions,
+            reference,
+            context=context
+        )
 
-        for form_name, submissions in context["split"].items():
+        context["mapped"][form_name] = mapped
 
-            if not submissions:
-                continue
+        print(f"✔ {form_name}: {len(mapped)} submission(s) mappées")
 
-            with open("data/reference/scolaire.json", encoding="utf-8") as f:
-                reference = json.load(f)
-                        
-            mapped_submissions = []
-
-            for submission in submissions:
-
-                mapped_items = map_sensory_responses(
-                    submission["sensory_responses"],
-                    reference
-                )
-
-                mapped_submissions.append({
-                    "items": mapped_items,
-                    "patient": submission.get("patient", {}),
-                    "respondent": submission.get("respondent", {}),
-                    "metadata": submission.get("metadata", {})
-                })
-
-            for ms in mapped_submissions:
-                scored = compute_scores(ms, reference)
-                all_scored.append(scored)
-
-        context["scores"] = all_scored
-
-        print(f"{form_name}: Enrichi")
-
+    #pprint(context["mapped"]) #full
 
     # =========================================================
     # 5. SCORING
@@ -186,6 +177,16 @@ def main():
 
     print("\nSCORES :")
     print(context["scores"])
+
+
+    # =========================================================
+    # FIN
+    # =========================================================
+    print("\n=== PIPELINE TERMINÉ ===")
+
+    print("\n📊 Résumé:")
+    for form_name in context["mapped"]:
+        print(f"- {form_name}: {len(context['mapped'][form_name])}")
 
     print("\n=== DONE ===")
 

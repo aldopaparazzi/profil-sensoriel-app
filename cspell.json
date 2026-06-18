@@ -3,7 +3,13 @@
     "ignorePaths": [],
     "dictionaryDefinitions": [],
     "dictionaries": [],
-    "words": [],
-    "ignoreWords": ["venv", "pycache"],
+    "words": [
+        "isoparse",
+        "Repondant"
+    ],
+    "ignoreWords": [
+        "venv",
+        "pycache"
+    ],
     "import": []
 }

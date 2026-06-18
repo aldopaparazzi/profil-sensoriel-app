@@ -1,54 +1,10 @@
-# pipeline/split.py
-from datetime import datetime
 from dateutil import parser
 from pprint import pprint
-"""
-Responsabilité :
-    Transformer le JSON Tally validé
-    en structure métier normalisée.
 
-Ne fait PAS :
-    - de validation métier
-    - de calcul
-    - de mapping CSV
-    - d'enrichissement
 
-Sortie cible :
-{
-    "patient": {
-        "Patient_Prenom": "mon prénom",
-        "Patient_Nom": "mon nom",
-        "Patient_Sexe": "Fille"
-    },
-
-    "respondent": {
-        "Repondant_Nom": "troufiniou",
-        "Repondant_Profession": "maton"
-    },
-
-    "sensory_responses": [
-        {"question_id": "1", "score": 1},
-        {"question_id": "2", "score": 2},
-        ...
-    ],
-
-    "comments": [
-        {
-            "domaine": "Auditif",
-            "commentaire": "Il a mal aux oreilles"
-        }
-    ],
-
-    "metadata": {
-        "submission_id": "jex1RA1",
-        "form_id": "Me7JAg",
-        "respondent_id": "Y59DeQ6",
-        "submitted_at": "2026-06-17T14:56:11.000Z",
-        "is_completed": True
-    }
-}
-"""
-
+# =========================================================
+# DOMAINES COMMENTAIRES VALIDES
+# =========================================================
 COMMENT_KEYS = {
     "Auditif",
     "Visuel",
@@ -65,109 +21,123 @@ COMMENT_KEYS = {
 }
 
 
-def split_dataset(clean: dict) -> list:
+# =========================================================
+# AGE (optionnel, tolérant)
+# =========================================================
+def compute_age(birth_date, submission_date):
+    if not birth_date or not submission_date:
+        return None
 
+    try:
+        birth = parser.isoparse(str(birth_date)).replace(tzinfo=None)
+        sub = parser.isoparse(str(submission_date)).replace(tzinfo=None)
+        return (sub - birth).days // 365
+    except Exception:
+        return None
+
+
+# =========================================================
+# SPLIT PRINCIPAL
+# =========================================================
+def split_dataset(clean: dict):
     result = []
 
-    for sub in clean.get("submissions", []):
+    submissions = clean.get("submissions", [])
+    #print(f"\n3.✂️ Split ({len(submissions)} submissions)")
 
-        entry = {
-            "patient": {},
-            "respondent": {},
-            "sensory_responses": [],
-            "comments": [],
-            "metadata": {
-                "submission_id": sub.get("id"),
-                "form_id": sub.get("formId"),
-                "respondent_id": sub.get("respondentId"),
-                "submitted_at": sub.get("submittedAt"),
-                "is_completed": sub.get("isCompleted")
-            }
+    for sub in submissions:
+
+        metadata = {
+            "submission_id": sub.get("id"),
+            "form_id": sub.get("formId"),
+            "respondent_id": sub.get("respondentId"),
+            "submitted_at": sub.get("submittedAt"),
+            "is_completed": sub.get("isCompleted"),
         }
-        birth_date = entry["patient"].get("Patient_DateNaissance")
-        submission_date = entry["metadata"].get("submitted_at")
 
-        entry["patient"]["age"] = compute_age(birth_date, submission_date)
+        patient = {}
+        respondent = {}
+        sensory_responses = []
+        comments = []
+        ignored_fields = []
 
+        # -------------------------------------------------
+        # parcours responses
+        # -------------------------------------------------
         for response in sub.get("responses", []):
 
             answer = response.get("answer")
 
-            # --------------------------------------
-            # dictionnaires
-            # --------------------------------------
+            if not isinstance(answer, dict):
+                continue
 
-            if isinstance(answer, dict):
+            for key, value in answer.items():
 
-                for key, value in answer.items():
+                # -------------------------
+                # PATIENT
+                # -------------------------
+                if key.startswith("Patient_"):
+                    clean_key = key.replace("Patient_", "")
+                    patient[clean_key] = value
 
-                    # ==============================
-                    # Patient
-                    # ==============================
+                # -------------------------
+                # REPONDANT
+                # -------------------------
+                elif key.startswith("Repondant_"):
+                    respondent[key] = value
 
-                    if key.startswith("Patient_"):
-                        clean_key = key.replace("Patient_", "").lower()
-                        entry["patient"][clean_key] = value
+                # -------------------------
+                # QUESTIONS
+                # -------------------------
+                elif str(key).isdigit():
+                    sensory_responses.append({
+                        "question_id": str(key),
+                        "score": value
+                    })
 
-#                        entry["patient"][key] = value
-                        continue
+                # -------------------------
+                # COMMENTAIRES
+                # -------------------------
+                elif key in COMMENT_KEYS and value:
+                    comments.append({
+                        "domaine": key,
+                        "commentaire": value
+                    })
 
-                    # ==============================
-                    # Répondant
-                    # ==============================
+                # -------------------------
+                # INCONNU (debug uniquement)
+                # -------------------------
+                else:
+                    ignored_fields.append(key)
 
-                    if key.startswith("Repondant_"):
+        # -------------------------------------------------
+        # AGE (sans hypothèse externe)
+        # -------------------------------------------------
+        patient["age"] = compute_age(
+            patient.get("Date_naissance"),
+            metadata.get("submitted_at")
+        )
 
-                        entry["respondent"][key] = value
-                        continue
+        # -------------------------------------------------
+        # LOGS PROPRES
+        # -------------------------------------------------
+        print(f"   └── {metadata['submission_id']}")
+        print(f"       ├── patient: {len(patient)} champs")
+        print(f"       ├── questions: {len(sensory_responses)}")
+        print(f"       ├── commentaires: {len(comments)}")
+        if ignored_fields:
+            print(f"       ├── ignorés: {len(set(ignored_fields))}")
+            pprint(ignored_fields)
 
-                    # ==============================
-                    # Réponse sensorielle
-                    # ==============================
-
-                    if key.isdigit():
-
-                        entry["sensory_responses"].append({
-                            "question_id": key,
-                            "score": value
-                        })
-
-                        continue
-
-                    # ==============================
-                    # Commentaire domaine
-                    # ==============================
-
-                    if key in COMMENT_KEYS:
-
-                        if value:
-
-                            entry["comments"].append({
-                                "domaine": key,
-                                "commentaire": value
-                            })
-
-                        continue
-
-        result.append(entry)
+        # -------------------------------------------------
+        # OUTPUT
+        # -------------------------------------------------
+        result.append({
+            "metadata": metadata,
+            "patient": patient,
+            "respondent": respondent,
+            "sensory_responses": sensory_responses,
+            "comments": comments,
+        })
 
     return result
-
-""" 
-def compute_age(birth_date: str, submission_date: str):
-    if not birth_date or not submission_date:
-        return None
-
-    birth = datetime.fromisoformat(birth_date)
-    sub = datetime.fromisoformat(submission_date)
-
-    return (sub - birth).days // 365
- """
-def compute_age(birth_date: str, submission_date: str):
-    if not birth_date or not submission_date:
-        return None
-
-    birth = parser.isoparse(birth_date)
-    sub = parser.isoparse(submission_date)
-
-    return (sub - birth).days // 365

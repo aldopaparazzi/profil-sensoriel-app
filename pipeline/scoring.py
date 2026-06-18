@@ -1,5 +1,5 @@
 from collections import defaultdict
-import math
+#import math
 
 
 # =========================================================
@@ -112,7 +112,7 @@ def compute_scores(mapped_submission, reference):
     """
 
     items = mapped_submission["items"]
-    form_type = mapped_submission["metadata"].get("form_id")
+    #form_type = mapped_submission["metadata"].get("form_id")
     age = mapped_submission["patient"].get("age")
     if age is None:
         print("Age manquant dans patient")
@@ -139,8 +139,8 @@ def compute_scores(mapped_submission, reference):
     from pprint import pprint
     pprint(reference)
 
-    config = reference["domaines_sensoriels"][form_type]
-    config = reference
+#    config = reference["domaines_sensoriels"][form_type]
+#    config = reference
 
     age_list = reference["age"]
 
