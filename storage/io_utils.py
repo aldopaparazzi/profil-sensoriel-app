@@ -56,7 +56,7 @@ def save_raw_json(raw, form_name: str, full_refresh: bool = False):
     # FULL REFRESH → ignore hash
     # =========================================================
     if not full_refresh and last_hash == current_hash:
-        print(f"⏭️ {form_name} inchangé → skip RAW")
+        print(f"⏭️  {form_name} inchangé → skip RAW")
         return None
 
     # =========================================================

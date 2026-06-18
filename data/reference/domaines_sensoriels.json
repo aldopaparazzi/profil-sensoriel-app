@@ -9,7 +9,8 @@
     "Comportemental",
     "Conduites",
     "Socio-émotionnel",
-    "Attentionnel"
+    "Attentionnel",
+    "Global_enfant"
   ],
   "jeune_enfant": [
     "Traitement_Global",
@@ -18,13 +19,15 @@
     "Tactile",
     "Mouvement",
     "Oral",
-    "Comportemental"
+    "Comportemental",
+    "Global_jeune_enfant"
   ],
   "scolaire": [
     "Auditif",
     "Visuel",
     "Tactile",
     "Mouvement",
-    "Comportemental"
+    "Comportemental",
+    "Global_scolaire"
   ]
 }

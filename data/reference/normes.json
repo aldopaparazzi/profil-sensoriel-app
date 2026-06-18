@@ -1,0 +1,1084 @@
+{
+  "jeune_enfant": {
+    "7": {
+      "quadrants": {
+        "recherche": {
+          "m": 25.9,
+          "sigma": 6.2
+        },
+        "evitement": {
+          "m": 15.3,
+          "sigma": 5.2
+        },
+        "sensibilite": {
+          "m": 23.2,
+          "sigma": 7.9
+        },
+        "enregistrement": {
+          "m": 14.3,
+          "sigma": 3.9
+        }
+      },
+      "domaines_sensoriels": {
+        "Traitement_Global": {
+          "m": 15.8,
+          "sigma": 4.9
+        },
+        "Auditif": {
+          "m": 10.1,
+          "sigma": 4.3
+        },
+        "Visuel": {
+          "m": 19.1,
+          "sigma": 5.6
+        },
+        "Tactile": {
+          "m": 9.4,
+          "sigma": 3.1
+        },
+        "Mouvement": {
+          "m": 13.9,
+          "sigma": 4.2
+        },
+        "traitement_sensoriel_oral": {
+          "m": 12.7,
+          "sigma": 5.5
+        },
+        "Comportemental": {
+          "m": 10.1,
+          "sigma": 4.7
+        }
+      }
+    },
+    "13": {
+      "quadrants": {
+        "recherche": {
+          "m": 23.7,
+          "sigma": 6.4
+        },
+        "evitement": {
+          "m": 15.8,
+          "sigma": 4.3
+        },
+        "sensibilite": {
+          "m": 20.6,
+          "sigma": 5.6
+        },
+        "enregistrement": {
+          "m": 13.6,
+          "sigma": 2.8
+        }
+      },
+      "domaines_sensoriels": {
+        "Traitement_Global": {
+          "m": 15.7,
+          "sigma": 4.9
+        },
+        "Auditif": {
+          "m": 8.8,
+          "sigma": 2.2
+        },
+        "Visuel": {
+          "m": 15.1,
+          "sigma": 5.4
+        },
+        "Tactile": {
+          "m": 9.4,
+          "sigma": 3.7
+        },
+        "Mouvement": {
+          "m": 14.6,
+          "sigma": 4.4
+        },
+        "traitement_sensoriel_oral": {
+          "m": 9.5,
+          "sigma": 2.5
+        },
+        "Comportemental": {
+          "m": 10.2,
+          "sigma": 2.9
+        }
+      }
+    },
+    "19": {
+      "quadrants": {
+        "recherche": {
+          "m": 23.7,
+          "sigma": 5.9
+        },
+        "evitement": {
+          "m": 17.1,
+          "sigma": 7
+        },
+        "sensibilite": {
+          "m": 22.3,
+          "sigma": 7.8
+        },
+        "enregistrement": {
+          "m": 15.8,
+          "sigma": 4.4
+        }
+      },
+      "domaines_sensoriels": {
+        "Traitement_Global": {
+          "m": 15.5,
+          "sigma": 4.7
+        },
+        "Auditif": {
+          "m": 10.4,
+          "sigma": 3.7
+        },
+        "Visuel": {
+          "m": 14.2,
+          "sigma": 5.2
+        },
+        "Tactile": {
+          "m": 9.8,
+          "sigma": 4.6
+        },
+        "Mouvement": {
+          "m": 15.4,
+          "sigma": 4
+        },
+        "traitement_sensoriel_oral": {
+          "m": 10,
+          "sigma": 3
+        },
+        "Comportemental": {
+          "m": 11,
+          "sigma": 4.1
+        }
+      }
+    },
+    "25": {
+      "quadrants": {
+        "recherche": {
+          "m": 22.5,
+          "sigma": 5.2
+        },
+        "evitement": {
+          "m": 17,
+          "sigma": 5.3
+        },
+        "sensibilite": {
+          "m": 20.3,
+          "sigma": 7.3
+        },
+        "enregistrement": {
+          "m": 15,
+          "sigma": 5.1
+        }
+      },
+      "domaines_sensoriels": {
+        "Traitement_Global": {
+          "m": 15,
+          "sigma": 5.1
+        },
+        "Auditif": {
+          "m": 9.1,
+          "sigma": 3.2
+        },
+        "Visuel": {
+          "m": 13.3,
+          "sigma": 5.8
+        },
+        "Tactile": {
+          "m": 9.1,
+          "sigma": 3.3
+        },
+        "Mouvement": {
+          "m": 14.4,
+          "sigma": 3.3
+        },
+        "traitement_sensoriel_oral": {
+          "m": 10,
+          "sigma": 4.5
+        },
+        "Comportemental": {
+          "m": 10.6,
+          "sigma": 4.6
+        }
+      }
+    },
+    "31": {
+      "quadrants": {
+        "recherche": {
+          "m": 22.7,
+          "sigma": 6.6
+        },
+        "evitement": {
+          "m": 16.5,
+          "sigma": 4.2
+        },
+        "sensibilite": {
+          "m": 18.5,
+          "sigma": 5.2
+        },
+        "enregistrement": {
+          "m": 14.6,
+          "sigma": 3.4
+        }
+      },
+      "domaines_sensoriels": {
+        "Traitement_Global": {
+          "m": 14.1,
+          "sigma": 4.4
+        },
+        "Auditif": {
+          "m": 9.3,
+          "sigma": 2.7
+        },
+        "Visuel": {
+          "m": 13.6,
+          "sigma": 4.8
+        },
+        "Tactile": {
+          "m": 8.6,
+          "sigma": 3.1
+        },
+        "Mouvement": {
+          "m": 14.2,
+          "sigma": 4
+        },
+        "traitement_sensoriel_oral": {
+          "m": 8.6,
+          "sigma": 2
+        },
+        "Comportemental": {
+          "m": 9.8,
+          "sigma": 3.1
+        }
+      }
+    }
+  },
+  "enfant": {
+    "3": {
+      "quadrants": {
+        "recherche": {
+          "m": 29.7,
+          "sigma": 10.4
+        },
+        "evitement": {
+          "m": 33.1,
+          "sigma": 10.4
+        },
+        "sensibilite": {
+          "m": 26.3,
+          "sigma": 7.4
+        },
+        "enregistrement": {
+          "m": 27.7,
+          "sigma": 5.9
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 14.9,
+          "sigma": 5.8
+        },
+        "Visuel": {
+          "m": 11.3,
+          "sigma": 4.3
+        },
+        "Tactile": {
+          "m": 14.1,
+          "sigma": 3.4
+        },
+        "Mouvement": {
+          "m": 11.6,
+          "sigma": 4.1
+        },
+        "Position_corps": {
+          "m": 9,
+          "sigma": 1.8
+        },
+        "Oral": {
+          "m": 14,
+          "sigma": 4.7
+        },
+        "conduites": {
+          "m": 13.5,
+          "sigma": 4.1
+        },
+        "Socio-émotionnel": {
+          "m": 20.8,
+          "sigma": 6.7
+        },
+        "Attentionnel": {
+          "m": 14.5,
+          "sigma": 4.5
+        }
+      }
+    },
+    "4": {
+      "quadrants": {
+        "recherche": {
+          "m": 31,
+          "sigma": 9.3
+        },
+        "evitement": {
+          "m": 33.5,
+          "sigma": 11.2
+        },
+        "sensibilite": {
+          "m": 28.1,
+          "sigma": 8.8
+        },
+        "enregistrement": {
+          "m": 28.4,
+          "sigma": 6.4
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 13.5,
+          "sigma": 5.5
+        },
+        "Visuel": {
+          "m": 10.3,
+          "sigma": 3.3
+        },
+        "Tactile": {
+          "m": 14.4,
+          "sigma": 4.4
+        },
+        "Mouvement": {
+          "m": 12.4,
+          "sigma": 4.2
+        },
+        "Position_corps": {
+          "m": 9.5,
+          "sigma": 2
+        },
+        "Oral": {
+          "m": 17,
+          "sigma": 8.4
+        },
+        "conduites": {
+          "m": 14.3,
+          "sigma": 5.3
+        },
+        "Socio-émotionnel": {
+          "m": 23.3,
+          "sigma": 9.3
+        },
+        "Attentionnel": {
+          "m": 13.9,
+          "sigma": 4.2
+        }
+      }
+    },
+    "5": {
+      "quadrants": {
+        "recherche": {
+          "m": 31.3,
+          "sigma": 9.3
+        },
+        "evitement": {
+          "m": 36.7,
+          "sigma": 9.6
+        },
+        "sensibilite": {
+          "m": 30,
+          "sigma": 7.8
+        },
+        "enregistrement": {
+          "m": 29.6,
+          "sigma": 5.9
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 15.9,
+          "sigma": 5.5
+        },
+        "Visuel": {
+          "m": 11,
+          "sigma": 3.7
+        },
+        "Tactile": {
+          "m": 14.5,
+          "sigma": 4.1
+        },
+        "Mouvement": {
+          "m": 12.4,
+          "sigma": 3.4
+        },
+        "Position_corps": {
+          "m": 8.7,
+          "sigma": 1.4
+        },
+        "Oral": {
+          "m": 16.6,
+          "sigma": 7.2
+        },
+        "conduites": {
+          "m": 15.1,
+          "sigma": 5.7
+        },
+        "Socio-émotionnel": {
+          "m": 24.8,
+          "sigma": 7.3
+        },
+        "Attentionnel": {
+          "m": 15.9,
+          "sigma": 5.1
+        }
+      }
+    },
+    "6": {
+      "quadrants": {
+        "recherche": {
+          "m": 32.8,
+          "sigma": 11.9
+        },
+        "evitement": {
+          "m": 35.2,
+          "sigma": 9.8
+        },
+        "sensibilite": {
+          "m": 28.7,
+          "sigma": 7.9
+        },
+        "enregistrement": {
+          "m": 31.4,
+          "sigma": 8.5
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 15.3,
+          "sigma": 6.3
+        },
+        "Visuel": {
+          "m": 10,
+          "sigma": 3.2
+        },
+        "Tactile": {
+          "m": 14.8,
+          "sigma": 4.2
+        },
+        "Mouvement": {
+          "m": 14,
+          "sigma": 5.6
+        },
+        "Position_corps": {
+          "m": 9.7,
+          "sigma": 2.9
+        },
+        "Oral": {
+          "m": 14.3,
+          "sigma": 5.7
+        },
+        "conduites": {
+          "m": 15.1,
+          "sigma": 6.6
+        },
+        "Socio-émotionnel": {
+          "m": 24.9,
+          "sigma": 7.8
+        },
+        "Attentionnel": {
+          "m": 16.3,
+          "sigma": 6.3
+        }
+      }
+    },
+    "8": {
+      "quadrants": {
+        "recherche": {
+          "m": 30.2,
+          "sigma": 10.8
+        },
+        "evitement": {
+          "m": 35.6,
+          "sigma": 10.7
+        },
+        "sensibilite": {
+          "m": 28.6,
+          "sigma": 7.8
+        },
+        "enregistrement": {
+          "m": 29.5,
+          "sigma": 7.4
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 15,
+          "sigma": 5.9
+        },
+        "Visuel": {
+          "m": 10.9,
+          "sigma": 3.9
+        },
+        "Tactile": {
+          "m": 13.6,
+          "sigma": 4.2
+        },
+        "Mouvement": {
+          "m": 12.3,
+          "sigma": 5.1
+        },
+        "Position_corps": {
+          "m": 9.3,
+          "sigma": 2
+        },
+        "Oral": {
+          "m": 15.2,
+          "sigma": 5.9
+        },
+        "conduites": {
+          "m": 13.7,
+          "sigma": 5.5
+        },
+        "Socio-émotionnel": {
+          "m": 25.3,
+          "sigma": 9
+        },
+        "Attentionnel": {
+          "m": 15.2,
+          "sigma": 5.3
+        }
+      }
+    },
+    "10": {
+      "quadrants": {
+        "recherche": {
+          "m": 27.6,
+          "sigma": 7.3
+        },
+        "evitement": {
+          "m": 36.1,
+          "sigma": 10.3
+        },
+        "sensibilite": {
+          "m": 28.3,
+          "sigma": 8.8
+        },
+        "enregistrement": {
+          "m": 30.3,
+          "sigma": 8.5
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 15,
+          "sigma": 5.3
+        },
+        "Visuel": {
+          "m": 10.2,
+          "sigma": 3.6
+        },
+        "Tactile": {
+          "m": 13.7,
+          "sigma": 4.4
+        },
+        "Mouvement": {
+          "m": 11.1,
+          "sigma": 3.7
+        },
+        "Position_corps": {
+          "m": 9.9,
+          "sigma": 3.1
+        },
+        "Oral": {
+          "m": 15.4,
+          "sigma": 7
+        },
+        "conduites": {
+          "m": 13.4,
+          "sigma": 4
+        },
+        "Socio-émotionnel": {
+          "m": 25.6,
+          "sigma": 9
+        },
+        "Attentionnel": {
+          "m": 14.4,
+          "sigma": 5.5
+        }
+      }
+    },
+    "12": {
+      "quadrants": {
+        "recherche": {
+          "m": 24.6,
+          "sigma": 6.7
+        },
+        "evitement": {
+          "m": 30.7,
+          "sigma": 11
+        },
+        "sensibilite": {
+          "m": 25.1,
+          "sigma": 8.1
+        },
+        "enregistrement": {
+          "m": 28.2,
+          "sigma": 7.8
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 11.9,
+          "sigma": 4.8
+        },
+        "Visuel": {
+          "m": 8.9,
+          "sigma": 3.9
+        },
+        "Tactile": {
+          "m": 12.5,
+          "sigma": 3.7
+        },
+        "Mouvement": {
+          "m": 9.4,
+          "sigma": 2.1
+        },
+        "Position_corps": {
+          "m": 10.3,
+          "sigma": 3
+        },
+        "Oral": {
+          "m": 13.2,
+          "sigma": 5
+        },
+        "conduites": {
+          "m": 11.7,
+          "sigma": 3.7
+        },
+        "Socio-émotionnel": {
+          "m": 22.1,
+          "sigma": 9
+        },
+        "Attentionnel": {
+          "m": 13.5,
+          "sigma": 5.1
+        }
+      }
+    }
+  },
+  "scolaire": {
+    "3": {
+      "quadrants": {
+        "recherche": {
+          "m": 13.7,
+          "sigma": 6.1
+        },
+        "evitement": {
+          "m": 15.8,
+          "sigma": 5.3
+        },
+        "sensibilite": {
+          "m": 17.3,
+          "sigma": 7
+        },
+        "enregistrement": {
+          "m": 18.8,
+          "sigma": 9.4
+        }
+      },
+      "composantes_scolaires": {
+        "composante_scolaire_1": {
+          "m": 19.1,
+          "sigma": 8.9
+        },
+        "composante_scolaire_2": {
+          "m": 17,
+          "sigma": 7.1
+        },
+        "composante_scolaire_3": {
+          "m": 17.6,
+          "sigma": 7
+        },
+        "composante_scolaire_4": {
+          "m": 11.8,
+          "sigma": 4.8
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 11.2,
+          "sigma": 5.3
+        },
+        "Visuel": {
+          "m": 11.7,
+          "sigma": 5.3
+        },
+        "Tactile": {
+          "m": 11.1,
+          "sigma": 4
+        },
+        "Mouvement": {
+          "m": 12.8,
+          "sigma": 7
+        },
+        "Comportemental": {
+          "m": 14.8,
+          "sigma": 4.8
+        }
+      }
+    },
+    "4": {
+      "quadrants": {
+        "recherche": {
+          "m": 11.8,
+          "sigma": 5.7
+        },
+        "evitement": {
+          "m": 15.8,
+          "sigma": 8
+        },
+        "sensibilite": {
+          "m": 16.5,
+          "sigma": 6.8
+        },
+        "enregistrement": {
+          "m": 16.8,
+          "sigma": 5.8
+        }
+      },
+      "composantes_scolaires": {
+        "composante_scolaire_1": {
+          "m": 17.4,
+          "sigma": 7.2
+        },
+        "composante_scolaire_2": {
+          "m": 15.2,
+          "sigma": 5.9
+        },
+        "composante_scolaire_3": {
+          "m": 16.8,
+          "sigma": 8.8
+        },
+        "composante_scolaire_4": {
+          "m": 11.6,
+          "sigma": 4.9
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 10.1,
+          "sigma": 5
+        },
+        "Visuel": {
+          "m": 10.3,
+          "sigma": 4
+        },
+        "Tactile": {
+          "m": 10.4,
+          "sigma": 4.2
+        },
+        "Mouvement": {
+          "m": 11,
+          "sigma": 5.1
+        },
+        "Comportemental": {
+          "m": 15.1,
+          "sigma": 7.2
+        }
+      }
+    },
+    "5": {
+      "quadrants": {
+        "recherche": {
+          "m": 15.4,
+          "sigma": 6.4
+        },
+        "evitement": {
+          "m": 16.7,
+          "sigma": 5.1
+        },
+        "sensibilite": {
+          "m": 19.4,
+          "sigma": 6
+        },
+        "enregistrement": {
+          "m": 20.7,
+          "sigma": 7.8
+        }
+      },
+      "composantes_scolaires": {
+        "composante_scolaire_1": {
+          "m": 22.7,
+          "sigma": 8.9
+        },
+        "composante_scolaire_2": {
+          "m": 19,
+          "sigma": 5.8
+        },
+        "composante_scolaire_3": {
+          "m": 18.3,
+          "sigma": 5.7
+        },
+        "composante_scolaire_4": {
+          "m": 12.1,
+          "sigma": 3.6
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 11.6,
+          "sigma": 4.2
+        },
+        "Visuel": {
+          "m": 13.6,
+          "sigma": 4.6
+        },
+        "Tactile": {
+          "m": 12.2,
+          "sigma": 4.8
+        },
+        "Mouvement": {
+          "m": 14.3,
+          "sigma": 6
+        },
+        "Comportemental": {
+          "m": 16.2,
+          "sigma": 4.2
+        }
+      }
+    },
+    "6": {
+      "quadrants": {
+        "recherche": {
+          "m": 14.6,
+          "sigma": 5.8
+        },
+        "evitement": {
+          "m": 15.3,
+          "sigma": 5.9
+        },
+        "sensibilite": {
+          "m": 17.3,
+          "sigma": 7
+        },
+        "enregistrement": {
+          "m": 21.7,
+          "sigma": 9.9
+        }
+      },
+      "composantes_scolaires": {
+        "composante_scolaire_1": {
+          "m": 22.5,
+          "sigma": 10.4
+        },
+        "composante_scolaire_2": {
+          "m": 17.4,
+          "sigma": 6.5
+        },
+        "composante_scolaire_3": {
+          "m": 16.9,
+          "sigma": 7.2
+        },
+        "composante_scolaire_4": {
+          "m": 12.2,
+          "sigma": 4.5
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 10.9,
+          "sigma": 5
+        },
+        "Visuel": {
+          "m": 14.1,
+          "sigma": 6.6
+        },
+        "Tactile": {
+          "m": 10.6,
+          "sigma": 3.6
+        },
+        "Mouvement": {
+          "m": 14,
+          "sigma": 6.6
+        },
+        "Comportemental": {
+          "m": 15.4,
+          "sigma": 5.3
+        }
+      }
+    },
+    "8": {
+      "quadrants": {
+        "recherche": {
+          "m": 12.7,
+          "sigma": 5.1
+        },
+        "evitement": {
+          "m": 15.8,
+          "sigma": 7.8
+        },
+        "sensibilite": {
+          "m": 15.7,
+          "sigma": 6.2
+        },
+        "enregistrement": {
+          "m": 19.6,
+          "sigma": 9.2
+        }
+      },
+      "composantes_scolaires": {
+        "composante_scolaire_1": {
+          "m": 19.6,
+          "sigma": 8.6
+        },
+        "composante_scolaire_2": {
+          "m": 15.5,
+          "sigma": 6
+        },
+        "composante_scolaire_3": {
+          "m": 16.2,
+          "sigma": 6.6
+        },
+        "composante_scolaire_4": {
+          "m": 12.6,
+          "sigma": 6.4
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 10,
+          "sigma": 3.7
+        },
+        "Visuel": {
+          "m": 12,
+          "sigma": 5.8
+        },
+        "Tactile": {
+          "m": 10.1,
+          "sigma": 4.3
+        },
+        "Mouvement": {
+          "m": 12.3,
+          "sigma": 5.8
+        },
+        "Comportemental": {
+          "m": 15.6,
+          "sigma": 7.6
+        }
+      }
+    },
+    "10": {
+      "quadrants": {
+        "recherche": {
+          "m": 12.1,
+          "sigma": 4.3
+        },
+        "evitement": {
+          "m": 15.4,
+          "sigma": 4.1
+        },
+        "sensibilite": {
+          "m": 15.9,
+          "sigma": 4.7
+        },
+        "enregistrement": {
+          "m": 20.5,
+          "sigma": 8.3
+        }
+      },
+      "composantes_scolaires": {
+        "composante_scolaire_1": {
+          "m": 19.6,
+          "sigma": 7.8
+        },
+        "composante_scolaire_2": {
+          "m": 15.6,
+          "sigma": 4.7
+        },
+        "composante_scolaire_3": {
+          "m": 16.4,
+          "sigma": 4.7
+        },
+        "composante_scolaire_4": {
+          "m": 12.4,
+          "sigma": 4.3
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 10.8,
+          "sigma": 4.3
+        },
+        "Visuel": {
+          "m": 13,
+          "sigma": 6.1
+        },
+        "Tactile": {
+          "m": 9.7,
+          "sigma": 2.4
+        },
+        "Mouvement": {
+          "m": 11.5,
+          "sigma": 4.2
+        },
+        "Comportemental": {
+          "m": 15.1,
+          "sigma": 5.2
+        }
+      }
+    },
+    "12": {
+      "quadrants": {
+        "recherche": {
+          "m": 11.7,
+          "sigma": 4.6
+        },
+        "evitement": {
+          "m": 14.5,
+          "sigma": 3.9
+        },
+        "sensibilite": {
+          "m": 13.7,
+          "sigma": 3.3
+        },
+        "enregistrement": {
+          "m": 17.9,
+          "sigma": 6.6
+        }
+      },
+      "composantes_scolaires": {
+        "composante_scolaire_1": {
+          "m": 17.2,
+          "sigma": 6
+        },
+        "composante_scolaire_2": {
+          "m": 14.2,
+          "sigma": 4.8
+        },
+        "composante_scolaire_3": {
+          "m": 14.7,
+          "sigma": 3.6
+        },
+        "composante_scolaire_4": {
+          "m": 11.7,
+          "sigma": 3.5
+        }
+      },
+      "domaines_sensoriels": {
+        "Auditif": {
+          "m": 9.1,
+          "sigma": 2.8
+        },
+        "Visuel": {
+          "m": 10.9,
+          "sigma": 4.6
+        },
+        "Tactile": {
+          "m": 9.4,
+          "sigma": 3.8
+        },
+        "Mouvement": {
+          "m": 10.5,
+          "sigma": 4
+        },
+        "Comportemental": {
+          "m": 14.3,
+          "sigma": 3.9
+        }
+      }
+    }
+  }
+}

@@ -1,266 +1,189 @@
-# pipeline/scoring.py
-
-def compute_scores(context):
-
-    print("5.📊 Scoring")
-
-    df = context["mapped"]
-
-    # TODO: vrais calculs
-    context["scores"] = {
-        "RE": 0,
-        "EV": 0,
-        "SE": 0,
-        "EN": 0
-    }
-
-    return context
-
-
-# =========================
-# =========================
-# OLD SCRIPT FOR REFERENCE
-# =========================
-# =========================
-from typing import Dict, Any
-import pandas as pd
-from pprint import pprint
-
-# =========================
-# debug
-# =========================
-def print_results(results: dict):
-    print("\n=== SCORES QUADRANTS ===\n")
-
-    for quadrant, data in results.items():
-        print(f"{quadrant}")
-        print(f"  raw   : {data['raw']}")
-        print(f"  mean  : {data['mean']}")
-        print(f"  sd    : {data['sd']}")
-        print(f"  z     : {data['z']}")
-        print(f"  class : {data['class']}")
-        print("")
+from collections import defaultdict
+import math
 
 
 # =========================================================
-# 1. IMPUTATION DES VALEURS
+# 1. UTILITAIRE : IMPUTATION DES ZÉROS
 # =========================================================
 
-def impute_missing_by_category_mean(df: pd.DataFrame) -> pd.DataFrame:
+def clean_values(values):
     """
-    Remplace les réponses invalides (0 ou NaN selon ton modèle)
-    par la moyenne du quadrant correspondant.
-
-    Hypothèse métier :
-    - 0 = item non applicable
-    - donc imputé par moyenne du groupe
+    Remplace les 0 par la moyenne des valeurs non nulles.
+    Règle métier :
+    - 0 = valeur manquante (exceptionnelle)
+    - imputation globale par moyenne du groupe
     """
 
-    df = df.copy()
+    non_zero = [v for v in values if v != 0]
 
-    # On considère 0 comme "non applicable"
-    df["response"] = df["response"].replace(0, pd.NA)
+    # sécurité (cas théorique si tout est à 0)
+    if not non_zero:
+        return values
 
-    # moyenne par quadrant
-    mean_by_quadrant = df.groupby("quadrant")["response"].transform("mean")
+    mean = sum(non_zero) / len(non_zero)
 
-    # remplacement des NA par la moyenne du groupe
-    df["response"] = df["response"].fillna(mean_by_quadrant)
-
-    return df
+    return [v if v != 0 else mean for v in values]
 
 
 # =========================================================
-# 2. SCORE BRUT PAR QUADRANT
+# 2. AGRÉGATION GÉNÉRIQUE
 # =========================================================
 
-def compute_raw_scores(df: pd.DataFrame) -> Dict[str, float]:
+def aggregate_group(items, key):
     """
-    Somme des réponses par quadrant.
-
-    Exemple :
-        RE -> 62
-        EV -> 38
-        SE -> 31
-        EN -> 47
+    Groupe les scores par clé (domain / quadrant / composante)
+    et retourne une liste de valeurs propres.
     """
 
-    return df.groupby("quadrant")["response"].sum().to_dict()
+    groups = defaultdict(list)
+
+    for item in items:
+        group = item.get(key)
+        score = item.get("score")
+
+        # ignore items sans groupe ou sans score
+        if group is None or score is None:
+            continue
+
+        groups[group].append(score)
+
+    return groups
 
 
-# =========================================================
-# 3. Z-SCORE
-# =========================================================
-
-def compute_z_score(raw: float, mean: float, sd: float) -> float:
+def compute_group_scores(groups):
     """
-    Normalisation statistique standard :
-
-        z = (x - μ) / σ
-    """
-
-    if sd == 0:
-        return 0.0  # sécurité minimale
-
-    return (raw - mean) / sd
-
-
-# =========================================================
-# 4. CLASSIFICATION CLINIQUE
-# =========================================================
-
-def classify_z_score(z: float) -> str:
-    """
-    Classification standard type psychométrie.
-
-    Ajustable avec la psychomotricienne ensuite.
+    Applique :
+    - imputation des 0
+    - somme
     """
 
-    if z <= -2:
-        return "Très inférieur"
-    if z <= -1:
-        return "Inférieur"
-    if z < 1:
-        return "Dans la norme"
-    if z < 2:
-        return "Supérieur"
-    return "Très supérieur"
+    result = {}
 
+    for group, values in groups.items():
+        cleaned = clean_values(values)
 
-# =========================================================
-# 5. RÉCUPÉRATION DES NORMES
-# =========================================================
-
-def get_norm(norm_table: Dict[str, Any], form_type: str, variable: str, age: int):
-    """
-    Accès aux tables de normes en mémoire.
-
-    norm_table structure attendue :
-    {
-        "RE": {
-            4: {"mean": 31, "sd": 9.3},
-            5: {"mean": 32, "sd": 8.7}
-        },
-        ...
-    }
-
-    ⚠️ On suppose ici que l'âge est déjà discrétisé
-    (comme dans Excel : 4.88 → 4)
-    """
-
-    try:
-        return norm_table[form_type][variable][age]
-    except KeyError:
-        raise ValueError(
-            f"Norme introuvable pour {form_type=} {variable=} {age=}"
-        )
-
-
-# =========================================================
-# 6. PIPELINE COMPLET QUADRANTS
-# =========================================================
-
-def compute_quadrant_scores(
-    df: pd.DataFrame,
-    norm_table: Dict[str, Any],
-    form_type: str,
-    age: float
-) -> Dict[str, Dict[str, Any]]:
-    """
-    Pipeline complet :
-    1. imputation
-    2. score brut
-    3. norme
-    4. z-score
-    5. classification
-    """
-
-    # -----------------------------------------------------
-    # 1. préparation des données
-    # -----------------------------------------------------
-
-    df = impute_missing_by_category_mean(df)
-
-    # -----------------------------------------------------
-    # 2. score brut
-    # -----------------------------------------------------
-
-    raw_scores = compute_raw_scores(df)
-
-    results = {}
-
-    # -----------------------------------------------------
-    # 3. discrétisation âge (Excel-like)
-    # -----------------------------------------------------
-
-    age_int = int(age)
-
-    # -----------------------------------------------------
-    # 4. calcul par quadrant
-    # -----------------------------------------------------
-
-    for quadrant, raw in raw_scores.items():
-
-        norm = get_norm(
-            norm_table,
-            form_type=form_type,
-            variable=quadrant,
-            age=age_int
-        )
-
-        z = compute_z_score(
-            raw,
-            norm["mean"],
-            norm["sd"]
-        )
-
-        results[quadrant] = {
-            "raw": float(raw),
-            "mean": norm["mean"],
-            "sd": norm["sd"],
-            "z": round(z, 2),
-            "class": classify_z_score(z)
+        result[group] = {
+            "raw_score": sum(cleaned),
+            "item_count": len(cleaned),
+            "mean_score": sum(cleaned) / len(cleaned) if cleaned else None,
         }
 
-    return results
+    return result
 
 
 # =========================================================
-# 7. EXEMPLE D'UTILISATION
+# 3. NORMALISATION (Z-SCORE)
 # =========================================================
 
-if __name__ == "__main__":
+def z_score(raw, mean, std):
+    """
+    Z = (X - μ) / σ
+    """
 
-    # exemple minimal
-    df = pd.DataFrame({
-        "quadrant": ["RE", "RE", "EV", "SE", "EN"],
-        "response": [5, 4, 3, 2, 4]
-    })
+    if std == 0 or std is None:
+        return None
 
-    # exemple de normes simplifiées
-    norm_table = {
-        "scolaire": {
-            "RE": {
-                4: {"mean": 31, "sd": 9.3}
-            },
-            "EV": {
-                4: {"mean": 33, "sd": 11.2}
-            },
-            "SE": {
-                4: {"mean": 28, "sd": 8.8}
-            },
-            "EN": {
-                4: {"mean": 28, "sd": 6.4}
-            }
-        }
-    }
+    return (raw - mean) / std
 
-    results = compute_quadrant_scores(
-        df=df,
-        norm_table=norm_table,
-        form_type="scolaire",
-        age=4.88
+
+def get_age_column(age, age_list):
+    """
+    Équivalent Excel :
+    EQUIV(age; age_list; 1)
+
+    => prend la valeur <= âge la plus proche
+    """
+
+    valid = [a for a in age_list if a <= age]
+
+    if not valid:
+        return 0
+
+    return age_list.index(max(valid))
+
+
+# =========================================================
+# 4. SCORING PRINCIPAL
+# =========================================================
+
+def compute_scores(mapped_submission, reference):
+    """
+    ENTRY POINT du scoring
+    """
+
+    items = mapped_submission["items"]
+    form_type = mapped_submission["metadata"].get("form_id")
+    age = mapped_submission["patient"].get("age")
+    if age is None:
+        print("Age manquant dans patient")
+
+    # -----------------------------------------------------
+    # 1. AGRÉGATION PAR DIMENSIONS
+    # -----------------------------------------------------
+
+    domains = compute_group_scores(
+        aggregate_group(items, "domaine_sensoriel")
     )
 
-#    print(results)
-    print_results(results)
+    quadrants = compute_group_scores(
+        aggregate_group(items, "quadrant")
+    )
+
+    components = compute_group_scores(
+        aggregate_group(items, "composante_scolaire")
+    )
+
+    # -----------------------------------------------------
+    # 2. TABLES DE RÉFÉRENCE
+    # -----------------------------------------------------
+    from pprint import pprint
+    pprint(reference)
+
+    config = reference["domaines_sensoriels"][form_type]
+    config = reference
+
+    age_list = reference["age"]
+
+    age_idx = get_age_column(age, age_list)
+
+    # -----------------------------------------------------
+    # 3. NORMALISATION DOMAINE / QUADRANT / COMPOSANTE
+    # -----------------------------------------------------
+
+    def enrich_with_zscores(group_scores, table_name):
+        enriched = {}
+
+        for name, data in group_scores.items():
+
+            ref = reference["questions"][name]
+
+            mean = ref["m"][age_idx]
+            std = ref["sigma"][age_idx]
+
+            enriched[name] = {
+                **data,
+                "z_score": z_score(data["raw_score"], mean, std),
+                "ref_mean": mean,
+                "ref_std": std,
+            }
+
+        return enriched
+
+    # domaines
+    domain_scores = enrich_with_zscores(domains, "domaines")
+
+    # quadrants
+    quadrant_scores = enrich_with_zscores(quadrants, "quadrants")
+
+    # composantes scolaires
+    component_scores = enrich_with_zscores(components, "composantes")
+
+    # -----------------------------------------------------
+    # 4. OUTPUT FINAL
+    # -----------------------------------------------------
+
+    return {
+        "domains": domain_scores,
+        "quadrants": quadrant_scores,
+        "composantes": component_scores,
+    }

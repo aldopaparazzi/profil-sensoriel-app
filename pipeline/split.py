@@ -1,85 +1,173 @@
 # pipeline/split.py
+from datetime import datetime
+from dateutil import parser
+from pprint import pprint
+"""
+Responsabilité :
+    Transformer le JSON Tally validé
+    en structure métier normalisée.
 
-#  ✔ séparation claire
-#       patient
-#       sensoriel
-#       metadata
-#  ✔ modèle stable
-#       question_id normalisé
-#       score isolé
-#       submission_id conservé
-#  ✔ prêt pour mapping
+Ne fait PAS :
+    - de validation métier
+    - de calcul
+    - de mapping CSV
+    - d'enrichissement
 
-def split_dataset(clean: dict) -> dict:
+Sortie cible :
+{
+    "patient": {
+        "Patient_Prenom": "mon prénom",
+        "Patient_Nom": "mon nom",
+        "Patient_Sexe": "Fille"
+    },
+
+    "respondent": {
+        "Repondant_Nom": "troufiniou",
+        "Repondant_Profession": "maton"
+    },
+
+    "sensory_responses": [
+        {"question_id": "1", "score": 1},
+        {"question_id": "2", "score": 2},
+        ...
+    ],
+
+    "comments": [
+        {
+            "domaine": "Auditif",
+            "commentaire": "Il a mal aux oreilles"
+        }
+    ],
+
+    "metadata": {
+        "submission_id": "jex1RA1",
+        "form_id": "Me7JAg",
+        "respondent_id": "Y59DeQ6",
+        "submitted_at": "2026-06-17T14:56:11.000Z",
+        "is_completed": True
+    }
+}
+"""
+
+COMMENT_KEYS = {
+    "Auditif",
+    "Visuel",
+    "Tactile",
+    "Mouvement",
+    "Position_corps",
+    "Oral",
+    "Comportemental",
+    "Conduites",
+    "Socio-émotionnel",
+    "Attentionnel",
+    "Global_Scolaire",
+    "Traitement_Global"
+}
+
+
+def split_dataset(clean: dict) -> list:
 
     result = []
 
     for sub in clean.get("submissions", []):
 
         entry = {
-            "metadata_patient": extract_patient_info(sub),
+            "patient": {},
+            "respondent": {},
             "sensory_responses": [],
             "comments": [],
-            "metadata_techniques": {
+            "metadata": {
                 "submission_id": sub.get("id"),
+                "form_id": sub.get("formId"),
+                "respondent_id": sub.get("respondentId"),
                 "submitted_at": sub.get("submittedAt"),
-                "form_id": sub.get("formId")
+                "is_completed": sub.get("isCompleted")
             }
         }
+        birth_date = entry["patient"].get("Patient_DateNaissance")
+        submission_date = entry["metadata"].get("submitted_at")
 
-        # =====================================================
-        # RESPONSES
-        # =====================================================
-        for r in sub.get("responses", []):
+        entry["patient"]["age"] = compute_age(birth_date, submission_date)
 
-            answer = r.get("answer")
-            qid = r.get("questionId")
+        for response in sub.get("responses", []):
+
+            answer = response.get("answer")
+
+            # --------------------------------------
+            # dictionnaires
+            # --------------------------------------
 
             if isinstance(answer, dict):
 
-                for question_id, score in answer.items():
-                    entry["sensory_responses"].append({
-                        "question_id": str(question_id),
-                        "score": score
-                    })
+                for key, value in answer.items():
 
-            else:
-                if answer is not None:
-                    entry["comments"].append({
-                        "question_id": qid,
-                        "text": answer
-                    })
+                    # ==============================
+                    # Patient
+                    # ==============================
+
+                    if key.startswith("Patient_"):
+                        clean_key = key.replace("Patient_", "").lower()
+                        entry["patient"][clean_key] = value
+
+#                        entry["patient"][key] = value
+                        continue
+
+                    # ==============================
+                    # Répondant
+                    # ==============================
+
+                    if key.startswith("Repondant_"):
+
+                        entry["respondent"][key] = value
+                        continue
+
+                    # ==============================
+                    # Réponse sensorielle
+                    # ==============================
+
+                    if key.isdigit():
+
+                        entry["sensory_responses"].append({
+                            "question_id": key,
+                            "score": value
+                        })
+
+                        continue
+
+                    # ==============================
+                    # Commentaire domaine
+                    # ==============================
+
+                    if key in COMMENT_KEYS:
+
+                        if value:
+
+                            entry["comments"].append({
+                                "domaine": key,
+                                "commentaire": value
+                            })
+
+                        continue
 
         result.append(entry)
 
     return result
 
-def extract_patient_info(sub: dict) -> dict:
+""" 
+def compute_age(birth_date: str, submission_date: str):
+    if not birth_date or not submission_date:
+        return None
 
-    responses = sub.get("responses", [])
+    birth = datetime.fromisoformat(birth_date)
+    sub = datetime.fromisoformat(submission_date)
 
-    patient = {
-        "prenom": None,
-        "nom": None,
-        "date_naissance": None,
-        "sexe": None,
-        "classe": None
-    }
+    return (sub - birth).days // 365
+ """
+def compute_age(birth_date: str, submission_date: str):
+    if not birth_date or not submission_date:
+        return None
 
-    for r in responses:
-        qid = r.get("questionId")
-        answer = r.get("answer")
+    birth = parser.isoparse(birth_date)
+    sub = parser.isoparse(submission_date)
 
-        # TODO: mapping à ajuster selon ton référentiel réel
-        if qid == "prenom":
-            patient["prenom"] = answer
-        elif qid == "nom":
-            patient["nom"] = answer
-        elif qid == "date_naissance":
-            patient["date_naissance"] = answer
-        elif qid == "sexe":
-            patient["sexe"] = answer
-        elif qid == "classe":
-            patient["classe"] = answer
-
-    return patient
+    return (sub - birth).days // 365

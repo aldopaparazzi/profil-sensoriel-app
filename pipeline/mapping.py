@@ -75,3 +75,16 @@ def load_reference_by_form(form_name: str):
 
     return load_reference(path)
     
+def merge_mapped(context):
+
+    all_items = []
+
+    for form_name, items in context["mapped"].items():
+        all_items.extend(items)
+
+    return {
+        "items": all_items,
+        "patient": context.get("patient"),
+        "respondent": context.get("respondent"),
+        "metadata": context.get("metadata"),
+    }

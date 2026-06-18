@@ -1,0 +1,312 @@
+{
+  "questions": {
+    "1": {
+      "label": "« passe à côté» des consignes orales données en classe (ou les manque) plus souvent que les élèves de son âge.",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "2": {
+      "label": "fait le sourde oreille ou semble m’ignorer.",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "3": {
+      "label": "éprouve des difficultés à accomplir ou terminer des tâches dans un environnement bruyant.",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "4": {
+      "label": "demande aux autres de se taire ou de faire moins de bruit.",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "composante_scolaire": "2",
+      "pour_calcul": false
+    },
+    "5": {
+      "label": "montre des signes d’anxiété et/ou de détresse lors de regroupements (ex : cantine ou grand rassemblement).",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "6": {
+      "label": "réagit vivement aux bruits inattendus ou forts (ex : alarme incendie, livre qui heurte le sol en tombant, porte qui claque, annonce par haut-parleur, sonnerie…).",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "7": {
+      "label": "éprouve des difficultés à participer à des activités de groupe dans lesquelles on parle beaucoup.",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "8": {
+      "label": "« passe à côté » des directives écrites ou des consignes comportant une démonstration (ou les manque) plus souvent que les élèves de son âge.",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "9": {
+      "label": "éprouve des difficultés à maintenir ou organiser les affaires et le matériel utilisé tout au long de la journée.",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "10": {
+      "label": "laisse certaines questions sans réponse sur une feuille d'informations, bien qu'il/elle connaisse les réponses.",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "11": {
+      "label": "regarde les personnes qui se déplacent dans la pièce.",
+      "quadrant": "RE",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "composante_scolaire": "2",
+      "pour_calcul": false
+    },
+    "12": {
+      "label": "détourne le regard de ses tâches pour observer tout ce qui se passe dans la pièce.",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "composante_scolaire": "2",
+      "pour_calcul": false
+    },
+    "13": {
+      "label": "manque les occasions de contact visuel avec moi au cours des interactions de tous les jours.",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "composante_scolaire": "4",
+      "pour_calcul": false
+    },
+    "14": {
+      "label": "est attiré·e par les écrans (ordinateur, tablette) comportant des images aux couleurs vives et brillantes ou animées avec un mouvement rapide.",
+      "quadrant": "RE",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "composante_scolaire": "2",
+      "pour_calcul": false
+    },
+    "15": {
+      "label": "s'approche trop près des autres lors de discussions en face à face.",
+      "quadrant": "RE",
+      "domaine_sensoriel": "Traitement de l'information TACTILE",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "16": {
+      "label": "ne semble pas remarquer que son visage ou ses mains restent sales.",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Traitement de l'information TACTILE",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "17": {
+      "label": "touche les personnes ou les objets au point d'agacer les autres.",
+      "quadrant": "RE",
+      "domaine_sensoriel": "Traitement de l'information TACTILE",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "18": {
+      "label": "manifeste un besoin de toucher des objets, des surfaces ou des textures (par exemple, veut ressentir les sensations tactiles provoquées par tout ce qui l'entoure, veut toucher à tout).",
+      "quadrant": "RE",
+      "domaine_sensoriel": "Traitement de l'information TACTILE",
+      "composante_scolaire": "2",
+      "pour_calcul": false
+    },
+    "19": {
+      "label": "veut vite s'essuyer les mains lors de tâches salissantes.",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Traitement de l'information TACTILE",
+      "composante_scolaire": "2",
+      "pour_calcul": false
+    },
+    "20": {
+      "label": "est facilement perturbé·e par des blessures bénignes (par exemple, lorsqu'il/elle se cogne à quelque chose, s'égratigne ou se coupe).",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Traitement de l'information TACTILE",
+      "composante_scolaire": "2",
+      "pour_calcul": false
+    },
+    "21": {
+      "label": "n'utilise que le bout de ses doigts lors d'activités qui demandent de la manipulation.",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Traitement de l'information TACTILE",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "22": {
+      "label": "sursaute ou recule lorsqu'on lui touche le corps ou qu'on s'approche trop près de lui/elle.",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Traitement de l'information TACTILE",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "23": {
+      "label": "ne stabilise pas les objets lorsqu'il/elle travaille (par exemple, tient pas sa feuille lorsqu'il/elle écrit).",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Traitement de l'information relative au MOUVEMENT",
+      "composante_scolaire": "4",
+      "pour_calcul": false
+    },
+    "24": {
+      "label": "joue avec des objets ou les tripote (par exemple, crayons, cahiers, classeurs).",
+      "quadrant": "RE",
+      "domaine_sensoriel": "Traitement de l'information relative au MOUVEMENT",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "25": {
+      "label": "ne tient pas en place ou devient nerveux(se) ou perturbateur lorsqu'il/elle est debout en rang ou près des autres (par exemple, en montant dans le car, en entrant dans l'école ou lorsqu'il/elle est assis·e au sein d'un groupe).",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Traitement de l'information relative au MOUVEMENT",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "26": {
+      "label": "est avachi·e, affalé·e sur sa chaise.",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Traitement de l'information relative au MOUVEMENT",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "27": {
+      "label": "se cogne aux choses ou aux gens, ne remarquant pas ce qui se trouve sur son chemin.",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Traitement de l'information relative au MOUVEMENT",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "28": {
+      "label": "est toujours en mouvement.",
+      "quadrant": "RE",
+      "domaine_sensoriel": "Traitement de l'information relative au MOUVEMENT",
+      "composante_scolaire": "1",
+      "pour_calcul": false
+    },
+    "29": {
+      "label": "trouve toutes sortes de prétextes pour aller voir l'enseignant.",
+      "quadrant": "RE",
+      "domaine_sensoriel": "Traitement de l'information relative au MOUVEMENT",
+      "composante_scolaire": "2",
+      "pour_calcul": false
+    },
+    "30": {
+      "label": "est moins rapide ou enclin·e à participer à des tâches ou à des activités physiques ou motrices que les élèves de son âge.",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Traitement de l'information relative au MOUVEMENT",
+      "composante_scolaire": "4",
+      "pour_calcul": false
+    },
+    "31": {
+      "label": "reste debout ou assis·e au bord du terrain de jeu ou de la cour lors de la récréation.*",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Traitement de l'information relative au MOUVEMENT",
+      "composante_scolaire": "4",
+      "pour_calcul": false
+    },
+    "32": {
+      "label": "refuse de participer à des jeux d'équipe (par exemple, football, basket-ball, balle au prisonnier).*",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Traitement de l'information relative au MOUVEMENT",
+      "composante_scolaire": "4",
+      "pour_calcul": false
+    },
+    "33": {
+      "label": "réalise les tâches de manière plus compliquée que nécessaire (par exemple, perd du temps, se déplace lentement).",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "34": {
+      "label": "semble fatigué·e (par exemple, manque d'énergie, est lent·e).",
+      "quadrant": "EN",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "4",
+      "pour_calcul": false
+    },
+    "35": {
+      "label": "pourrait être décrit·e comme hyper-réactif·ve ou ayant des réactions spectaculaires ou excessives par rapport aux élèves de son âge.",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "2",
+      "pour_calcul": false
+    },
+    "36": {
+      "label": "présente un sens de l'humour peu développé.",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "4",
+      "pour_calcul": false
+    },
+    "37": {
+      "label": "pourrait être décrit·e comme inflexible ou rigide par rapport aux élèves de son âge.",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "4",
+      "pour_calcul": false
+    },
+    "38": {
+      "label": "montre des signes d'anxiété et/ou de détresse lors de changements de plans et de routines ou lors des modifications survenues par rapport à ses attentes.",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "39": {
+      "label": "peut être têtu·e ou peu coopératif·ve.",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "40": {
+      "label": "persévère au point que cela perturbe sa participation aux activités (par exemple, ne peut pas passer à autre chose).",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "41": {
+      "label": "se met en retrait ou s'isole lorsqu'il y a des modifications dans l'environnement ou des changements de routine.",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "42": {
+      "label": "est facilement frustré·e.",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "3",
+      "pour_calcul": false
+    },
+    "43": {
+      "label": "interagit ou participe moins au sein de groupes que les élèves de son âge.",
+      "quadrant": "EV",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "4",
+      "pour_calcul": false
+    },
+    "44": {
+      "label": "est gêné·e lorsque les règles sont enfreintes.*",
+      "quadrant": "SE",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au Traitement de l'information sensorielle",
+      "composante_scolaire": "2",
+      "pour_calcul": false
+    }
+  }
+}
