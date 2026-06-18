@@ -5,7 +5,7 @@
 #   nettoyer
 #   garantir la cohérence minimale
 
-from utils.logger import log
+#from utils.logger import log
 
 def filter_empty_submissions(raw: dict, context: dict) -> dict:
     if not raw:
