@@ -20,31 +20,31 @@
         }
       },
       "domaines_sensoriels": {
-        "Traitement_Global": {
+        "traitement_global": {
           "m": 15.8,
           "sigma": 4.9
         },
-        "Auditif": {
+        "auditif": {
           "m": 10.1,
           "sigma": 4.3
         },
-        "Visuel": {
+        "visuel": {
           "m": 19.1,
           "sigma": 5.6
         },
-        "Tactile": {
+        "tactile": {
           "m": 9.4,
           "sigma": 3.1
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 13.9,
           "sigma": 4.2
         },
-        "traitement_sensoriel_oral": {
+        "sensoriel_oral": {
           "m": 12.7,
           "sigma": 5.5
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 10.1,
           "sigma": 4.7
         }
@@ -70,31 +70,31 @@
         }
       },
       "domaines_sensoriels": {
-        "Traitement_Global": {
+        "traitement_global": {
           "m": 15.7,
           "sigma": 4.9
         },
-        "Auditif": {
+        "auditif": {
           "m": 8.8,
           "sigma": 2.2
         },
-        "Visuel": {
+        "visuel": {
           "m": 15.1,
           "sigma": 5.4
         },
-        "Tactile": {
+        "tactile": {
           "m": 9.4,
           "sigma": 3.7
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 14.6,
           "sigma": 4.4
         },
-        "traitement_sensoriel_oral": {
+        "sensoriel_oral": {
           "m": 9.5,
           "sigma": 2.5
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 10.2,
           "sigma": 2.9
         }
@@ -120,31 +120,31 @@
         }
       },
       "domaines_sensoriels": {
-        "Traitement_Global": {
+        "traitement_global": {
           "m": 15.5,
           "sigma": 4.7
         },
-        "Auditif": {
+        "auditif": {
           "m": 10.4,
           "sigma": 3.7
         },
-        "Visuel": {
+        "visuel": {
           "m": 14.2,
           "sigma": 5.2
         },
-        "Tactile": {
+        "tactile": {
           "m": 9.8,
           "sigma": 4.6
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 15.4,
           "sigma": 4
         },
-        "traitement_sensoriel_oral": {
+        "sensoriel_oral": {
           "m": 10,
           "sigma": 3
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 11,
           "sigma": 4.1
         }
@@ -170,31 +170,31 @@
         }
       },
       "domaines_sensoriels": {
-        "Traitement_Global": {
+        "traitement_global": {
           "m": 15,
           "sigma": 5.1
         },
-        "Auditif": {
+        "auditif": {
           "m": 9.1,
           "sigma": 3.2
         },
-        "Visuel": {
+        "visuel": {
           "m": 13.3,
           "sigma": 5.8
         },
-        "Tactile": {
+        "tactile": {
           "m": 9.1,
           "sigma": 3.3
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 14.4,
           "sigma": 3.3
         },
-        "traitement_sensoriel_oral": {
+        "sensoriel_oral": {
           "m": 10,
           "sigma": 4.5
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 10.6,
           "sigma": 4.6
         }
@@ -220,31 +220,31 @@
         }
       },
       "domaines_sensoriels": {
-        "Traitement_Global": {
+        "traitement_global": {
           "m": 14.1,
           "sigma": 4.4
         },
-        "Auditif": {
+        "auditif": {
           "m": 9.3,
           "sigma": 2.7
         },
-        "Visuel": {
+        "visuel": {
           "m": 13.6,
           "sigma": 4.8
         },
-        "Tactile": {
+        "tactile": {
           "m": 8.6,
           "sigma": 3.1
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 14.2,
           "sigma": 4
         },
-        "traitement_sensoriel_oral": {
+        "sensoriel_oral": {
           "m": 8.6,
           "sigma": 2
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 9.8,
           "sigma": 3.1
         }
@@ -272,27 +272,27 @@
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 14.9,
           "sigma": 5.8
         },
-        "Visuel": {
+        "visuel": {
           "m": 11.3,
           "sigma": 4.3
         },
-        "Tactile": {
+        "tactile": {
           "m": 14.1,
           "sigma": 3.4
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 11.6,
           "sigma": 4.1
         },
-        "Position_corps": {
+        "position_corps": {
           "m": 9,
           "sigma": 1.8
         },
-        "Oral": {
+        "sensoriel_oral": {
           "m": 14,
           "sigma": 4.7
         },
@@ -300,11 +300,11 @@
           "m": 13.5,
           "sigma": 4.1
         },
-        "Socio-émotionnel": {
+        "socio-émotionnel": {
           "m": 20.8,
           "sigma": 6.7
         },
-        "Attentionnel": {
+        "attentionnel": {
           "m": 14.5,
           "sigma": 4.5
         }
@@ -330,27 +330,27 @@
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 13.5,
           "sigma": 5.5
         },
-        "Visuel": {
+        "visuel": {
           "m": 10.3,
           "sigma": 3.3
         },
-        "Tactile": {
+        "tactile": {
           "m": 14.4,
           "sigma": 4.4
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 12.4,
           "sigma": 4.2
         },
-        "Position_corps": {
+        "position_corps": {
           "m": 9.5,
           "sigma": 2
         },
-        "Oral": {
+        "sensoriel_oral": {
           "m": 17,
           "sigma": 8.4
         },
@@ -358,11 +358,11 @@
           "m": 14.3,
           "sigma": 5.3
         },
-        "Socio-émotionnel": {
+        "socio-émotionnel": {
           "m": 23.3,
           "sigma": 9.3
         },
-        "Attentionnel": {
+        "attentionnel": {
           "m": 13.9,
           "sigma": 4.2
         }
@@ -388,27 +388,27 @@
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 15.9,
           "sigma": 5.5
         },
-        "Visuel": {
+        "visuel": {
           "m": 11,
           "sigma": 3.7
         },
-        "Tactile": {
+        "tactile": {
           "m": 14.5,
           "sigma": 4.1
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 12.4,
           "sigma": 3.4
         },
-        "Position_corps": {
+        "position_corps": {
           "m": 8.7,
           "sigma": 1.4
         },
-        "Oral": {
+        "sensoriel_oral": {
           "m": 16.6,
           "sigma": 7.2
         },
@@ -416,11 +416,11 @@
           "m": 15.1,
           "sigma": 5.7
         },
-        "Socio-émotionnel": {
+        "socio-émotionnel": {
           "m": 24.8,
           "sigma": 7.3
         },
-        "Attentionnel": {
+        "attentionnel": {
           "m": 15.9,
           "sigma": 5.1
         }
@@ -446,27 +446,27 @@
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 15.3,
           "sigma": 6.3
         },
-        "Visuel": {
+        "visuel": {
           "m": 10,
           "sigma": 3.2
         },
-        "Tactile": {
+        "tactile": {
           "m": 14.8,
           "sigma": 4.2
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 14,
           "sigma": 5.6
         },
-        "Position_corps": {
+        "position_corps": {
           "m": 9.7,
           "sigma": 2.9
         },
-        "Oral": {
+        "sensoriel_oral": {
           "m": 14.3,
           "sigma": 5.7
         },
@@ -474,11 +474,11 @@
           "m": 15.1,
           "sigma": 6.6
         },
-        "Socio-émotionnel": {
+        "socio-émotionnel": {
           "m": 24.9,
           "sigma": 7.8
         },
-        "Attentionnel": {
+        "attentionnel": {
           "m": 16.3,
           "sigma": 6.3
         }
@@ -504,27 +504,27 @@
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 15,
           "sigma": 5.9
         },
-        "Visuel": {
+        "visuel": {
           "m": 10.9,
           "sigma": 3.9
         },
-        "Tactile": {
+        "tactile": {
           "m": 13.6,
           "sigma": 4.2
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 12.3,
           "sigma": 5.1
         },
-        "Position_corps": {
+        "position_corps": {
           "m": 9.3,
           "sigma": 2
         },
-        "Oral": {
+        "sensoriel_oral": {
           "m": 15.2,
           "sigma": 5.9
         },
@@ -532,11 +532,11 @@
           "m": 13.7,
           "sigma": 5.5
         },
-        "Socio-émotionnel": {
+        "socio-émotionnel": {
           "m": 25.3,
           "sigma": 9
         },
-        "Attentionnel": {
+        "attentionnel": {
           "m": 15.2,
           "sigma": 5.3
         }
@@ -562,27 +562,27 @@
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 15,
           "sigma": 5.3
         },
-        "Visuel": {
+        "visuel": {
           "m": 10.2,
           "sigma": 3.6
         },
-        "Tactile": {
+        "tactile": {
           "m": 13.7,
           "sigma": 4.4
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 11.1,
           "sigma": 3.7
         },
-        "Position_corps": {
+        "position_corps": {
           "m": 9.9,
           "sigma": 3.1
         },
-        "Oral": {
+        "sensoriel_oral": {
           "m": 15.4,
           "sigma": 7
         },
@@ -590,11 +590,11 @@
           "m": 13.4,
           "sigma": 4
         },
-        "Socio-émotionnel": {
+        "socio-émotionnel": {
           "m": 25.6,
           "sigma": 9
         },
-        "Attentionnel": {
+        "attentionnel": {
           "m": 14.4,
           "sigma": 5.5
         }
@@ -620,27 +620,27 @@
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 11.9,
           "sigma": 4.8
         },
-        "Visuel": {
+        "visuel": {
           "m": 8.9,
           "sigma": 3.9
         },
-        "Tactile": {
+        "tactile": {
           "m": 12.5,
           "sigma": 3.7
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 9.4,
           "sigma": 2.1
         },
-        "Position_corps": {
+        "position_corps": {
           "m": 10.3,
           "sigma": 3
         },
-        "Oral": {
+        "sensoriel_oral": {
           "m": 13.2,
           "sigma": 5
         },
@@ -648,11 +648,11 @@
           "m": 11.7,
           "sigma": 3.7
         },
-        "Socio-émotionnel": {
+        "socio-émotionnel": {
           "m": 22.1,
           "sigma": 9
         },
-        "Attentionnel": {
+        "attentionnel": {
           "m": 13.5,
           "sigma": 5.1
         }
@@ -680,41 +680,41 @@
         }
       },
       "composantes_scolaires": {
-        "composante_scolaire_1": {
+        "1": {
           "m": 19.1,
           "sigma": 8.9
         },
-        "composante_scolaire_2": {
+        "2": {
           "m": 17,
           "sigma": 7.1
         },
-        "composante_scolaire_3": {
+        "3": {
           "m": 17.6,
           "sigma": 7
         },
-        "composante_scolaire_4": {
+        "4": {
           "m": 11.8,
           "sigma": 4.8
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 11.2,
           "sigma": 5.3
         },
-        "Visuel": {
+        "visuel": {
           "m": 11.7,
           "sigma": 5.3
         },
-        "Tactile": {
+        "tactile": {
           "m": 11.1,
           "sigma": 4
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 12.8,
           "sigma": 7
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 14.8,
           "sigma": 4.8
         }
@@ -740,41 +740,41 @@
         }
       },
       "composantes_scolaires": {
-        "composante_scolaire_1": {
+        "1": {
           "m": 17.4,
           "sigma": 7.2
         },
-        "composante_scolaire_2": {
+        "2": {
           "m": 15.2,
           "sigma": 5.9
         },
-        "composante_scolaire_3": {
+        "3": {
           "m": 16.8,
           "sigma": 8.8
         },
-        "composante_scolaire_4": {
+        "4": {
           "m": 11.6,
           "sigma": 4.9
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 10.1,
           "sigma": 5
         },
-        "Visuel": {
+        "visuel": {
           "m": 10.3,
           "sigma": 4
         },
-        "Tactile": {
+        "tactile": {
           "m": 10.4,
           "sigma": 4.2
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 11,
           "sigma": 5.1
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 15.1,
           "sigma": 7.2
         }
@@ -800,41 +800,41 @@
         }
       },
       "composantes_scolaires": {
-        "composante_scolaire_1": {
+        "1": {
           "m": 22.7,
           "sigma": 8.9
         },
-        "composante_scolaire_2": {
+        "2": {
           "m": 19,
           "sigma": 5.8
         },
-        "composante_scolaire_3": {
+        "3": {
           "m": 18.3,
           "sigma": 5.7
         },
-        "composante_scolaire_4": {
+        "4": {
           "m": 12.1,
           "sigma": 3.6
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 11.6,
           "sigma": 4.2
         },
-        "Visuel": {
+        "visuel": {
           "m": 13.6,
           "sigma": 4.6
         },
-        "Tactile": {
+        "tactile": {
           "m": 12.2,
           "sigma": 4.8
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 14.3,
           "sigma": 6
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 16.2,
           "sigma": 4.2
         }
@@ -860,41 +860,41 @@
         }
       },
       "composantes_scolaires": {
-        "composante_scolaire_1": {
+        "1": {
           "m": 22.5,
           "sigma": 10.4
         },
-        "composante_scolaire_2": {
+        "2": {
           "m": 17.4,
           "sigma": 6.5
         },
-        "composante_scolaire_3": {
+        "3": {
           "m": 16.9,
           "sigma": 7.2
         },
-        "composante_scolaire_4": {
+        "4": {
           "m": 12.2,
           "sigma": 4.5
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 10.9,
           "sigma": 5
         },
-        "Visuel": {
+        "visuel": {
           "m": 14.1,
           "sigma": 6.6
         },
-        "Tactile": {
+        "tactile": {
           "m": 10.6,
           "sigma": 3.6
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 14,
           "sigma": 6.6
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 15.4,
           "sigma": 5.3
         }
@@ -920,41 +920,41 @@
         }
       },
       "composantes_scolaires": {
-        "composante_scolaire_1": {
+        "1": {
           "m": 19.6,
           "sigma": 8.6
         },
-        "composante_scolaire_2": {
+        "2": {
           "m": 15.5,
           "sigma": 6
         },
-        "composante_scolaire_3": {
+        "3": {
           "m": 16.2,
           "sigma": 6.6
         },
-        "composante_scolaire_4": {
+        "4": {
           "m": 12.6,
           "sigma": 6.4
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 10,
           "sigma": 3.7
         },
-        "Visuel": {
+        "visuel": {
           "m": 12,
           "sigma": 5.8
         },
-        "Tactile": {
+        "tactile": {
           "m": 10.1,
           "sigma": 4.3
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 12.3,
           "sigma": 5.8
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 15.6,
           "sigma": 7.6
         }
@@ -980,41 +980,41 @@
         }
       },
       "composantes_scolaires": {
-        "composante_scolaire_1": {
+        "1": {
           "m": 19.6,
           "sigma": 7.8
         },
-        "composante_scolaire_2": {
+        "2": {
           "m": 15.6,
           "sigma": 4.7
         },
-        "composante_scolaire_3": {
+        "3": {
           "m": 16.4,
           "sigma": 4.7
         },
-        "composante_scolaire_4": {
+        "4": {
           "m": 12.4,
           "sigma": 4.3
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 10.8,
           "sigma": 4.3
         },
-        "Visuel": {
+        "visuel": {
           "m": 13,
           "sigma": 6.1
         },
-        "Tactile": {
+        "tactile": {
           "m": 9.7,
           "sigma": 2.4
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 11.5,
           "sigma": 4.2
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 15.1,
           "sigma": 5.2
         }
@@ -1040,41 +1040,41 @@
         }
       },
       "composantes_scolaires": {
-        "composante_scolaire_1": {
+        "1": {
           "m": 17.2,
           "sigma": 6
         },
-        "composante_scolaire_2": {
+        "2": {
           "m": 14.2,
           "sigma": 4.8
         },
-        "composante_scolaire_3": {
+        "3": {
           "m": 14.7,
           "sigma": 3.6
         },
-        "composante_scolaire_4": {
+        "4": {
           "m": 11.7,
           "sigma": 3.5
         }
       },
       "domaines_sensoriels": {
-        "Auditif": {
+        "auditif": {
           "m": 9.1,
           "sigma": 2.8
         },
-        "Visuel": {
+        "visuel": {
           "m": 10.9,
           "sigma": 4.6
         },
-        "Tactile": {
+        "tactile": {
           "m": 9.4,
           "sigma": 3.8
         },
-        "Mouvement": {
+        "mouvement": {
           "m": 10.5,
           "sigma": 4
         },
-        "Comportemental": {
+        "comportemental": {
           "m": 14.3,
           "sigma": 3.9
         }

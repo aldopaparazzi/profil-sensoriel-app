@@ -1,14 +1,10 @@
 # config/settings.py
 
 import json
-#import os
 from pathlib import Path
 
-#from dotenv import load_dotenv
-
-
 # =========================================================
-# FICHIERS DE CONFIGURATION
+# CHEMINS
 # =========================================================
 
 CONFIG_PATH = Path(__file__).resolve().parent / "runtime.json"
@@ -16,13 +12,12 @@ ENV_FILE = Path(__file__).resolve().parent / ".env"
 
 
 # =========================================================
-# CONFIG JSON
+# CONFIG PRINCIPALE
 # =========================================================
 
 def load_config():
     """
-    Charge runtime.json
-    et injecte le token Tally.
+    Charge runtime.json et injecte le token Tally.
     """
 
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
@@ -34,43 +29,50 @@ def load_config():
 
 
 # =========================================================
-# TOKEN TALLY
+# TOKEN MANAGEMENT
 # =========================================================
 
 def get_tally_token():
     """
-    Retourne le token Tally.
+    Lit le token depuis .env.
 
-    Si le fichier .env n'existe pas,
-    demande le token à l'utilisateur
-    puis le sauvegarde.
+    Règles :
+    - si .env n'existe pas → demande utilisateur
+    - si fichier invalide → erreur explicite
     """
 
+    # -----------------------------------------------------
+    # CAS 1 : fichier absent → création interactive
+    # -----------------------------------------------------
     if not ENV_FILE.exists():
-
-        token = input(
-            "🔑 Entrez votre token Tally : "
-        ).strip()
-
+        token = input("🔑 Entrez votre token Tally : ").strip()
         save_tally_token(token)
+        return token
 
-#    load_dotenv(ENV_FILE, override=True)
-#    return os.getenv("TALLY_TOKEN")
-    content = ENV_FILE.read_text(
-        encoding="utf-8"
-    ).strip()
+    # -----------------------------------------------------
+    # CAS 2 : lecture fichier existant
+    # -----------------------------------------------------
+    content = ENV_FILE.read_text(encoding="utf-8").strip()
+
+    # sécurité minimale
+    if "=" not in content:
+        raise ValueError("Fichier .env invalide (format attendu: TALLY_TOKEN=xxx)")
 
     return content.split("=", 1)[1]
 
+
+# =========================================================
+# SAUVEGARDE TOKEN
+# =========================================================
+
 def save_tally_token(token: str):
     """
-    Sauvegarde le token dans .env.
+    Écrit le token dans .env.
+
+    Remplace entièrement le fichier.
     """
 
-    ENV_FILE.parent.mkdir(
-        parents=True,
-        exist_ok=True
-    )
+    ENV_FILE.parent.mkdir(parents=True, exist_ok=True)
 
     ENV_FILE.write_text(
         f"TALLY_TOKEN={token}\n",
@@ -78,17 +80,22 @@ def save_tally_token(token: str):
     )
 
 
+# =========================================================
+# REMPLACEMENT TOKEN (ERREUR 401)
+# =========================================================
+
 def replace_tally_token():
     """
-    Demande un nouveau token
-    et remplace l'ancien.
+    Appelé quand l'API retourne 401.
+
+    Comportement :
+    - demande un nouveau token
+    - écrase .env
+    - retourne le token immédiatement
     """
 
-    token = input(
-        "\n🔑 Token invalide. Nouveau token : "
-    ).strip()
+    token = input("\n🔑 Token invalide. Nouveau token : ").strip()
 
     save_tally_token(token)
-    load_dotenv(ENV_FILE, override=True)
 
     return token

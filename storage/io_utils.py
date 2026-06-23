@@ -5,6 +5,83 @@ from storage.data_fingerprint import dataframe_hash, json_hash
 from storage.state import load_state, save_state
 
 RAW_DIR = Path("data/raw")
+MAPPED_DIR = Path("data/mapped")
+SCORED_DIR = Path("data/scored")
+
+
+def save_scored_json(data: dict, form_name: str):
+    """
+    Sauvegarde les données scoré dans data/mapped/.
+
+    Args:
+        data: dict (scored output du pipeline)
+        form_name: str (nom du formulaire)
+    """
+
+    # =========================================================
+    # 1. création dossier si besoin
+    # =========================================================
+    SCORED_DIR.mkdir(parents=True, exist_ok=True)
+
+    # =========================================================
+    # 2. timestamp
+    # =========================================================
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    # =========================================================
+    # 3. nom de fichier
+    # =========================================================
+    filename = f"{form_name}.json" #_{timestamp}.json"
+    path = SCORED_DIR / filename
+
+    # =========================================================
+    # 4. sauvegarde JSON
+    # =========================================================
+    path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+
+    print(f"💾 SCORED JSON sauvegardé : {path}")
+
+    return path
+
+def save_mapped_json(data: dict, form_name: str):
+    """
+    Sauvegarde les données mappées dans data/mapped/.
+
+    Args:
+        data: dict (mapped output du pipeline)
+        form_name: str (nom du formulaire)
+    """
+
+    # =========================================================
+    # 1. création dossier si besoin
+    # =========================================================
+    MAPPED_DIR.mkdir(parents=True, exist_ok=True)
+
+    # =========================================================
+    # 2. timestamp
+    # =========================================================
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    # =========================================================
+    # 3. nom de fichier
+    # =========================================================
+    filename = f"{form_name}.json" #_{timestamp}.json"
+    path = MAPPED_DIR / filename
+
+    # =========================================================
+    # 4. sauvegarde JSON
+    # =========================================================
+    path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+
+    print(f"💾 MAPPED JSON sauvegardé : {path}")
+
+    return path
 
 def normalize_raw(raw: dict) -> dict:
 
@@ -56,60 +133,45 @@ def save_raw_json(raw, form_name: str, full_refresh: bool = False):
     # FULL REFRESH → ignore hash
     # =========================================================
     if not full_refresh and last_hash == current_hash:
-        print(f"⏭️  {form_name} inchangé → skip RAW")
+        print(f"\n⏭️  {form_name} inchangé → skip RAW")
         return None
 
     # =========================================================
-    # SAVE RAW
+    #  NOMS DE FICHIERS
     # =========================================================
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f"{form_name}_{timestamp}.json"
-    path = RAW_DIR / filename
 
-    path.write_text(
+    file_last = RAW_DIR / f"{form_name}.json"
+    file_archived = RAW_DIR / f"{form_name}_{timestamp}.json"
+
+    # =========================================================
+    # 1. ARCHIVE (timestamp)
+    # =========================================================
+    file_archived.write_text(
         json.dumps(raw, ensure_ascii=False, indent=2),
         encoding="utf-8"
     )
 
+    # =========================================================
+    # 2. LAST (overwrite)
+    # =========================================================
+    file_last.write_text(
+        json.dumps(raw, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
     # =========================================================
     # UPDATE STATE
     # =========================================================
     state[form_name] = current_hash
     save_state(state)
 
-    print(f"💾 RAW JSON sauvegardé : {path}")
-
+    print(f"💾 RAW JSON sauvegardé : {file_last}")
+    print(f"   - archive : {file_archived}")
+    print(f"   - last    : {file_last}")
+    
     print("\n=== HASH DEBUG ===")
     print("FORM:", form_name)
     print("CURRENT:", current_hash)
     print("LAST:", last_hash)
     print("==================\n")
-    return path
-
-def save_raw_csv(df, form_name):
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
-
-    current_hash = dataframe_hash(df)
-
-    state = load_state()
-    last_hash = state.get(form_name)
-
-    # 🔥 CAS 1 : pas de changement
-    if last_hash == current_hash:
-        print(f"⏭️ {form_name} inchangé → skip RAW")
-        return None
-
-    # 🔥 CAS 2 : changement détecté → save
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f"{form_name}_{timestamp}.csv"
-
-    path = RAW_DIR / filename
-    df.to_csv(path, index=False)
-
-    # update state
-    state[form_name] = current_hash
-    save_state(state)
-
-    print(f"💾 RAW sauvegardé : {path}")
-
-    return path
+    return file_last

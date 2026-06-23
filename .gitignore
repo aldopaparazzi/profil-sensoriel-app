@@ -1,6 +1,8 @@
 .env
 
 data/raw/
+data/mapped/
+data/scored/
 archives/
 .claude/
 .vscode/

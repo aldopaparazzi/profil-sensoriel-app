@@ -1,33 +1,65 @@
 {
-  "enfant": [
-    "Auditif",
-    "Visuel",
-    "Tactile",
-    "Mouvement",
-    "Position_corps",
-    "Oral",
-    "Comportemental",
-    "Conduites",
-    "Socio-émotionnel",
-    "Attentionnel",
-    "Global_enfant"
-  ],
-  "jeune_enfant": [
-    "Traitement_Global",
-    "Auditif",
-    "Visuel",
-    "Tactile",
-    "Mouvement",
-    "Oral",
-    "Comportemental",
-    "Global_jeune_enfant"
-  ],
-  "scolaire": [
-    "Auditif",
-    "Visuel",
-    "Tactile",
-    "Mouvement",
-    "Comportemental",
-    "Global_scolaire"
-  ]
+  "enfant": {
+    "domaines_sensoriels": [
+      "Auditif",
+      "Visuel",
+      "Tactile",
+      "Mouvement",
+      "Position_corps",
+      "Oral",
+      "Comportemental",
+      "Conduites",
+      "Socio-émotionnel",
+      "Attentionnel",
+      "Global_enfant"
+    ],
+    "quadrants": [
+      "recherche",
+      "evitement",
+      "sensibilite",
+      "enregistrement"
+    ]
+  },
+
+  "jeune_enfant": {
+    "domaines_sensoriels": [
+      "Traitement_Global",
+      "Auditif",
+      "Visuel",
+      "Tactile",
+      "Mouvement",
+      "Oral",
+      "Comportemental",
+      "Global_jeune_enfant"
+    ],
+    "quadrants": [
+      "recherche",
+      "evitement",
+      "sensibilite",
+      "enregistrement"
+    ]
+  },
+
+  "scolaire": {
+    "domaines_sensoriels": [
+      "Auditif",
+      "Visuel",
+      "Tactile",
+      "Mouvement",
+      "Comportemental",
+      "Global_scolaire"
+    ],
+    "quadrants": [
+      "recherche",
+      "evitement",
+      "sensibilite",
+      "enregistrement"
+    ],
+    "composantes_scolaires": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ]
+  }
 }

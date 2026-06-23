@@ -1,139 +1,166 @@
-# Reprise de projet – Profil Sensoriel App
+# 📦 SCRIPT DE REPRISE — PIPELINE PROFIL SENSORIEL (VERSION CONSOLIDÉE)
 
-## Contexte général
+### 🧭 OBJECTIF DU PROJET
 
-Nous développons un pipeline Python qui transforme les exports JSON de Tally en données exploitables pour le calcul du profil sensoriel.
+Construire un pipeline déterministe et traçable qui :
 
-Le projet est volontairement découpé en étapes simples et lisibles :
+* ingère des submissions JSON (type Tally)
+* transforme les données brutes en structure métier stable
+* enrichit les réponses avec une référence contrôlée
+* prépare un scoring statistique basé sur des normes
+* permet un accès final par `submission_id` pour reporting
 
-```text
-Raw Tally JSON
-    ↓
-fetch_tally.py
-    ↓
-validate.py
-    ↓
-split.py
-    ↓
-mapping.py
-    ↓
-scoring.py
-    ↓
-report.py
+---
+
+## 🧱 ARCHITECTURE DU PIPELINE
+
+### 1. INGESTION (Tally API)
+
+#### 🎯 Rôle
+
+Récupérer les données sans transformation.
+
+#### 📥 INPUT
+
+API Tally
+
+#### 📤 OUTPUT
+
+```json
+{
+  "submissions": [...]
+}
 ```
 
-L'objectif actuel est de fiabiliser entièrement le pipeline avant de construire le scoring.
+#### ⚠️ RÈGLES
+
+* aucune transformation
+* aucune suppression de données
+* structure JSON brute conservée
 
 ---
 
-## Contraintes importantes
+### 2. VALIDATION (pipeline/validate.py)
 
-### 1. Pas de jargon inutile
+#### 🎯 Rôle
 
-Les explications doivent rester simples et orientées métier.
+Garantir une structure minimale exploitable.
 
-Toujours privilégier :
+#### 📥 INPUT
 
-* ce qui entre
-* ce qui sort
-* ce qui peut casser
-* comment on le détecte
+```python
+raw["submissions"]
+```
 
-plutôt que des considérations théoriques.
-
----
-
-### 2. Éviter les silences dangereux
-
-Le pipeline ne doit jamais :
-
-* perdre une question
-* supprimer une donnée sans le dire
-* ignorer une erreur silencieusement
-
-Toute anomalie doit être :
-
-* conservée
-* tracée
-* loggée
-
----
-
-### 3. Ne jamais spéculer sur les données
-
-Si une information n'est pas visible dans les exemples fournis :
-
-* demander confirmation
-* ne pas inventer de schéma
-* ne pas supposer de structure
-
----
-
-## Format actuel des données
-
-### Après split.py
-
-Une submission devient :
+#### 📤 OUTPUT
 
 ```python
 {
+  "submissions": [...]
+}
+```
+
+#### ⚠️ RÈGLES STRICTES
+
+* ne pas modifier les données métier
+* ne pas filtrer silencieusement
+* toute anomalie doit être loggée dans `context`
+* les submissions sans `responses` sont conservées mais signalées
+
+---
+
+### 3. SPLIT (pipeline/split.py)
+
+#### 🎯 Rôle
+
+Transformer les JSON bruts en structure métier stable.
+
+#### 📤 OUTPUT PAR SUBMISSION
+
+```python
+{
+    "metadata": {...},
     "patient": {...},
-
     "respondent": {...},
-
-    "comments": {
-        "Auditif": "...",
-        "Tactile": "...",
-    },
-
     "sensory_responses": [
         {
             "question_id": "1",
-            "score": 4
+            "score": 3
         }
     ],
-
-    "metadata": {
-        "submission_id": "...",
-        "form_id": "...",
-        "submitted_at": "...",
-        ...
-    }
+    "comments": {...}
 }
 ```
 
 ---
 
-### Après mapping.py
+#### ⚠️ RÈGLES STRICTES
 
-Chaque réponse est enrichie avec le JSON de référence.
+* aucune logique métier
+* aucun scoring
+* aucun mapping de labels
+* aucune suppression silencieuse de données
+* champs inconnus stockés dans `ignored_fields`
+
+---
+
+#### 👤 PATIENT
+
+* champs `Patient_*` extraits dans un dictionnaire
+* `Patient_Date_naissance` utilisé pour calcul âge
+
+---
+
+#### 📅 ÂGE
 
 ```python
-{
-    "metadata": {...},
+compute_age(birth_date, submitted_at)
+```
 
-    "patient": {...},
+* retourne `None` si invalide
+* tolérant aux erreurs
 
-    "respondent": {...},
+---
 
-    "comments": {...},
+#### 💬 COMMENTAIRES VALIDES
 
-    "items": [
+```python
+COMMENT_KEYS = {
+    "Auditif", "Visuel", "Tactile", "Mouvement",
+    "Position_corps", "Oral", "Comportemental",
+    "Conduites", "Socio-émotionnel", "Attentionnel",
+    "Global_Scolaire", "Traitement_Global"
+}
+```
+
+---
+
+## 🧠 4. MAPPING (pipeline/mapping.py)
+
+### 🎯 Rôle
+
+Enrichir les réponses avec les métadonnées de référence.
+
+---
+
+### 📥 INPUT
+
+* `context["split"]`
+* `data/reference/<form_name>.json`
+
+---
+
+### 📤 OUTPUT
+
+```python
+context["mapped"] = {
+    "scolaire": [
         {
-            "question_id": "1",
-            "score": 4,
-
-            "label": "...",
-
-            "quadrant": "EV",
-
-            "domaine_sensoriel": "...",
-
-            "composante_scolaire": "...",
-
-            "pour_calcul": False,
-
-            "valid": True
+            "metadata": {...},
+            "patient": {...},
+            "respondent": {...},
+            "items": [...],
+            "comments": {...}
         }
     ]
 }
@@ -141,253 +168,360 @@ Chaque réponse est enrichie avec le JSON de référence.
 
 ---
 
-## Références
+### 📌 STRUCTURE ITEM
 
-Les références ne sont plus des CSV.
+```python
+{
+    "question_id": "1",
+    "score": 3,
+    "label": "...",
+    "quadrant": "recherche",
+    "domaine_sensoriel": "auditif",
+    "composante_scolaire": "1",
+    "pour_calcul": true,
+    "valid": true
+}
+```
 
-Elles sont désormais stockées dans :
+---
+
+### ⚠️ RÈGLES CRITIQUES MAPPING
+
+* toutes les questions sont conservées
+* question inconnue autorisée mais `valid=False`
+* aucune erreur silencieuse
+* toutes anomalies loggées dans `context`
+
+---
+
+### 🧼 NORMALISATION OBLIGATOIRE
+
+#### 🔴 RÈGLE STRUCTURELLE
+
+Toutes les valeurs suivantes sont normalisées en **lowercase strict** :
+
+* `quadrant`
+* `domaine_sensoriel`
+
+---
+
+#### ⚠️ CONSÉQUENCE
+
+* aucun matching basé sur la casse
+* aucune transformation dans scoring
+* comparaison stricte uniquement
+
+---
+
+### 📌 RÉFÉRENCE QUESTIONS
 
 ```text
-data/reference/enfant.json
-data/reference/jeune_enfant.json
-data/reference/scolaire.json
+data/reference/reference.json
 ```
 
 Structure :
 
-```python
+```json
 {
+  "enfant": {
     "questions": {
-        "1": {
-            "label": "...",
-            "quadrant": "...",
-            "domaine_sensoriel": "...",
-            "composante_scolaire": "...",
-            "pour_calcul": false
-        }
+      "1": {
+        "label": "...",
+        "quadrant": "...",
+        "domaine_sensoriel": "...",
+        "domaine_label": "...",
+        "composante_scolaire": "...",
+        "pour_calcul": true
+      }
     }
-}
-```
+  },
 
-Le chargement des références est centralisé dans main.py.
-
-mapping.py ne charge plus de fichiers.
-
----
-
-## Structure actuelle du contexte
-
-Le choix retenu est un dictionnaire plutôt qu'une liste.
-
-Objectif :
-
-* accès direct à une submission
-* génération future d'un rapport par submission_id
-
-Structure cible :
-
-```python
-context["mapped"] = {
-
-    "scolaire": {
-
-        "jex1RA1": {
-
-            "metadata": {...},
-
-            "patient": {...},
-
-            "respondent": {...},
-
-            "comments": {...},
-
-            "items": [...]
-        }
-    },
-
-    "enfant": {},
-
-    "jeune_enfant": {}
-}
-```
-
-Ce format a été choisi parce qu'il est plus cohérent pour :
-
-* rechercher une submission
-* afficher un rapport
-* déboguer
-
----
-
-## Décisions prises sur les commentaires
-
-Ancien format :
-
-```python
-[
-    {
-        "domaine": "Auditif",
-        "commentaire": "..."
+  "jeune_enfant": {
+    "questions": {
+      "1": {
+        "label": "...",
+        "quadrant": "...",
+        "domaine_sensoriel": "...",
+        "composante_scolaire": "...",
+        "pour_calcul": true
+      }
     }
-]
-```
+  },
 
-Nouveau format :
-
-```python
-{
-    "Auditif": "...",
-    "Tactile": "..."
+  "scolaire": {
+    "questions": {
+      "1": {
+        "label": "...",
+        "quadrant": "...",
+        "domaine_sensoriel": "...",
+        "composante_scolaire": "1",
+        "pour_calcul": true
+      }
+    }
+  }
 }
 ```
 
-Pourquoi :
+---
 
-* un seul commentaire possible par domaine
-* plus lisible
-* accès direct
+## 🧠 5. VALIDATION / RÉFÉRENCES
 
-Les doublons de domaine ont été corrigés à la source dans Tally.
+#### 🎯 Rôle
+
+Fournir les métadonnées métier des questions.
 
 ---
 
-## Particularités Tally identifiées
+#### 📌 CONTRAINTE
 
-### Champ UX "zero"
+* les clés doivent être cohérentes avec les valeurs mapping
+* aucune transformation de texte en aval
 
-Certaines réponses contiennent :
+---
+
+## 🧮 6. SCORING (À VENIR)
+
+### 🎯 Rôle
+
+* calculs uniquement
+* aucune logique de parsing
+* aucune transformation de données
+
+---
+
+### 📥 INPUT ATTENDU
 
 ```python
+mapped["items"]
+normes.json
+```
+
+---
+
+### 📌 RÈGLES STRICTES
+
+* matching strict uniquement
+* aucune correction de clé automatique
+* aucune supposition si clé absente
+* toute absence doit être loggée
+
+---
+
+### 📊 NORMALISATION STATISTIQUE
+
+Formule :
+
+```python
+z = (raw_score - m) / sigma
+```
+
+---
+
+### 📌 STRUCTURE NORMES
+
+```json
 {
-    "zero": ...
+  "scolaire": {
+    "3": {
+      "quadrants": {
+        "recherche": {"m": 13.7, "sigma": 6.1}
+      },
+      "domaines_sensoriels": {
+        "auditif": {"m": 11.2, "sigma": 5.3}
+      },
+      "composantes_scolaires": {
+        "1": {"m": 19.1, "sigma": 8.9}
+      }
+    }
+  }
 }
 ```
 
-Ce champ sert uniquement à l'interface Tally.
+---
 
-Il est ignoré par le pipeline.
+## 🚨 CONTRAINTES GLOBALES
+
+### ❌ INTERDIT
+
+* deviner une clé absente
+* corriger automatiquement une incohérence
+* filtrer silencieusement des données
+* transformer les textes métier en aval
+* modifier les données dans split
+* faire du fuzzy matching
 
 ---
 
-### Commentaires vides
+### ✔ AUTORISÉ
 
-Les commentaires vides génèrent des clés présentes mais sans contenu.
-
-Ils sont ignorés dans split.py.
+* logs explicites
+* conservation des données incohérentes
+* tolérance aux valeurs null
+* traçabilité complète des erreurs
 
 ---
 
-## Logs souhaités
+## 🧪 ÉTAT ACTUEL DU SYSTÈME
 
-Les logs doivent être utiles à l'exécution.
+### ✔ SPLIT
+
+* stable
+* reproductible
+* extraction patient OK
+* commentaires OK
+
+### ✔ MAPPING
+
+* enrichissement fonctionnel
+* normalisation lowercase appliquée
+
+### ⚠️ POINTS DE VIGILANCE
+
+* cohérence stricte reference ↔ normes
+* submissions partielles possibles
+* champs inconnus (doivent être tracés)
+
+---
+
+## 🎯 OBJECTIF FINAL DU PIPELINE
+
+Permettre :
+
+```text
+GET /report/{submission_id}
+```
+
+et retourner :
+
+* patient structuré
+* réponses enrichies
+* commentaires organisés
+* scores normalisés (z-score)
+* traçabilité complète des anomalies
+
+---
+
+## 🚀 PROCHAINE PHASE
+
+1. implémenter scoring strict sans ambiguïté
+2. ajouter validation de cohérence reference ↔ normes
+3. sécuriser les clés manquantes (mode audit)
+4. construire endpoint report final
+
+---
+---
+# Règle réelle de `pour_calcul`
+
+`pour_calcul` **ne signifie pas** :
+
+```python
+inclure_la_question_dans_tous_les_calculs
+```
+
+mais plutôt :
+
+```python
+inclure_la_question_dans_le_calcul_des_domaines_sensoriels
+```
+
+---
+
+# Calcul des quadrants
+
+Les scores de quadrant sont calculés à partir de **toutes les questions valides** du quadrant concerné.
 
 Exemple :
 
-```text
-3.✂️ Split
-
-   └── jex1RA1
-       ├── patient: 8 champs
-       ├── questions: 44
-       ├── commentaires: 5
-       ├── ignorés: 3
-
-✔ scolaire: 4 submission(s) structurées
+```python
+if item["valid"]:
+    quadrants[item["quadrant"]] += item["score"]
 ```
 
-Puis :
+sans tenir compte de :
 
-```text
-4.🧠 Mapping
-
-📥 scolaire
-
- └── mon prénom mon nom (jex1RA1)
-
-✔ scolaire: 4 submission(s) mappées
+```python
+pour_calcul
 ```
 
-Les logs doivent rester lisibles humainement.
+---
+
+# Calcul des composantes scolaires
+
+Même logique.
+
+Exemple :
+
+```python
+if item["valid"]:
+    composantes[item["composante_scolaire"]] += item["score"]
+```
+
+sans filtrage sur :
+
+```python
+pour_calcul
+```
 
 ---
 
-## État actuel du pipeline
+# Calcul des domaines sensoriels
 
-### fetch_tally.py
+Là seulement :
 
-Considéré stable.
-
----
-
-### validate.py
-
-Doit uniquement vérifier la structure minimale.
-
-Il ne doit pas filtrer agressivement les données.
-
-__Objectif__ :
-
-* détecter les anomalies
-* pas supprimer des submissions
+```python
+if item["valid"] and item["pour_calcul"]:
+    domaines[item["domaine_sensoriel"]] += item["score"]
+```
 
 ---
 
-### split.py
+# Conséquence pratique
 
-Considéré quasiment stable.
+Pour une question comme :
 
-__Fonctions__ :
+```json
+{
+    "question_id": "31",
+    "score": 5,
+    "quadrant": "evitement",
+    "domaine_sensoriel": "mouvement",
+    "composante_scolaire": "4",
+    "pour_calcul": false
+}
+```
 
-* extraction patient
-* extraction répondant
-* extraction réponses
-* extraction commentaires
-* calcul âge
+elle participe :
 
-__Sécurités__ :
+✅ au score du quadrant `evitement`
 
-* calcul d'âge protégé
-* champs ignorés tracés
-* conservation de toutes les questions
+✅ au score de la composante scolaire `4`
 
----
-
-### mapping.py
-
-En cours de stabilisation.
-
-__Objectif__ :
-
-* enrichir chaque question avec la référence JSON
-* conserver les questions inconnues
-* enregistrer les erreurs de mapping
-* ne jamais perdre une donnée
-
-Le chargement des références est fait uniquement dans main.py.
+❌ au score du domaine sensoriel `mouvement`
 
 ---
 
-## Étape suivante
+# Donc les règles de filtrage deviennent
 
-Construire scoring.py.
+## Quadrants
 
-__Principe attendu :__
+```python
+valid == True
+```
 
-1. travailler uniquement sur les items mappés
-2. ignorer les items avec :
+## Composantes scolaires
 
-    ```python
-    pour_calcul = False
-    ```
+```python
+valid == True
+```
 
-3. calculer :
+## Domaines sensoriels
 
-   * scores par quadrant
-   * scores par domaine sensoriel
-   * scores par composante scolaire
+```python
+valid == True
+and
+pour_calcul == True
+```
 
-4. produire une structure propre pour report.py
+---
 
-Le scoring ne doit plus relire les références JSON.
-
-Toutes les informations nécessaires sont déjà présentes dans les items issus du mapping.
+C'est d'ailleurs cohérent avec ce qu'on observe dans les questionnaires sensoriels : certaines questions sont utilisées dans les profils/quadrants globaux mais sont exclues des sous-scores de certains domaines sensoriels pour des raisons de validité psychométrique.

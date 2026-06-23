@@ -10,17 +10,17 @@
 from pprint import pprint
 import json
 
+from config.settings import load_config, replace_tally_token
 from utils.logger import log
+from ingestion.fetch_tally import fetch_tally, TallyAPIError
+from storage.io_utils import save_raw_json, save_mapped_json, save_scored_json
 from pipeline.validate import filter_empty_submissions
 from pipeline.split import split_dataset
-from pipeline.mapping import map_all_submissions #,load_reference, map_sensory_responses
-#from pipeline.profiling import profile_dataset
-#from pipeline.scoring import compute_scores
+from pipeline.mapping import (
+    map_all_submissions,
+)
+from pipeline.scoring import compute_scores
 
-from ingestion.fetch_tally import fetch_tally, TallyAPIError
-from storage.io_utils import save_raw_json
-
-from config.settings import load_config, replace_tally_token
 
 
 def main():
@@ -81,10 +81,10 @@ def main():
     for form_name, raw in context["raw"].items():
         clean = filter_empty_submissions(raw, context)
         context["validated"][form_name] = clean
-        #print(f"{form_name}: Données filtrées")
+        # print(f"{form_name}: Données filtrées")
         print(f"✔ {form_name}: {len(clean['submissions'])} submission(s) valides")
 
-#    print("\n==========  DEBUG  ==============")
+    #    print("\n==========  DEBUG  ==============")
 
     # for r in clean["submissions"][0]["responses"]:
     # pprint(r)
@@ -92,12 +92,11 @@ def main():
     # =========================================================
     # 2.5 PROFILING
     # =========================================================
-    #log(context, "\n2.5 🔎 Profiling")
+    # log(context, "\n2.5 🔎 Profiling")
     #
-    #for form_name, clean in context["validated"].items():
+    # for form_name, clean in context["validated"].items():
     #    profile_dataset(clean, form_name)
-#    print("\n==========  /DEBUG  ==============")
-
+    #    print("\n==========  /DEBUG  ==============")
 
     # =========================================================
     # 3. SPLIT
@@ -107,78 +106,70 @@ def main():
     for form_name, clean in context["validated"].items():
         submissions = split_dataset(clean)
         context["split"][form_name] = submissions
-        print(f"✔ {form_name}: {len(submissions)} submission(s) structurées\n")
+        print(f"\n✔ {form_name}: {len(submissions)} submission(s) structurées\n")
         # print(f"{form_name}: Éléments séparés")
 
     # debug léger sur 1 élément
-    #if context["split"].get("scolaire"):
+    # if context["split"].get("scolaire"):
     #    print("\n🔎 Exemple split (scolaire):")
     #    pprint(context["split"]["scolaire"][0])
 
     # =========================================================
-    # 4. MAPPING (IMPORTANT: PAR FORM)
+    # 4. MAPPING
     # =========================================================
     log(context, "\n4.🧠 Mapping")
 
-    # chargement centralisé des références
-    references = {
-        "enfant": json.load(open("data/reference/enfant.json", encoding="utf-8")),
-        "jeune_enfant": json.load(open("data/reference/jeune_enfant.json", encoding="utf-8")),
-        "scolaire": json.load(open("data/reference/scolaire.json", encoding="utf-8")),
-    }
+    reference = json.load(open("data/reference/reference.json", encoding="utf-8"))
 
     for form_name, submissions in context["split"].items():
-
         if not submissions:
             print(f"📭 {form_name}: aucune submission")
             continue
 
-        reference = references.get(form_name)
+        form_reference = reference.get(form_name)
 
-        if not reference:
+        # reference_form = reference[form_name]["questions"]
+
+        if not form_reference:
             print(f"⚠️ {form_name}: pas de référence trouvée")
             continue
 
         mapped = map_all_submissions(
-            submissions,
-            reference,
-            context=context
+            submissions, reference[form_name]["questions"], context=context
         )
 
         context["mapped"][form_name] = mapped
+        save_mapped_json(data=mapped, form_name=form_name)
 
-        print(f"✔ {form_name}: {len(mapped)} submission(s) mappées")
-        pprint(mapped) #full
-
-    #pprint(context["mapped"]) #full
+        #print(f"\n✔ {form_name}: {len(mapped)} submission(s) mappées")
+        #pprint(mapped)  # full
 
     # =========================================================
     # 5. SCORING
     # =========================================================
     log(context, "\n5.📊 Scoring")
 
-    #context = compute_scores(context)
+    context = compute_scores(context)
+    scored = context["scores"][form_name]
+    save_scored_json(data=scored, form_name=form_name)
 
-    #print("\nSCORES :")
-    #print(context["scores"])
 
-#    scored = compute_scores(mapped, reference)
-#    scored = compute_scores(mapped_submission, reference)
-#
-#    # injection dans payload complet
-#    final_payload = {
-#        **mapped,
-#        "scores": scored
-#    }
+    #    scored = compute_scores(mapped, reference)
+    #    scored = compute_scores(mapped_submission, reference)
+    #
+    #    # injection dans payload complet
+    #    final_payload = {
+    #        **mapped,
+    #        "scores": scored
+    #    }
 
     # =========================================================
     # 6. REPORT(placeholder)
     # =========================================================
     log(context, "\n6.📄 Report")
 
-    print("\nSCORES :")
-    print(context["scores"])
-
+    pprint("\nSCORES :")
+    pprint(context["scores"])
 
     # =========================================================
     # FIN

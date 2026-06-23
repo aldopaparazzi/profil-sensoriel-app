@@ -23,8 +23,9 @@ def map_sensory_responses(responses, reference, context=None):
 
     enriched = []
     errors = []
-
-    questions_ref = reference.get("questions", {})
+    #print(reference.keys())
+    #print(list(reference.values())[0].keys())
+    questions_ref = reference #.get("questions", {})
 
     for response in responses:
 
@@ -67,7 +68,7 @@ def map_sensory_responses(responses, reference, context=None):
             enriched.append({
                 "question_id": question_id,
                 "score": score,
-                "label": None,
+                #"label": None,
                 "quadrant": None,
                 "domaine_sensoriel": None,
                 "composante_scolaire": None,
@@ -82,7 +83,7 @@ def map_sensory_responses(responses, reference, context=None):
         enriched.append({
             "question_id": question_id,
             "score": score,
-            "label": meta.get("label"),
+            #"label": meta.get("label"),
             "quadrant": meta.get("quadrant"),
             "domaine_sensoriel": meta.get("domaine_sensoriel"),
             "composante_scolaire": meta.get("composante_scolaire"),
@@ -131,11 +132,21 @@ def map_all_submissions(submissions, reference, context=None):
     Applique le mapping à toutes les submissions d'un formulaire.
     """
 
-    mapped = []
+    mapped = {}
 
     for submission in submissions:
-        mapped.append(
-            map_submission(submission, reference, context)
+
+        mapped_submission = map_submission(
+            submission,
+            reference,
+            context
         )
+
+        submission_id = (
+            mapped_submission["metadata"]
+            ["submission_id"]
+        )
+
+        mapped[submission_id] = mapped_submission
 
     return mapped
