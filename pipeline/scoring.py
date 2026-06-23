@@ -1,184 +1,131 @@
-"""
-PIPELINE - SCORING (ÉTAPE 5)
+# pipeline\scoring.py
 
-Objectif :
-- calculer les scores bruts
-- aucune interprétation clinique
-- aucune utilisation des normes
-- aucune modification des données source
-
-Entrée :
-context["mapped"]
-
-Sortie :
-context["scores"]
-"""
-
-from collections import defaultdict
-
+from typing import TypedDict, Optional
+from pipeline.types import NormResult
 
 # =========================================================
-# HELPERS
+# SCORING - DOMAINES SENSORIELS (Z-SCORE)
 # =========================================================
 
-def _sum_by_key(items, field_name, use_pour_calcul=False):
-    """
-    Additionne les scores par catégorie.
-
-    Args:
-        items: liste des items mappés
-        field_name: quadrant, domaine_sensoriel...
-        use_pour_calcul:
-            False -> ignore pour_calcul
-            True  -> exige pour_calcul == True
-
-    Returns:
-        dict
-    """
-
-    scores = defaultdict(int)
-
-    for item in items:
-
-        if not item.get("valid", False):
-            continue
-
-        if use_pour_calcul and not item.get("pour_calcul", False):
-            continue
-
-        key = item.get(field_name)
-
-        if not key:
-            continue
-
-        scores[key] += item.get("score", 0)
-
-    return dict(scores)
-
-
-# =========================================================
-# QUADRANTS
-# =========================================================
-
-def score_quadrants(items):
-    """
-    Toutes les questions valides participent.
-    """
-
-    return _sum_by_key(
-        items,
-        "quadrant",
-        use_pour_calcul=False
-    )
-
-
-# =========================================================
-# DOMAINES SENSORIELS
-# =========================================================
-
-def score_domaines_sensoriels(items):
-    """
-    Seulement les questions :
-    - valid == True
-    - pour_calcul == True
-    """
-
-    return _sum_by_key(
-        items,
-        "domaine_sensoriel",
-        use_pour_calcul=True
-    )
-
-
-# =========================================================
-# COMPOSANTES SCOLAIRES
-# =========================================================
-
-def score_composantes_scolaires(items):
-    """
-    Toutes les questions valides participent.
-    """
-
-    return _sum_by_key(
-        items,
-        "composante_scolaire",
-        use_pour_calcul=False
-    )
-
-
-# =========================================================
-# SCORING D'UNE SUBMISSION
-# =========================================================
-
-def score_submission(submission):
-    """
-    Calcule tous les scores d'une submission.
-    """
-
-    items = submission.get("items", [])
-
-    return {
-        "quadrants": score_quadrants(items),
-        "domaines_sensoriels": score_domaines_sensoriels(items),
-        "composantes_scolaires": score_composantes_scolaires(items)
-    }
-
-
-# =========================================================
-# SCORING D'UN FORMULAIRE
-# =========================================================
-
-def score_form(mapped_form):
-    """
-    mapped_form :
-
-    {
-        "submission_id": {...},
-        ...
-    }
-    """
+def compute_domain_scores(mapped_submissions, normes, form_name):
 
     results = {}
 
-    for submission_id, submission in mapped_form.items():
+    for submission_id, submission in mapped_submissions.items():
 
-        results[submission_id] = score_submission(
-            submission
-        )
+        items = submission.get("items", [])
+        patient = submission.get("patient", {})
+
+        age_group = patient.get("age")
+
+        domain_scores = {}
+
+        for item in items:
+
+            if not item.get("pour_calcul"):
+                continue
+
+            domain = item["domaine_sensoriel"]
+            raw = item["score"]
+
+            norm = resolve_norm(
+                norms=normes,
+                population=form_name,
+                metric_type="domaines_sensoriels",
+                metric_name=domain,
+                age_group=str(age_group) if age_group else None
+            )
+
+            if norm["error"]:
+                domain_scores[domain] = {
+                    "raw": raw,
+                    "z": None,
+                    "error": norm["error"]
+                }
+                continue
+
+            m = norm["m"]
+            sigma = norm["sigma"]
+
+            z = (raw - m) / sigma if sigma else None
+
+            domain_scores[domain] = {
+                "raw": raw,
+                "z": z,
+                "warning": norm["warning"]
+            }
+
+        results[submission_id] = domain_scores
 
     return results
 
-
-# =========================================================
-# POINT D'ENTRÉE PIPELINE
-# =========================================================
-
-def compute_scores(context):
+def compute_z_score(raw, m, sigma):
     """
-    Remplit context["scores"].
+    z = (raw - m) / sigma
+    """
 
-    Structure finale :
+    if sigma == 0:
+        return None
 
-    context["scores"] = {
-        "scolaire": {
-            "submission_id": {...}
-        },
-        "maison": {...},
-        "clinique": {...}
+    return round((raw - m) / sigma, 2)
+
+def resolve_norm(
+    norms: dict,
+    population: str,
+    metric_type: str,
+    metric_name: str,
+    age_group: str | None
+) -> NormResult:
+
+    result: NormResult = {
+        "m": None,
+        "sigma": None,
+        "age_group_used": None,
+        "warning": None,
+        "error": None,
     }
-    """
 
-    context.setdefault("scores", {})
+    # =========================================================
+    # 1. population
+    # =========================================================
+    pop_data = norms.get(population)
+    if not pop_data:
+        result["error"] = "missing_population"
+        return result
 
-    for form_name, mapped_form in context["mapped"].items():
+    # =========================================================
+    # 2. age group
+    # =========================================================
+    if not age_group:
+        result["error"] = "missing_age_group"
+        return result
 
-        context["scores"][form_name] = score_form(
-            mapped_form
-        )
+    age_block = pop_data.get(age_group)
+    if not age_block:
+        result["error"] = "missing_age_group"
+        return result
 
-        print(
-            f"📊 {form_name}: "
-            f"{len(context['scores'][form_name])} score(s)"
-        )
+    # =========================================================
+    # 3. metric type
+    # =========================================================
+    metric_table = age_block.get(metric_type)
+    if not metric_table:
+        result["error"] = "missing_metric_type"
+        return result
 
-    return context
+    # =========================================================
+    # 4. metric name
+    # =========================================================
+    norm = metric_table.get(metric_name)
+    if not norm:
+        result["error"] = "missing_metric_name"
+        return result
+
+    # =========================================================
+    # 5. extraction
+    # =========================================================
+    result["m"] = norm["m"]
+    result["sigma"] = norm["sigma"]
+    result["age_group_used"] = age_group
+
+    return result

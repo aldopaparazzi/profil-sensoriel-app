@@ -19,7 +19,7 @@ from pipeline.split import split_dataset
 from pipeline.mapping import (
     map_all_submissions,
 )
-from pipeline.scoring import compute_scores
+from pipeline.scoring import compute_domain_scores
 
 
 
@@ -149,19 +149,23 @@ def main():
     # =========================================================
     log(context, "\n5.📊 Scoring")
 
-    context = compute_scores(context)
-    scored = context["scores"][form_name]
-    save_scored_json(data=scored, form_name=form_name)
+    normes = json.load(open("data/reference/normes.json", encoding="utf-8"))
 
+    domain_scores = {}
 
-    #    scored = compute_scores(mapped, reference)
-    #    scored = compute_scores(mapped_submission, reference)
-    #
-    #    # injection dans payload complet
-    #    final_payload = {
-    #        **mapped,
-    #        "scores": scored
-    #    }
+    for form_name, mapped in context["mapped"].items():
+
+        domain_scores[form_name] = compute_domain_scores(
+            mapped,
+            normes,
+            form_name
+        )
+
+    context["scores"] = domain_scores
+
+    print("\n📊 SCORES DOMAINES :")
+    pprint(context["scores"])
+    
 
     # =========================================================
     # 6. REPORT(placeholder)
