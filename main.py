@@ -1,4 +1,5 @@
 # main.py
+
 # raw → split → mapped → scores → report
 # 1. Fetch Tally json
 # 2. Validation
@@ -7,24 +8,19 @@
 # 5. Scoring
 # 6. Report
 
-from pprint import pprint
 import json
-
+from pprint import pprint
 from config.settings import load_config, replace_tally_token
-from utils.logger import log
 from ingestion.fetch_tally import fetch_tally, TallyAPIError
-from storage.io_utils import save_raw_json, save_mapped_json, save_scored_json
+from storage.io_utils import save_raw_json
 from pipeline.validate import filter_empty_submissions
 from pipeline.split import split_dataset
-from pipeline.mapping import (
-    map_all_submissions,
-)
-from pipeline.scoring import compute_domain_scores
-
-
+from pipeline.mapping import map_submission, enrich_patient
+from pipeline.scoring import compute_all_scores # compute_domain_scores
+from reporting.report import build_final_report, export_report
+from core.age import load_age_bands
 
 def main():
-
     print("\n=== PROFIL SENSORIEL V1 ===\n")
 
     config = load_config()
@@ -33,156 +29,103 @@ def main():
         "raw": {},
         "validated": {},
         "split": {},
-        "mapped": {},
-        "scores": {},
         "errors": [],
         "debug": config.get("debug", False),
+        "age_bands" : load_age_bands()
     }
 
     token = config["tally_token"]
 
-    log(context, "1.📥 Fetch Tally")
+    # 1. FETCH
+    print( "1.📥 Récupération des données sur Tally")
 
-    # =========================================================
-    # 1. INGESTION + RAW
-    # =========================================================
     for form_name, form_id in config["forms"].items():
+
         try:
             raw = fetch_tally(form_id, token)
-
         except TallyAPIError as e:
             if e.status_code == 401:
-                print("\n⚠️ Token Tally invalide")
                 token = replace_tally_token()
-
                 raw = fetch_tally(form_id, token)
-
             else:
-                error_msg = f"[{form_name}] {str(e)}"
-                context["errors"].append(error_msg)
+                context["errors"].append(str(e))
                 continue
 
         save_raw_json(raw, form_name)
         context["raw"][form_name] = raw
 
-        print(f"✔ {form_name}: {len(raw.get('submissions', []))} submission(s)")
-
-        print(f"{form_name}: À jour")
+        print(f"✔ {form_name}")
 
     if not context["raw"]:
-        print("\n⛔ Aucun formulaire récupéré.")
+        print("⛔ aucun data")
         return
 
-    # =========================================================
-    # 2. VALIDATION
-    # =========================================================
-    log(context, "\n2.🧹 Validation")
-
+    # 2. VALIDATE
+    print( "\n2.🧹 Validation")
     for form_name, raw in context["raw"].items():
-        clean = filter_empty_submissions(raw, context)
-        context["validated"][form_name] = clean
-        # print(f"{form_name}: Données filtrées")
-        print(f"✔ {form_name}: {len(clean['submissions'])} submission(s) valides")
+        context["validated"][form_name] = filter_empty_submissions(raw, context)
 
-    #    print("\n==========  DEBUG  ==============")
-
-    # for r in clean["submissions"][0]["responses"]:
-    # pprint(r)
-
-    # =========================================================
-    # 2.5 PROFILING
-    # =========================================================
-    # log(context, "\n2.5 🔎 Profiling")
-    #
-    # for form_name, clean in context["validated"].items():
-    #    profile_dataset(clean, form_name)
-    #    print("\n==========  /DEBUG  ==============")
-
-    # =========================================================
     # 3. SPLIT
-    # =========================================================
-    log(context, "\n3.✂️ Split")
-
+    print( "\n3.✂️ Split")
     for form_name, clean in context["validated"].items():
-        submissions = split_dataset(clean)
-        context["split"][form_name] = submissions
-        print(f"\n✔ {form_name}: {len(submissions)} submission(s) structurées\n")
-        # print(f"{form_name}: Éléments séparés")
+        context["split"][form_name] = split_dataset(clean, form_name)
 
-    # debug léger sur 1 élément
-    # if context["split"].get("scolaire"):
-    #    print("\n🔎 Exemple split (scolaire):")
-    #    pprint(context["split"]["scolaire"][0])
+    # 4. MAP + SCORE + REPORT
+    print("\n4.🧠 Mapping + Scoring + Report")
 
-    # =========================================================
-    # 4. MAPPING
-    # =========================================================
-    log(context, "\n4.🧠 Mapping")
 
-    reference = json.load(open("data/reference/reference.json", encoding="utf-8"))
+    reference = json.load(
+        open("data/reference/reference.json", encoding="utf-8")
+    )
+
+    normes = json.load(
+        open("data/reference/normes.json", encoding="utf-8")
+    )
 
     for form_name, submissions in context["split"].items():
-        if not submissions:
-            print(f"📭 {form_name}: aucune submission")
+
+        form_ref = reference.get(form_name)
+
+        if not form_ref:
+            print(f"\n⚠ référence absente : {form_name}")
             continue
 
-        form_reference = reference.get(form_name)
+        for submission in submissions:
 
-        # reference_form = reference[form_name]["questions"]
+            submission_id = submission["metadata"]["submission_id"]
 
-        if not form_reference:
-            print(f"⚠️ {form_name}: pas de référence trouvée")
-            continue
+            mapped = map_submission(
+                submission,
+                form_ref["questions"],
+                context=context
+            )
 
-        mapped = map_all_submissions(
-            submissions, reference[form_name]["questions"], context=context
-        )
+            patient = mapped["patient"]
 
-        context["mapped"][form_name] = mapped
-        save_mapped_json(data=mapped, form_name=form_name)
+            mapped["patient"] = enrich_patient(
+                patient,
+                form_name,
+                context["age_bands"]
+            )
 
-        #print(f"\n✔ {form_name}: {len(mapped)} submission(s) mappées")
-        #pprint(mapped)  # full
+            all_scores = compute_all_scores(
+                {submission_id: mapped},
+                normes,
+                form_name
+            )
 
-    # =========================================================
-    # 5. SCORING
-    # =========================================================
-    log(context, "\n5.📊 Scoring")
+            scores = all_scores[submission_id]
 
-    normes = json.load(open("data/reference/normes.json", encoding="utf-8"))
+            report = build_final_report(
+                mapped,
+                scores,
+                submission_id
+            )
 
-    domain_scores = {}
-
-    for form_name, mapped in context["mapped"].items():
-
-        domain_scores[form_name] = compute_domain_scores(
-            mapped,
-            normes,
-            form_name
-        )
-
-    context["scores"] = domain_scores
-
-    print("\n📊 SCORES DOMAINES :")
-    pprint(context["scores"])
-    
-
-    # =========================================================
-    # 6. REPORT(placeholder)
-    # =========================================================
-    log(context, "\n6.📄 Report")
-
-    pprint("\nSCORES :")
-    pprint(context["scores"])
-
-    # =========================================================
-    # FIN
-    # =========================================================
-    print("\n=== PIPELINE TERMINÉ ===")
-
-    print("\n📊 Résumé:")
-    for form_name in context["mapped"]:
-        print(f"- {form_name}: {len(context['mapped'][form_name])}")
+            export_report(
+                report,
+                mapped["patient"]
+            )
 
     print("\n=== DONE ===")
 

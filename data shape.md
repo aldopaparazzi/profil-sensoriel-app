@@ -1,25 +1,50 @@
-patients
-- id
-- external_id
-- nom
-- prénom
-- date_naissance
+# Structure cible de sortie
 
-assessments
-- id
-- patient_id
-- population
-- created_at
-- source_file
+```json
+{
+  "submission_id": "VpVxLYj",
 
-responses
-- assessment_id
-- question_id
-- value
+  "patient": {
+    "prenom": "Dummy",
+    "nom": "Test",
+    "form_type": "scolaire",
+    "birth_date": "2011-06-16",
+    "evaluation_date": "2026-06-22",
+    "age_decimal": 15.0,
+    "age_group": "14-17"
+  },
 
-scores
-- assessment_id
-- quadrant
-- sensory_domain
-- score
-- interpretation
+  "quadrants": {
+    "recherche": {
+      "raw": 62,
+      "mean": 31,
+      "sigma": 9.3,
+      "z": 3.33
+    }
+  },
+
+  "domains": {
+    "auditif": {
+      "raw": 25,
+      "mean": 12,
+      "sigma": 4,
+      "z": 3.25
+    }
+  },
+
+  "composantes_scolaires": {
+    "attention": {
+      "raw": 18,
+      "mean": 9,
+      "sigma": 3,
+      "z": 3
+    }
+  },
+
+  "items": {
+    "1": 5,
+    "2": 1,
+    "3": 4
+  }
+}
+```

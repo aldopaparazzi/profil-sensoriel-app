@@ -332,7 +332,7 @@
             "42": {
                 "label": "manifeste une aversion claire pour toute nourriture, à l’exception de quelques rares aliments de son choix.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "traitement_sensoriel_oral",
+                "domaine_sensoriel": "sensoriel_oral",
                 "domaine_label": "Traitement de l’information SENSORIELLE ORALE",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -340,7 +340,7 @@
             "43": {
                 "label": "bave.",
                 "quadrant": "na",
-                "domaine_sensoriel": "traitement_sensoriel_oral",
+                "domaine_sensoriel": "sensoriel_oral",
                 "domaine_label": "Traitement de l’information SENSORIELLE ORALE",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -348,7 +348,7 @@
             "44": {
                 "label": "préfère une certaine texture d’aliments (par exemple, moelleux, croquant).",
                 "quadrant": "sensibilite",
-                "domaine_sensoriel": "traitement_sensoriel_oral",
+                "domaine_sensoriel": "sensoriel_oral",
                 "domaine_label": "Traitement de l’information SENSORIELLE ORALE",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -356,7 +356,7 @@
             "45": {
                 "label": "boit pour se calmer.",
                 "quadrant": "enregistrement",
-                "domaine_sensoriel": "traitement_sensoriel_oral",
+                "domaine_sensoriel": "sensoriel_oral",
                 "domaine_label": "Traitement de l’information SENSORIELLE ORALE",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -364,7 +364,7 @@
             "46": {
                 "label": "a des haut-le-cœur avec de la nourriture ou des boissons.",
                 "quadrant": "sensibilite",
-                "domaine_sensoriel": "traitement_sensoriel_oral",
+                "domaine_sensoriel": "sensoriel_oral",
                 "domaine_label": "Traitement de l’information SENSORIELLE ORALE",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -372,7 +372,7 @@
             "47": {
                 "label": "garde la nourriture dans ses joues avant de l’avaler.",
                 "quadrant": "na",
-                "domaine_sensoriel": "traitement_sensoriel_oral",
+                "domaine_sensoriel": "sensoriel_oral",
                 "domaine_label": "Traitement de l’information SENSORIELLE ORALE",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -380,7 +380,7 @@
             "48": {
                 "label": "éprouve des difficultés à passer aux aliments solides (sevrage).",
                 "quadrant": "sensibilite",
-                "domaine_sensoriel": "traitement_sensoriel_oral",
+                "domaine_sensoriel": "sensoriel_oral",
                 "domaine_label": "Traitement de l’information SENSORIELLE ORALE",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -928,7 +928,7 @@
             "62": {
                 "label": "semble avoir une faible estime de soi (par exemple, difficulté à s’aimer).",
                 "quadrant": "enregistrement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -936,7 +936,7 @@
             "63": {
                 "label": "à besoin d'encouragements dans une situation exigeante ou pour reprendre une tâche difficile.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -944,7 +944,7 @@
             "64": {
                 "label": "est sensible aux critique&.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -952,7 +952,7 @@
             "65": {
                 "label": "a es peurs prévisibles et claquement identifiées.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -960,7 +960,7 @@
             "66": {
                 "label": "dit qu'il/elle se sent nul·le.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -968,7 +968,7 @@
             "67": {
                 "label": "est trop sérieux·se.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -976,7 +976,7 @@
             "68": {
                 "label": "a des réactions émotionnelles violentes quand il/elle n'arrive pas à l'accomplir ou à terminer une tâche.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -984,7 +984,7 @@
             "69": {
                 "label": "a des difficultés à interpréter le langage corporel ou les expressions faciales.",
                 "quadrant": "sensibilite",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -992,7 +992,7 @@
             "70": {
                 "label": "est facilement frustré·e.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -1000,7 +1000,7 @@
             "71": {
                 "label": "a des peurs qui perturbent les routines quotidiennes.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -1008,7 +1008,7 @@
             "72": {
                 "label": "montre des signes d'anxiété et/ou de détresse lors de changements de plans et de routines ou lors des modifications survenues par rapport à ses attentes.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -1016,7 +1016,7 @@
             "73": {
                 "label": "a un besoin de protection plus important que les enfants de son âge (pare exemple, est sans défense sur le plan physique ou fonctionnel).",
                 "quadrant": "sensibilite",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -1024,7 +1024,7 @@
             "74": {
                 "label": "interagit ou participe moins au sein d'un groupe que les autres enfants de son âge.",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true
@@ -1032,7 +1032,7 @@
             "75": {
                 "label": "éprouve des difficultés avec les relations amicales (par exemple à du mal à se faire des ami·e·s ou à les garder).",
                 "quadrant": "evitement",
-                "domaine_sensoriel": "socio-émotionnel",
+                "domaine_sensoriel": "socio_emotionnel",
                 "domaine_label": "Réponses SOCIO-EMOTIONNELLE relatives au traitement de l'information sensorielle",
                 "composante_scolaire": "1",
                 "pour_calcul": true

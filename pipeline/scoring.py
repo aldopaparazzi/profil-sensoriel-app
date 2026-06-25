@@ -1,131 +1,138 @@
 # pipeline\scoring.py
+from pprint import pprint
 
-from typing import TypedDict, Optional
-from pipeline.types import NormResult
+from core.age import resolve_age_group, load_age_bands, normalize_age
+from core.norms import resolve_norm, normalize_key, normalize_item
+from core.scoring_math import compute_z_score
 
-# =========================================================
-# SCORING - DOMAINES SENSORIELS (Z-SCORE)
-# =========================================================
 
-def compute_domain_scores(mapped_submissions, normes, form_name):
+def compute_metric_scores(raw_scores, normes, form_name, age_group, metric_type):
 
     results = {}
 
-    for submission_id, submission in mapped_submissions.items():
+    for key, raw in raw_scores.items():
+        key = normalize_key(key)
 
-        items = submission.get("items", [])
-        patient = submission.get("patient", {})
+        norm = resolve_norm(
+            norms=normes,
+            population=form_name,
+            metric_type=metric_type,
+            metric_name=key,
+            age_group=age_group,
+        )
 
-        age_group = patient.get("age")
-
-        domain_scores = {}
-
-        for item in items:
-
-            if not item.get("pour_calcul"):
-                continue
-
-            domain = item["domaine_sensoriel"]
-            raw = item["score"]
-
-            norm = resolve_norm(
-                norms=normes,
-                population=form_name,
-                metric_type="domaines_sensoriels",
-                metric_name=domain,
-                age_group=str(age_group) if age_group else None
-            )
-
-            if norm["error"]:
-                domain_scores[domain] = {
-                    "raw": raw,
-                    "z": None,
-                    "error": norm["error"]
-                }
-                continue
-
-            m = norm["m"]
-            sigma = norm["sigma"]
-
-            z = (raw - m) / sigma if sigma else None
-
-            domain_scores[domain] = {
+        if norm["error"]:
+            results[key] = {
                 "raw": raw,
-                "z": z,
-                "warning": norm["warning"]
+                "mean": None,
+                "sigma": None,
+                "z": None,
+                "error": norm["error"],
             }
+            continue
 
-        results[submission_id] = domain_scores
+        mean = norm["m"]
+        sigma = norm["sigma"]
+
+        results[key] = {
+            "raw": raw,
+            "mean": mean,
+            "sigma": sigma,
+            "z": compute_z_score(raw, mean, sigma),
+        }
 
     return results
 
-def compute_z_score(raw, m, sigma):
-    """
-    z = (raw - m) / sigma
-    """
 
-    if sigma == 0:
-        return None
+def compute_raw_scores(items, group_field, only_pour_calcul=False):
 
-    return round((raw - m) / sigma, 2)
+    results = {}
+    for items in items:
+        if only_pour_calcul and not items.get("pour_calcul"):
+            continue
+        key = items.get(group_field)
+        if not key:
+            continue
+        score = items.get("score", 0)
+        results[key] = results.get(key, 0) + score
+    return results
 
-def resolve_norm(
-    norms: dict,
-    population: str,
-    metric_type: str,
-    metric_name: str,
-    age_group: str | None
-) -> NormResult:
 
-    result: NormResult = {
-        "m": None,
-        "sigma": None,
-        "age_group_used": None,
-        "warning": None,
-        "error": None,
-    }
+def compute_final_scores(raw_scores, normes, form_name, age_group, metric_type):
+    results = {}
 
-    # =========================================================
-    # 1. population
-    # =========================================================
-    pop_data = norms.get(population)
-    if not pop_data:
-        result["error"] = "missing_population"
-        return result
+    for key, raw in raw_scores.items():
+        norm = resolve_norm(
+            norms=normes,
+            population=form_name,
+            metric_type=metric_type,
+            metric_name=key,
+            age_group=age_group,
+        )
 
-    # =========================================================
-    # 2. age group
-    # =========================================================
-    if not age_group:
-        result["error"] = "missing_age_group"
-        return result
+        if norm["error"]:
+            results[key] = {
+                "raw": raw,
+                "mean": None,
+                "sigma": None,
+                "z": None,
+                "error": norm["error"],
+            }
+            continue
 
-    age_block = pop_data.get(age_group)
-    if not age_block:
-        result["error"] = "missing_age_group"
-        return result
+        mean = norm["m"]
+        sigma = norm["sigma"]
 
-    # =========================================================
-    # 3. metric type
-    # =========================================================
-    metric_table = age_block.get(metric_type)
-    if not metric_table:
-        result["error"] = "missing_metric_type"
-        return result
+        results[key] = {
+            "raw": raw,
+            "mean": mean,
+            "sigma": sigma,
+            "z": compute_z_score(raw, mean, sigma),
+        }
 
-    # =========================================================
-    # 4. metric name
-    # =========================================================
-    norm = metric_table.get(metric_name)
-    if not norm:
-        result["error"] = "missing_metric_name"
-        return result
+    return results
 
-    # =========================================================
-    # 5. extraction
-    # =========================================================
-    result["m"] = norm["m"]
-    result["sigma"] = norm["sigma"]
-    result["age_group_used"] = age_group
 
-    return result
+def compute_all_scores(mapped_submissions, normes, form_name):
+
+    age_bands = load_age_bands()
+    results = {}
+    for submission_id, submission in mapped_submissions.items():
+        patient = submission["patient"]
+        items = submission["responses"]
+        items = (
+            submission["responses"]["responses"]
+            if "responses" in submission and isinstance(submission["responses"], dict)
+            else submission["responses"]
+        )
+        """
+        print("\n=== ITEMS DEBUG ===")
+        print(type(items))
+        pprint(items)
+        """
+        domain_raw = compute_raw_scores(
+            items, "domaine_sensoriel", only_pour_calcul=True
+        )
+        quadrant_raw = compute_raw_scores(items, "quadrant")
+        comp_raw = compute_raw_scores(items, "composante_scolaire")
+        age_months = patient["age_months"]
+        age_group = resolve_age_group(age_months, form_name, age_bands)
+        results[submission_id] = {
+            "patient": {**patient, "age_decimal": age_months, "age_group": age_group},
+            "domains": compute_final_scores(
+                domain_raw, normes, form_name, age_group, "domaines_sensoriels"
+            ),
+            "quadrants": compute_final_scores(
+                quadrant_raw, normes, form_name, age_group, "quadrants"
+            ),
+            "composantes_scolaires": compute_final_scores(
+                comp_raw, normes, form_name, age_group, "composantes_scolaires"
+            ),
+        }
+    '''
+    print("AGE MONTHS:", patient["age_months"])
+    print("AGE DECIMAL:", age_months)
+    print("AGE GROUP:", age_group)
+    print("FORM:", form_name)
+    '''
+    return results

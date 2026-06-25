@@ -1,3 +1,6 @@
+# pipeline\mapping.py
+from core.age import resolve_age_group
+
 """
 PIPELINE - MAPPING (ÉTAPE 4)
 
@@ -109,15 +112,28 @@ def map_submission(submission, reference, context=None):
     """
     Transforme une submission splitée en submission enrichie.
     """
+#    print("TYPE SUBMISSION:", type(submission))
+#    print("CONTENT:", submission)
+#    patient = submission.get("patient", {})
+
+
+    if not isinstance(submission, dict):
+        raise TypeError(
+            f"map_submission attend un dict, reçu: {type(submission)}"
+        )
+    
+    patient = normalize_patient(
+        submission.get("patient", {}), 
+        submission.get("metadata", {}))
 
     return {
-        "items": map_sensory_responses(
+        "responses": map_sensory_responses(
             submission.get("sensory_responses", []),
             reference,
             context=context
         ),
         "comments": submission.get("comments", {}),
-        "patient": submission.get("patient", {}),
+        "patient": patient,
         "respondent": submission.get("respondent", {}),
         "metadata": submission.get("metadata", {})
     }
@@ -150,3 +166,29 @@ def map_all_submissions(submissions, reference, context=None):
         mapped[submission_id] = mapped_submission
 
     return mapped
+
+
+def normalize_patient(patient: dict, metadata: dict) -> dict:
+    return {
+        "nom": patient.get("Nom"),
+        "prenom": patient.get("Prenom"),
+        "birth_date": patient.get("Date_naissance"),
+        "age_months": patient.get("age"),
+        "sexe": patient.get("Sexe"),
+        "niveau": patient.get("Niveau"),
+        "form_type": metadata.get("form_name"),
+        "evaluation_date": metadata.get("submitted_at"),
+    }
+
+def enrich_patient(patient, form_name, age_bands):
+    age_months = patient.get("age_months")
+
+    patient["age"] = round(age_months / 12, 2) if age_months else None
+
+    patient["age_group"] = resolve_age_group(
+        age_months,
+        form_name,
+        age_bands
+    )
+
+    return patient

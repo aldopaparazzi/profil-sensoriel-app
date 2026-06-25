@@ -1,0 +1,41 @@
+{
+  "jeune_enfant": {
+    "value_unit": "months",
+    "label_unit": "months",
+    "bands": [
+      { "min": 7,  "max": 12, "key": "7-12"  ,   "label":"7-12 mois" },
+      { "min": 13, "max": 18, "key": "13-18" ,   "label":"13-18 mois" },
+      { "min": 19, "max": 24, "key": "19-24" ,   "label":"19-24 mois" },
+      { "min": 25, "max": 30, "key": "25-30" ,   "label":"25-30 mois" },
+      { "min": 31, "max": 35, "key": "31-35" ,   "label":"31-35 mois" }
+    ]
+  },
+
+  "enfant": {
+    "value_unit": "months",
+    "label_unit": "years",
+    "bands": [
+      { "min": 36,  "max": 47,  "key": "3-4",   "label":"3-4 ans" },
+      { "min": 48,  "max": 59,  "key": "4-5",   "label":"4-5 ans" },
+      { "min": 60,  "max": 71,  "key": "5-6",   "label":"5-6 ans" },
+      { "min": 72,  "max": 95,  "key": "6-8",   "label":"6-8 ans" },
+      { "min": 96,  "max": 119, "key": "8-10",  "label":"8-10 ans" },
+      { "min": 120, "max": 143, "key": "10-12", "label":"10-12 ans" },
+      { "min": 144, "max": 173, "key": "12-14", "label":"12-14 ans" }
+    ]
+},
+
+  "scolaire": {
+    "value_unit": "months",
+    "label_unit": "years",
+    "bands": [
+      { "min": 36,  "max": 47,  "key": "3-4",   "label":"3-4 ans" },
+      { "min": 48,  "max": 59,  "key": "4-5",   "label":"4-5 ans" },
+      { "min": 60,  "max": 71,  "key": "5-6",   "label":"5-6 ans" },
+      { "min": 72,  "max": 95,  "key": "6-8",   "label":"6-8 ans" },
+      { "min": 96,  "max": 119, "key": "8-10",  "label":"8-10 ans" },
+      { "min": 120, "max": 143, "key": "10-12", "label":"10-12 ans" },
+      { "min": 144, "max": 173, "key": "12-14", "label":"12-14 ans" }
+    ]
+  }
+}

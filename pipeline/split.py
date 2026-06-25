@@ -1,6 +1,6 @@
-from dateutil import parser
+#from utils.logger import log
 from pprint import pprint
-
+from utils.age import get_patient_age
 
 # =========================================================
 # DOMAINES COMMENTAIRES VALIDES
@@ -20,26 +20,10 @@ COMMENT_KEYS = {
     "Traitement_Global"
 }
 
-
-# =========================================================
-# AGE (optionnel, tolérant)
-# =========================================================
-def compute_age(birth_date, submission_date):
-    if not birth_date or not submission_date:
-        return None
-
-    try:
-        birth = parser.isoparse(str(birth_date)).replace(tzinfo=None)
-        sub = parser.isoparse(str(submission_date)).replace(tzinfo=None)
-        return (sub - birth).days // 365
-    except Exception:
-        return None
-
-
 # =========================================================
 # SPLIT PRINCIPAL
 # =========================================================
-def split_dataset(clean: dict):
+def split_dataset(clean: dict, form_name: str):
     result = []
 
     submissions = clean.get("submissions", [])
@@ -53,6 +37,7 @@ def split_dataset(clean: dict):
             "respondent_id": sub.get("respondentId"),
             "submitted_at": sub.get("submittedAt"),
             "is_completed": sub.get("isCompleted"),
+            "form_name": form_name
         }
 
         patient = {}
@@ -60,6 +45,8 @@ def split_dataset(clean: dict):
         sensory_responses = []
         comments = {}
         ignored_fields = []
+        form_name = metadata["form_name"]
+        
 
         # -------------------------------------------------
         # parcours responses
@@ -115,22 +102,27 @@ def split_dataset(clean: dict):
         # -------------------------------------------------
         # AGE (sans hypothèse externe)
         # -------------------------------------------------
-        patient["age"] = compute_age(
-            patient.get("Date_naissance"),
-            metadata.get("submitted_at")
+        patient["age"] = get_patient_age(
+            patient,
+            metadata,
+            form_name
         )
 
+        
         # -------------------------------------------------
         # LOGS PROPRES
         # -------------------------------------------------
+        print("\n"+patient["Nom"]+" "+patient["Prenom"])
         print(f"   └── {metadata['submission_id']}")
         print(f"       ├── patient: {len(patient)} champs")
         print(f"       ├── questions: {len(sensory_responses)}")
         print(f"       ├── commentaires: {len(comments)}")
         if ignored_fields:
             print(f"       ├── ignorés: {len(set(ignored_fields))}")
-            pprint(ignored_fields)
-
+#            pprint(ignored_fields)
+#        print("\n")
+        
+        
         # -------------------------------------------------
         # OUTPUT
         # -------------------------------------------------
