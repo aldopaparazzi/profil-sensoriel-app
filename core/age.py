@@ -56,12 +56,3 @@ def age_to_group(age, population, age_bands):
 
 if __name__ == "__main__":
     print(compute_age("2018-01-01", "2020-01-01"))
-
-def normalize_age(age, unit):
-    if age is None:
-        return None
-    if unit == "months":
-        return age
-    if unit == "years":
-        return age / 12
-    return None

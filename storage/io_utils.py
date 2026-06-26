@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from datetime import datetime
-from storage.data_fingerprint import dataframe_hash, json_hash
+from storage.data_fingerprint import json_hash #dataframe_hash,
 from storage.state import load_state, save_state
 
 RAW_DIR = Path("data/raw")
@@ -11,7 +11,7 @@ SCORED_DIR = Path("data/scored")
 
 def save_scored_json(data: dict, form_name: str):
     """
-    Sauvegarde les données scoré dans data/mapped/.
+    Sauvegarde les données scored dans data/mapped/.
 
     Args:
         data: dict (scored output du pipeline)
@@ -26,7 +26,7 @@ def save_scored_json(data: dict, form_name: str):
     # =========================================================
     # 2. timestamp
     # =========================================================
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    #timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     # =========================================================
     # 3. nom de fichier
@@ -63,7 +63,7 @@ def save_mapped_json(data: dict, form_name: str):
     # =========================================================
     # 2. timestamp
     # =========================================================
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    #timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     # =========================================================
     # 3. nom de fichier

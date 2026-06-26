@@ -9,7 +9,7 @@
 # 6. Report
 
 import json
-from pprint import pprint
+#from pprint import pprint
 from config.settings import load_config, replace_tally_token
 from ingestion.fetch_tally import fetch_tally, TallyAPIError
 from storage.io_utils import save_raw_json

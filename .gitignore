@@ -3,6 +3,7 @@
 data/raw/
 data/mapped/
 data/scored/
+data/report/
 archives/
 .claude/
 .vscode/
@@ -13,11 +14,13 @@ venv/
 .venv/
 
 *_old*
+*old_*
 *.old
 *.pyc
 *.pyo
 
 resultat.*
+convert_reference.py
 
 *.ps1
 *.~lock.*

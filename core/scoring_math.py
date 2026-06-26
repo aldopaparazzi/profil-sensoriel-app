@@ -22,7 +22,7 @@ def z_to_percentile(z):
     if z is None:
         return None
 
-    return round(norm.cdf(z) * 100, 1)
+    return round(float(norm.cdf(z) * 100), 1)
 
 def interpret_percentile(p):
     if p is None:

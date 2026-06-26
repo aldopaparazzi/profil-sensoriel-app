@@ -1,5 +1,6 @@
 #from utils.logger import log
-from pprint import pprint
+
+#from pprint import pprint
 from utils.age import get_patient_age
 
 # =========================================================

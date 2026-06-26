@@ -139,35 +139,6 @@ def map_submission(submission, reference, context=None):
     }
 
 
-# =========================================================
-# 3. MAPPING MULTI-SUBMISSIONS
-# =========================================================
-
-def map_all_submissions(submissions, reference, context=None):
-    """
-    Applique le mapping à toutes les submissions d'un formulaire.
-    """
-
-    mapped = {}
-
-    for submission in submissions:
-
-        mapped_submission = map_submission(
-            submission,
-            reference,
-            context
-        )
-
-        submission_id = (
-            mapped_submission["metadata"]
-            ["submission_id"]
-        )
-
-        mapped[submission_id] = mapped_submission
-
-    return mapped
-
-
 def normalize_patient(patient: dict, metadata: dict) -> dict:
     return {
         "nom": patient.get("Nom"),
