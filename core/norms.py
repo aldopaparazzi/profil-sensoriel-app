@@ -67,18 +67,6 @@ def resolve_norm(
     '''
     return result
 
-def empty_result(error: str) -> NormResult:
-    return {
-        "m": None,
-        "sigma": None,
-        "age_group_used": None,
-        "warning": None,
-        "error": error,
-    }
-
-# core/normalize.py
-
-
 def normalize_key(value: str | None) -> str | None:
     """
     Normalise toutes les clés métier pour éviter les mismatch :
@@ -101,11 +89,3 @@ def normalize_key(value: str | None) -> str | None:
     value = value.replace(" ", "_").replace("-", "_")
 
     return value
-
-def normalize_item(item: dict) -> dict:
-    return {
-        "question_id": item.get("question_id"),
-        "raw": item.get("score"),
-        "domain": normalize_key(item.get("domaine_sensoriel")),
-        "quadrant": normalize_key(item.get("quadrant")),
-    }

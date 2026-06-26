@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from datetime import datetime
-from storage.data_fingerprint import dataframe_hash, json_hash
+from storage.data_fingerprint import json_hash #dataframe_hash,
 from storage.state import load_state, save_state
 
 RAW_DIR = Path("data/raw")
