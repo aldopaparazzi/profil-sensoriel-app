@@ -9,16 +9,18 @@
 # 6. Report
 
 import json
-#from pprint import pprint
+
+# from pprint import pprint
 from config.settings import load_config, replace_tally_token
 from ingestion.fetch_tally import fetch_tally, TallyAPIError
 from storage.io_utils import save_raw_json
 from pipeline.validate import filter_empty_submissions
 from pipeline.split import split_dataset
 from pipeline.mapping import map_submission, enrich_patient
-from pipeline.scoring import compute_all_scores # compute_domain_scores
+from pipeline.scoring import compute_all_scores  # compute_domain_scores
 from reporting.report import build_final_report, export_report
 from core.age import load_age_bands
+
 
 def main():
     print("\n=== PROFIL SENSORIEL V1 ===\n")
@@ -31,16 +33,16 @@ def main():
         "split": {},
         "errors": [],
         "debug": config.get("debug", False),
-        "age_bands" : load_age_bands()
+        "age_bands": load_age_bands(),
+        "generate_html": config.get("generate_html", True),  # Nouveau paramètre
     }
 
     token = config["tally_token"]
 
     # 1. FETCH
-    print( "1.📥 Récupération des données sur Tally")
+    print("1.📥 Récupération des données sur Tally")
 
     for form_name, form_id in config["forms"].items():
-
         try:
             raw = fetch_tally(form_id, token)
         except TallyAPIError as e:
@@ -61,29 +63,23 @@ def main():
         return
 
     # 2. VALIDATE
-    print( "\n2.🧹 Validation")
+    print("\n2.🧹 Validation")
     for form_name, raw in context["raw"].items():
         context["validated"][form_name] = filter_empty_submissions(raw, context)
 
     # 3. SPLIT
-    print( "\n3.✂️ Split")
+    print("\n3.✂️ Split")
     for form_name, clean in context["validated"].items():
         context["split"][form_name] = split_dataset(clean, form_name)
 
     # 4. MAP + SCORE + REPORT
     print("\n4.🧠 Mapping + Scoring + Report")
 
+    reference = json.load(open("data/reference/reference.json", encoding="utf-8"))
 
-    reference = json.load(
-        open("data/reference/reference.json", encoding="utf-8")
-    )
-
-    normes = json.load(
-        open("data/reference/normes.json", encoding="utf-8")
-    )
+    normes = json.load(open("data/reference/normes.json", encoding="utf-8"))
 
     for form_name, submissions in context["split"].items():
-
         form_ref = reference.get(form_name)
 
         if not form_ref:
@@ -91,40 +87,25 @@ def main():
             continue
 
         for submission in submissions:
-
             submission_id = submission["metadata"]["submission_id"]
 
-            mapped = map_submission(
-                submission,
-                form_ref["questions"],
-                context=context
-            )
+            mapped = map_submission(submission, form_ref["questions"], context=context)
 
             patient = mapped["patient"]
 
-            mapped["patient"] = enrich_patient(
-                patient,
-                form_name,
-                context["age_bands"]
-            )
+            mapped["patient"] = enrich_patient(patient, form_name, context["age_bands"])
 
-            all_scores = compute_all_scores(
-                {submission_id: mapped},
-                normes,
-                form_name
-            )
+            all_scores = compute_all_scores({submission_id: mapped}, normes, form_name)
 
             scores = all_scores[submission_id]
 
-            report = build_final_report(
-                mapped,
-                scores,
-                submission_id
-            )
+            report = build_final_report(mapped, scores, submission_id)
 
+            # Export avec génération HTML optionnelle
             export_report(
                 report,
-                mapped["patient"]
+                mapped["patient"],
+                generate_html=context.get("generate_html", True),
             )
 
     print("\n=== DONE ===")

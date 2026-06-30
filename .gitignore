@@ -24,4 +24,4 @@ convert_reference.py
 
 *.ps1
 *.~lock.*
-source_code.*
+source_code*

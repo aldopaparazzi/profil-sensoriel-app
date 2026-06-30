@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil Sensoriel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:       #F5F3EE;
+    --surface:  #FFFFFF;
+    --border:   #D8D4CC;
+    --text:     #1A1916;
+    --muted:    #6B6860;
+    --re:       #C04828;
+    --ev:       #185FA5;
+    --se:       #3B6D11;
+    --en:       #854F0B;
+    --warn:     #A32D2D;
+    --ok:       #0F6E56;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  header {
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  header h1 {
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+
+  header .subtitle {
+    margin-top: .4rem;
+    font-size: .78rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .75rem;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  h2 {
+    font-size: .7rem;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  section { margin-bottom: 2.5rem; }
+
+  /* Quadrants en tableau avec barres */
+  .quadrants {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .quadrants tr {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .quadrants tr:last-child { border-bottom: none; }
+
+  .quadrants td {
+    padding: .65rem .5rem;
+    font-size: .85rem;
+    vertical-align: middle;
+  }
+
+  .quadrants .col-name { width: 34%; }
+  .quadrants .col-ds   { width: 12%; font-family: 'IBM Plex Mono', monospace; text-align: right; padding-right: 1.2rem; }
+  .quadrants .col-bar  { width: 54%; }
+
+  .bar-track {
+    position: relative;
+    height: 7px;
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  .bar-fill {
+    position: absolute;
+    height: 100%;
+    border-radius: 4px;
+  }
+
+  .bar-zero {
+    position: absolute;
+    top: -5px;
+    width: 1.5px;
+    height: 17px;
+    background: var(--text);
+    opacity: .25;
+  }
+
+  .quad-raw {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    color: var(--muted);
+    margin-top: .2rem;
+    line-height: 1.5;
+    display: none; /* caché par défaut dans le tableau compact */
+  }
+
+  .ds-high { color: var(--warn); }
+  .ds-mid  { color: var(--text); }
+  .ds-low  { color: var(--ok); }
+
+  /* Domaines / Composantes */
+  .domain-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .domain-table tr {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .domain-table tr:last-child { border-bottom: none; }
+
+  .domain-table td {
+    padding: .65rem .5rem;
+    font-size: .85rem;
+    vertical-align: middle;
+  }
+
+  .col-name { width: 34%; }
+  .col-ds   { width: 12%; font-family: 'IBM Plex Mono', monospace; text-align: right; padding-right: 1.2rem; }
+  .col-bar  { width: 54%; }
+
+  /* Items */
+  .raw-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .76rem;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .raw-table th {
+    text-align: left;
+    padding: .4rem .5rem;
+    border-bottom: 2px solid var(--text);
+    font-weight: 500;
+    font-size: .68rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+  }
+
+  .raw-table td {
+    padding: .32rem .5rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .raw-table tr:hover td { background: rgba(0,0,0,.025); }
+
+  .q-badge {
+    display: inline-block;
+    font-size: .62rem;
+    font-weight: 500;
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: .04em;
+  }
+
+  .q-RE { background: #FAECE7; color: var(--re); }
+  .q-EV { background: #E6F1FB; color: var(--ev); }
+  .q-SE { background: #EAF3DE; color: var(--se); }
+  .q-EN { background: #FAEEDA; color: var(--en); }
+
+  .na-flag {
+    font-size: .62rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* Commentaires */
+  .comment-list {
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
+  }
+
+  .comment-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--text);
+    border-radius: 4px;
+    padding: .75rem 1rem;
+  }
+
+  .comment-domain {
+    font-size: .65rem;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .3rem;
+  }
+
+  .comment-text {
+    font-size: .85rem;
+    line-height: 1.5;
+  }
+
+  /* Actions */
+  .actions {
+    display: flex;
+    gap: .65rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  button {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: .75rem;
+    font-weight: 500;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    padding: .5rem 1.1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid var(--text);
+    background: var(--surface);
+    color: var(--text);
+    transition: background .15s, color .15s;
+  }
+
+  button:hover { background: var(--text); color: var(--surface); }
+  button.primary { background: var(--text); color: var(--surface); }
+  button.primary:hover { background: #333; }
+
+  .note {
+    font-size: .72rem;
+    color: var(--muted);
+    margin-top: .5rem;
+    font-style: italic;
+  }
+
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    font-size: .72rem;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .legend span { display: flex; align-items: center; gap: .4rem; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: var(--text);
+    color: var(--surface);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .76rem;
+    padding: .65rem 1.3rem;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity .25s;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .toast.show { opacity: 1; }
+
+  .empty-state {
+    font-size: .8rem;
+    color: var(--muted);
+    font-style: italic;
+    padding: 1rem 0;
+  }
+
+  @media print {
+    body { padding: 1rem; background: white; }
+    .actions { display: none; }
+    .toast { display: none; }
+  }
+
+  @media (max-width: 640px) {
+    .quadrants { grid-template-columns: repeat(2, 1fr); }
+    header { flex-direction: column; align-items: flex-start; }
+    .meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1 id="report-title">Profil Sensoriel</h1>
+    <p class="subtitle" id="report-subtitle">Profil Sensoriel 2 – Winnie Dunn</p>
+  </div>
+  <div class="meta" id="report-meta"></div>
+</header>
+
+<div class="actions">
+  <button class="primary" onclick="copyResume()">Copier le résumé</button>
+  <button onclick="window.print()">Imprimer / PDF</button>
+  <button onclick="toggleRaw()" id="toggle-raw-btn">Afficher les items</button>
+</div>
+
+<!-- Quadrants -->
+<section>
+  <h2>Quadrants sensoriels — écarts-types</h2>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--re)"></span> au-dessus de la moyenne</span>
+    <span><span class="dot" style="background:var(--ev)"></span> en dessous de la moyenne</span>
+    <span style="opacity:.5">|  trait vertical = moyenne normative (DS 0)</span>
+  </div>
+  <table class="domain-table">
+    <tbody id="quadrants-body"></tbody>
+  </table>
+</section>
+
+<!-- Domaines -->
+<section>
+  <h2>Domaines sensoriels — écarts-types</h2>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--re)"></span> au-dessus de la moyenne</span>
+    <span><span class="dot" style="background:var(--ev)"></span> en dessous de la moyenne</span>
+    <span style="opacity:.5">|  trait vertical = moyenne normative (DS 0)</span>
+  </div>
+  <table class="domain-table">
+    <tbody id="domain-body"></tbody>
+  </table>
+</section>
+
+<!-- Composantes scolaires (uniquement si présentes) -->
+<section id="composantes-section" style="display:none">
+  <h2>Composantes scolaires — écarts-types</h2>
+  <table class="domain-table">
+    <tbody id="composantes-body"></tbody>
+  </table>
+</section>
+
+<!-- Commentaires -->
+<section id="comments-section" style="display:none">
+  <h2>Commentaires</h2>
+  <div class="comment-list" id="comments-list"></div>
+</section>
+
+<!-- Items -->
+<section id="raw-section" style="display:none">
+  <h2>Détail des réponses par item</h2>
+  <table class="raw-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Domaine</th>
+        <th>Q</th>
+        <th>Item</th>
+        <th>Val</th>
+      </tr>
+    </thead>
+    <tbody id="raw-body"></tbody>
+  </table>
+</section>
+
+<div class="toast" id="toast">Copié ✓</div>
+
+<script>
+/* =========================================================
+   DONNÉES INJECTÉES À LA GÉNÉRATION
+   (remplacées par le pipeline Python via .replace())
+   ========================================================= */
+const REPORT_DATA = __DATA_JSON__;
+const REFERENCE = __REFERENCE_JSON__;
+
+/* =========================================================
+   CONSTANTES DE PRÉSENTATION
+   ========================================================= */
+const QUADRANT_CODE = {
+  recherche:      "RE",
+  evitement:      "EV",
+  sensibilite:    "SE",
+  enregistrement: "EN"
+};
+
+const QUADRANT_LABEL = {
+  recherche:      "Recherche",
+  evitement:      "Évitement",
+  sensibilite:    "Sensibilité",
+  enregistrement: "Enregistrement"
+};
+
+const DOMAIN_LABEL = {
+  auditif:          "Auditif",
+  visuel:           "Visuel",
+  tactile:          "Tactile",
+  mouvement:        "Mouvement",
+  position_corps:   "Position du corps",
+  oral:             "Sensoriel oral",
+  comportemental:   "Comportemental",
+  conduites:        "Conduites",
+  "socio-émotionnel": "Socio-émotionnel",
+  attentionnel:     "Attentionnel",
+  traitement_global: "Traitement global",
+  global_scolaire:  "Global (scolaire)",
+  global_enfant:    "Global (enfant)",
+  global_jeune_enfant: "Global (jeune enfant)"
+};
+
+const COMPOSANTE_LABEL = {
+  "1": "Composante scolaire 1",
+  "2": "Composante scolaire 2",
+  "3": "Composante scolaire 3",
+  "4": "Composante scolaire 4"
+};
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+function fmtDS(z) {
+  const v = Number(z);
+  return (v >= 0 ? "+" : "") + v.toFixed(2);
+}
+
+function dsClass(z) {
+  const abs = Math.abs(Number(z));
+  if (abs >= 2) return "ds-high";
+  if (abs <= 0.5) return "ds-low";
+  return "ds-mid";
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return "—";
+  const d = new Date(isoStr);
+  if (isNaN(d)) return isoStr;
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function ageLabel(patient) {
+  if (patient.age_group) return `tranche ${patient.age_group}`;
+  return "";
+}
+
+/* =========================================================
+   RENDU : HEADER
+   ========================================================= */
+function renderHeader(patient) {
+  const fullName = [patient.prenom, patient.nom].filter(Boolean).join(" ");
+  document.getElementById("report-title").textContent =
+    fullName ? `Profil Sensoriel · ${fullName}` : "Profil Sensoriel";
+
+  document.getElementById("report-meta").innerHTML = `
+    <div>Population : ${patient.form_type || "—"}</div>
+    <div>Né·e le ${formatDate(patient.birth_date)}</div>
+    <div>Évaluation du ${formatDate(patient.evaluation_date)}</div>
+    <div>Âge : ${patient.age != null ? patient.age + " ans" : "—"} ${ageLabel(patient) ? "→ " + ageLabel(patient) : ""}</div>
+    ${patient.niveau ? `<div>Niveau : ${patient.niveau}</div>` : ""}
+  `;
+}
+
+/* =========================================================
+   RENDU : QUADRANTS (maintenant en tableau avec barres)
+   ========================================================= */
+function renderQuadrants(quadrants) {
+  const tbody = document.getElementById("quadrants-body");
+  tbody.innerHTML = "";
+
+  // Ordre d'affichage fixe et cohérent avec le modèle Dunn
+  const order = ["recherche", "evitement", "sensibilite", "enregistrement"];
+
+  order.forEach(key => {
+    const q = quadrants[key];
+    if (!q) return;
+
+    const code = QUADRANT_CODE[key] || "?";
+    const label = QUADRANT_LABEL[key] || key;
+    const z = Number(q.z ?? 0);
+    const dsStr = fmtDS(z);
+    const cls = dsClass(z);
+
+    // Calcul de la barre
+    const pctZero = 50;
+    const pctFill = Math.min(Math.abs(z) / 3 * 50, 50);
+    const barLeft = z >= 0 ? pctZero : pctZero - pctFill;
+    const barColor = z >= 0 ? "#C04828" : "#185FA5";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="col-name">
+        ${label}
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted);margin-left:.5rem;">
+          (${code})
+        </span>
+      </td>
+      <td class="col-ds ${cls}">${dsStr}</td>
+      <td class="col-bar">
+        <div class="bar-track">
+          <div class="bar-fill" style="left:${barLeft.toFixed(1)}%;width:${pctFill.toFixed(1)}%;background:${barColor}"></div>
+          <div class="bar-zero" style="left:50%"></div>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* =========================================================
+   RENDU : TABLEAU GÉNÉRIQUE AVEC BARRE (domaines / composantes)
+   ========================================================= */
+function renderBarTable(tbody, dataObj, labelMap, fallbackPrefix) {
+  tbody.innerHTML = "";
+
+  const entries = Object.entries(dataObj || {});
+  if (entries.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="3" class="empty-state">Aucune donnée disponible</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+
+  entries.forEach(([key, vals]) => {
+    const z = Number(vals.z ?? 0);
+    const dsStr = fmtDS(z);
+    const cls = dsClass(z);
+
+    const pctZero = 50;
+    const pctFill = Math.min(Math.abs(z) / 3 * 50, 50);
+    const barLeft = z >= 0 ? pctZero : pctZero - pctFill;
+    const barColor = z >= 0 ? "#C04828" : "#185FA5";
+
+    const label = (labelMap && labelMap[key]) || `${fallbackPrefix || ""}${key}`;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="col-name">${label}</td>
+      <td class="col-ds ${cls}">${dsStr}</td>
+      <td class="col-bar">
+        <div class="bar-track">
+          <div class="bar-fill" style="left:${barLeft.toFixed(1)}%;width:${pctFill.toFixed(1)}%;background:${barColor}"></div>
+          <div class="bar-zero" style="left:50%"></div>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* =========================================================
+   RENDU : COMMENTAIRES
+   ========================================================= */
+function renderComments(comments) {
+  const section = document.getElementById("comments-section");
+  const list = document.getElementById("comments-list");
+  list.innerHTML = "";
+
+  const entries = Object.entries(comments || {}).filter(([, txt]) => txt && txt.trim());
+
+  if (entries.length === 0) {
+    section.style.display = "none";
+    return;
+  }
+
+  section.style.display = "block";
+  entries.forEach(([domain, text]) => {
+    const div = document.createElement("div");
+    div.className = "comment-item";
+    div.innerHTML = `
+      <div class="comment-domain">${DOMAIN_LABEL[domain.toLowerCase()] || domain}</div>
+      <div class="comment-text"></div>
+    `;
+    // textContent pour échapper tout HTML dans les commentaires libres
+    div.querySelector(".comment-text").textContent = text;
+    list.appendChild(div);
+  });
+}
+
+/* =========================================================
+   RENDU : ITEMS DÉTAILLÉS (jointure responses + reference)
+   ========================================================= */
+function renderRawItems(responses, formType) {
+  const tbody = document.getElementById("raw-body");
+  tbody.innerHTML = "";
+
+  const refForm = (REFERENCE && REFERENCE[formType] && REFERENCE[formType].questions) || {};
+
+  const ids = Object.keys(responses || {}).sort((a, b) => Number(a) - Number(b));
+
+  if (ids.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Aucune réponse disponible</td></tr>`;
+    return;
+  }
+
+  ids.forEach(id => {
+    const val = responses[id];
+    const meta = refForm[id];
+
+    const domaineLabel = meta ? (meta.domaine_label || meta.domaine_sensoriel) : "—";
+    const quadrantKey = meta ? meta.quadrant : null;
+    const code = quadrantKey ? (QUADRANT_CODE[quadrantKey] || quadrantKey.toUpperCase()) : "";
+    const badge = code ? `<span class="q-badge q-${code}">${code}</span>` : "";
+    const label = meta ? meta.label : "(question introuvable dans la référence)";
+    const naFlag = (meta && meta.pour_calcul === false) ? ` <span class="na-flag">(hors calcul)</span>` : "";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${id}</td>
+      <td>${domaineLabel}</td>
+      <td>${badge}</td>
+      <td>${label}${naFlag}</td>
+      <td>${val}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* =========================================================
+   INTERACTIONS
+   ========================================================= */
+function toggleRaw() {
+  const s = document.getElementById("raw-section");
+  const btn = document.getElementById("toggle-raw-btn");
+  const hidden = s.style.display === "none";
+  s.style.display = hidden ? "block" : "none";
+  btn.textContent = hidden ? "Masquer les items" : "Afficher les items";
+}
+
+function copyResume() {
+  const p = REPORT_DATA.patient || {};
+  const fullName = [p.prenom, p.nom].filter(Boolean).join(" ");
+
+  const lines = [
+    `PROFIL SENSORIEL – ${fullName || "Patient"}`,
+    `Évaluation du ${formatDate(p.evaluation_date)} | Âge : ${p.age ?? "—"} ans | ${ageLabel(p)}`,
+    "",
+    "QUADRANTS (écarts-types)"
+  ];
+
+  const order = ["recherche", "evitement", "sensibilite", "enregistrement"];
+  order.forEach(key => {
+    const q = (REPORT_DATA.quadrants || {})[key];
+    if (!q) return;
+    const code = QUADRANT_CODE[key];
+    const label = QUADRANT_LABEL[key].padEnd(14, " ");
+    const sig = Math.abs(q.z) >= 2 ? "  ← significatif" : "";
+    lines.push(`  ${label} (${code}) : ${fmtDS(q.z)}${sig}`);
+  });
+
+  lines.push("", "DOMAINES (écarts-types)");
+  Object.entries(REPORT_DATA.domains || {}).forEach(([key, d]) => {
+    const label = (DOMAIN_LABEL[key] || key).padEnd(18, " ");
+    const sig = Math.abs(d.z) >= 2 ? "  ← significatif" : "";
+    lines.push(`  ${label} : ${fmtDS(d.z)}${sig}`);
+  });
+
+  const comments = Object.entries(REPORT_DATA.comments || {}).filter(([, t]) => t && t.trim());
+  if (comments.length) {
+    lines.push("", "COMMENTAIRES");
+    comments.forEach(([domain, text]) => {
+      lines.push(`  ${DOMAIN_LABEL[domain.toLowerCase()] || domain} : ${text}`);
+    });
+  }
+
+  const text = lines.join("\n");
+  navigator.clipboard.writeText(text)
+    .then(showToast)
+    .catch(() => { prompt("Copier ce texte :", text); });
+}
+
+function showToast() {
+  const t = document.getElementById("toast");
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+/* =========================================================
+   INITIALISATION
+   ========================================================= */
+function init() {
+  const data = REPORT_DATA;
+
+  renderHeader(data.patient || {});
+  renderQuadrants(data.quadrants || {});
+
+  renderBarTable(
+    document.getElementById("domain-body"),
+    data.domains,
+    DOMAIN_LABEL
+  );
+
+  const composantes = data.composantes_scolaires;
+  if (composantes && Object.keys(composantes).length > 0) {
+    document.getElementById("composantes-section").style.display = "block";
+    renderBarTable(
+      document.getElementById("composantes-body"),
+      composantes,
+      COMPOSANTE_LABEL,
+      "Composante "
+    );
+  }
+
+  renderComments(data.comments);
+  renderRawItems(data.responses, (data.patient || {}).form_type);
+}
+
+init();
+</script>
+</body>
+</html>
