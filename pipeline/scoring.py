@@ -10,7 +10,7 @@ def compute_all_scores(mapped_submissions, normes, form_name):
     """
     age_bands = load_age_bands()
     results = {}
-
+    
     for submission_id, submission in mapped_submissions.items():
         patient = submission["patient"]
         items = submission["responses"]
@@ -19,25 +19,23 @@ def compute_all_scores(mapped_submissions, normes, form_name):
         domain_raw = {}
         quadrant_raw = {}
         comp_raw = {}
-
+        
         for item in items:
+            score = item.get("score", 0)
+            
             if item.get("pour_calcul", False):
                 domain = item.get("domaine_sensoriel")
                 if domain:
-                    domain_raw[domain] = domain_raw.get(domain, 0) + item.get(
-                        "score", 0
-                    )
-
+                    domain_raw[domain] = domain_raw.get(domain, 0) + score
+            
             quadrant = item.get("quadrant")
             if quadrant:
-                quadrant_raw[quadrant] = quadrant_raw.get(quadrant, 0) + item.get(
-                    "score", 0
-                )
-
+                quadrant_raw[quadrant] = quadrant_raw.get(quadrant, 0) + score
+            
             comp = item.get("composante_scolaire")
             if comp:
-                comp_raw[comp] = comp_raw.get(comp, 0) + item.get("score", 0)
-
+                comp_raw[comp] = comp_raw.get(comp, 0) + score
+        
         age_months = patient["age_months"]
         age_group = resolve_age_group(age_months, form_name, age_bands)
 

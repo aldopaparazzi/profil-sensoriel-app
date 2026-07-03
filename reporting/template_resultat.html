@@ -1,733 +1,951 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profil Sensoriel</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
-
-  :root {
-    --bg:       #F5F3EE;
-    --surface:  #FFFFFF;
-    --border:   #D8D4CC;
-    --text:     #1A1916;
-    --muted:    #6B6860;
-    --re:       #C04828;
-    --ev:       #185FA5;
-    --se:       #3B6D11;
-    --en:       #854F0B;
-    --warn:     #A32D2D;
-    --ok:       #0F6E56;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'IBM Plex Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    padding: 2rem;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  header {
-    border-bottom: 2px solid var(--text);
-    padding-bottom: 1rem;
-    margin-bottom: 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  header h1 {
-    font-size: 1.05rem;
-    font-weight: 500;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-  }
-
-  header .subtitle {
-    margin-top: .4rem;
-    font-size: .78rem;
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  .meta {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: .75rem;
-    color: var(--muted);
-    text-align: right;
-    line-height: 1.8;
-  }
-
-  h2 {
-    font-size: .7rem;
-    font-weight: 500;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
-
-  section { margin-bottom: 2.5rem; }
-
-  /* Quadrants en tableau avec barres */
-  .quadrants {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .quadrants tr {
-    border-bottom: 1px solid var(--border);
-  }
-
-  .quadrants tr:last-child { border-bottom: none; }
-
-  .quadrants td {
-    padding: .65rem .5rem;
-    font-size: .85rem;
-    vertical-align: middle;
-  }
-
-  .quadrants .col-name { width: 34%; }
-  .quadrants .col-ds   { width: 12%; font-family: 'IBM Plex Mono', monospace; text-align: right; padding-right: 1.2rem; }
-  .quadrants .col-bar  { width: 54%; }
-
-  .bar-track {
-    position: relative;
-    height: 7px;
-    background: var(--border);
-    border-radius: 4px;
-  }
-
-  .bar-fill {
-    position: absolute;
-    height: 100%;
-    border-radius: 4px;
-  }
-
-  .bar-zero {
-    position: absolute;
-    top: -5px;
-    width: 1.5px;
-    height: 17px;
-    background: var(--text);
-    opacity: .25;
-  }
-
-  .quad-raw {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: .72rem;
-    color: var(--muted);
-    margin-top: .2rem;
-    line-height: 1.5;
-    display: none; /* caché par défaut dans le tableau compact */
-  }
-
-  .ds-high { color: var(--warn); }
-  .ds-mid  { color: var(--text); }
-  .ds-low  { color: var(--ok); }
-
-  /* Domaines / Composantes */
-  .domain-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .domain-table tr {
-    border-bottom: 1px solid var(--border);
-  }
-
-  .domain-table tr:last-child { border-bottom: none; }
-
-  .domain-table td {
-    padding: .65rem .5rem;
-    font-size: .85rem;
-    vertical-align: middle;
-  }
-
-  .col-name { width: 34%; }
-  .col-ds   { width: 12%; font-family: 'IBM Plex Mono', monospace; text-align: right; padding-right: 1.2rem; }
-  .col-bar  { width: 54%; }
-
-  /* Items */
-  .raw-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: .76rem;
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
-  .raw-table th {
-    text-align: left;
-    padding: .4rem .5rem;
-    border-bottom: 2px solid var(--text);
-    font-weight: 500;
-    font-size: .68rem;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    background: var(--bg);
-    position: sticky;
-    top: 0;
-  }
-
-  .raw-table td {
-    padding: .32rem .5rem;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-  }
-
-  .raw-table tr:hover td { background: rgba(0,0,0,.025); }
-
-  .q-badge {
-    display: inline-block;
-    font-size: .62rem;
-    font-weight: 500;
-    padding: 1px 5px;
-    border-radius: 3px;
-    letter-spacing: .04em;
-  }
-
-  .q-RE { background: #FAECE7; color: var(--re); }
-  .q-EV { background: #E6F1FB; color: var(--ev); }
-  .q-SE { background: #EAF3DE; color: var(--se); }
-  .q-EN { background: #FAEEDA; color: var(--en); }
-
-  .na-flag {
-    font-size: .62rem;
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  /* Commentaires */
-  .comment-list {
-    display: flex;
-    flex-direction: column;
-    gap: .65rem;
-  }
-
-  .comment-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--text);
-    border-radius: 4px;
-    padding: .75rem 1rem;
-  }
-
-  .comment-domain {
-    font-size: .65rem;
-    font-weight: 500;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: .3rem;
-  }
-
-  .comment-text {
-    font-size: .85rem;
-    line-height: 1.5;
-  }
-
-  /* Actions */
-  .actions {
-    display: flex;
-    gap: .65rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-  }
-
-  button {
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: .75rem;
-    font-weight: 500;
-    letter-spacing: .07em;
-    text-transform: uppercase;
-    padding: .5rem 1.1rem;
-    border-radius: 3px;
-    cursor: pointer;
-    border: 1px solid var(--text);
-    background: var(--surface);
-    color: var(--text);
-    transition: background .15s, color .15s;
-  }
-
-  button:hover { background: var(--text); color: var(--surface); }
-  button.primary { background: var(--text); color: var(--surface); }
-  button.primary:hover { background: #333; }
-
-  .note {
-    font-size: .72rem;
-    color: var(--muted);
-    margin-top: .5rem;
-    font-style: italic;
-  }
-
-  .legend {
-    display: flex;
-    gap: 1.5rem;
-    font-size: .72rem;
-    color: var(--muted);
-    font-family: 'IBM Plex Mono', monospace;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .legend span { display: flex; align-items: center; gap: .4rem; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-
-  .toast {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    background: var(--text);
-    color: var(--surface);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: .76rem;
-    padding: .65rem 1.3rem;
-    border-radius: 4px;
-    opacity: 0;
-    transition: opacity .25s;
-    pointer-events: none;
-    z-index: 100;
-  }
-
-  .toast.show { opacity: 1; }
-
-  .empty-state {
-    font-size: .8rem;
-    color: var(--muted);
-    font-style: italic;
-    padding: 1rem 0;
-  }
-
-  @media print {
-    body { padding: 1rem; background: white; }
-    .actions { display: none; }
-    .toast { display: none; }
-  }
-
-  @media (max-width: 640px) {
-    .quadrants { grid-template-columns: repeat(2, 1fr); }
-    header { flex-direction: column; align-items: flex-start; }
-    .meta { text-align: left; }
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <div>
-    <h1 id="report-title">Profil Sensoriel</h1>
-    <p class="subtitle" id="report-subtitle">Profil Sensoriel 2 – Winnie Dunn</p>
-  </div>
-  <div class="meta" id="report-meta"></div>
-</header>
-
-<div class="actions">
-  <button class="primary" onclick="copyResume()">Copier le résumé</button>
-  <button onclick="window.print()">Imprimer / PDF</button>
-  <button onclick="toggleRaw()" id="toggle-raw-btn">Afficher les items</button>
-</div>
-
-<!-- Quadrants -->
-<section>
-  <h2>Quadrants sensoriels — écarts-types</h2>
-  <div class="legend">
-    <span><span class="dot" style="background:var(--re)"></span> au-dessus de la moyenne</span>
-    <span><span class="dot" style="background:var(--ev)"></span> en dessous de la moyenne</span>
-    <span style="opacity:.5">|  trait vertical = moyenne normative (DS 0)</span>
-  </div>
-  <table class="domain-table">
-    <tbody id="quadrants-body"></tbody>
-  </table>
-</section>
-
-<!-- Domaines -->
-<section>
-  <h2>Domaines sensoriels — écarts-types</h2>
-  <div class="legend">
-    <span><span class="dot" style="background:var(--re)"></span> au-dessus de la moyenne</span>
-    <span><span class="dot" style="background:var(--ev)"></span> en dessous de la moyenne</span>
-    <span style="opacity:.5">|  trait vertical = moyenne normative (DS 0)</span>
-  </div>
-  <table class="domain-table">
-    <tbody id="domain-body"></tbody>
-  </table>
-</section>
-
-<!-- Composantes scolaires (uniquement si présentes) -->
-<section id="composantes-section" style="display:none">
-  <h2>Composantes scolaires — écarts-types</h2>
-  <table class="domain-table">
-    <tbody id="composantes-body"></tbody>
-  </table>
-</section>
-
-<!-- Commentaires -->
-<section id="comments-section" style="display:none">
-  <h2>Commentaires</h2>
-  <div class="comment-list" id="comments-list"></div>
-</section>
-
-<!-- Items -->
-<section id="raw-section" style="display:none">
-  <h2>Détail des réponses par item</h2>
-  <table class="raw-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Domaine</th>
-        <th>Q</th>
-        <th>Item</th>
-        <th>Val</th>
-      </tr>
-    </thead>
-    <tbody id="raw-body"></tbody>
-  </table>
-</section>
-
-<div class="toast" id="toast">Copié ✓</div>
-
-<script>
-/* =========================================================
-   DONNÉES INJECTÉES À LA GÉNÉRATION
-   (remplacées par le pipeline Python via .replace())
-   ========================================================= */
-const REPORT_DATA = __DATA_JSON__;
-const REFERENCE = __REFERENCE_JSON__;
-
-/* =========================================================
-   CONSTANTES DE PRÉSENTATION
-   ========================================================= */
-const QUADRANT_CODE = {
-  recherche:      "RE",
-  evitement:      "EV",
-  sensibilite:    "SE",
-  enregistrement: "EN"
-};
-
-const QUADRANT_LABEL = {
-  recherche:      "Recherche",
-  evitement:      "Évitement",
-  sensibilite:    "Sensibilité",
-  enregistrement: "Enregistrement"
-};
-
-const DOMAIN_LABEL = {
-  auditif:          "Auditif",
-  visuel:           "Visuel",
-  tactile:          "Tactile",
-  mouvement:        "Mouvement",
-  position_corps:   "Position du corps",
-  oral:             "Sensoriel oral",
-  comportemental:   "Comportemental",
-  conduites:        "Conduites",
-  "socio-émotionnel": "Socio-émotionnel",
-  attentionnel:     "Attentionnel",
-  traitement_global: "Traitement global",
-  global_scolaire:  "Global (scolaire)",
-  global_enfant:    "Global (enfant)",
-  global_jeune_enfant: "Global (jeune enfant)"
-};
-
-const COMPOSANTE_LABEL = {
-  "1": "Composante scolaire 1",
-  "2": "Composante scolaire 2",
-  "3": "Composante scolaire 3",
-  "4": "Composante scolaire 4"
-};
-
-/* =========================================================
-   HELPERS
-   ========================================================= */
-function fmtDS(z) {
-  const v = Number(z);
-  return (v >= 0 ? "+" : "") + v.toFixed(2);
-}
-
-function dsClass(z) {
-  const abs = Math.abs(Number(z));
-  if (abs >= 2) return "ds-high";
-  if (abs <= 0.5) return "ds-low";
-  return "ds-mid";
-}
-
-function formatDate(isoStr) {
-  if (!isoStr) return "—";
-  const d = new Date(isoStr);
-  if (isNaN(d)) return isoStr;
-  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
-}
-
-function ageLabel(patient) {
-  if (patient.age_group) return `tranche ${patient.age_group}`;
-  return "";
-}
-
-/* =========================================================
-   RENDU : HEADER
-   ========================================================= */
-function renderHeader(patient) {
-  const fullName = [patient.prenom, patient.nom].filter(Boolean).join(" ");
-  document.getElementById("report-title").textContent =
-    fullName ? `Profil Sensoriel · ${fullName}` : "Profil Sensoriel";
-
-  document.getElementById("report-meta").innerHTML = `
-    <div>Population : ${patient.form_type || "—"}</div>
-    <div>Né·e le ${formatDate(patient.birth_date)}</div>
-    <div>Évaluation du ${formatDate(patient.evaluation_date)}</div>
-    <div>Âge : ${patient.age != null ? patient.age + " ans" : "—"} ${ageLabel(patient) ? "→ " + ageLabel(patient) : ""}</div>
-    ${patient.niveau ? `<div>Niveau : ${patient.niveau}</div>` : ""}
-  `;
-}
-
-/* =========================================================
-   RENDU : QUADRANTS (maintenant en tableau avec barres)
-   ========================================================= */
-function renderQuadrants(quadrants) {
-  const tbody = document.getElementById("quadrants-body");
-  tbody.innerHTML = "";
-
-  // Ordre d'affichage fixe et cohérent avec le modèle Dunn
-  const order = ["recherche", "evitement", "sensibilite", "enregistrement"];
-
-  order.forEach(key => {
-    const q = quadrants[key];
-    if (!q) return;
-
-    const code = QUADRANT_CODE[key] || "?";
-    const label = QUADRANT_LABEL[key] || key;
-    const z = Number(q.z ?? 0);
-    const dsStr = fmtDS(z);
-    const cls = dsClass(z);
-
-    // Calcul de la barre
-    const pctZero = 50;
-    const pctFill = Math.min(Math.abs(z) / 3 * 50, 50);
-    const barLeft = z >= 0 ? pctZero : pctZero - pctFill;
-    const barColor = z >= 0 ? "#C04828" : "#185FA5";
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="col-name">
-        ${label}
-        <span style="font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted);margin-left:.5rem;">
-          (${code})
-        </span>
-      </td>
-      <td class="col-ds ${cls}">${dsStr}</td>
-      <td class="col-bar">
-        <div class="bar-track">
-          <div class="bar-fill" style="left:${barLeft.toFixed(1)}%;width:${pctFill.toFixed(1)}%;background:${barColor}"></div>
-          <div class="bar-zero" style="left:50%"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profil Sensoriel</title>
+    <style>
+      /* ===== IMPORTS & VARIABLES ===== */
+      @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap");
+
+      :root {
+        --bg: #f5f3ee;
+        --surface: #ffffff;
+        --border: #e7e5e4;
+        --text: #1a1916;
+        --muted: #6b6860;
+
+        /* Quadrant colors */
+        --re: #c04828;
+        --ev: #185fa5;
+        --se: #3b6d11;
+        --en: #854f0b;
+
+        /* DS severity */
+        --ds-high: #a32d2d;
+        --ds-mid: #d88932;
+        --ds-low: #0f6e56;
+
+        /* Bar colors (z-score severity) */
+        --bar-neutral: #5fae61;
+        --bar-low: #d6b43c;
+        --bar-medium: #d88932;
+        --bar-high: #c94a3f;
+        --bar-very-high: #a32d2d;
+      }
+
+      /* ===== RESET & BASE ===== */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "IBM Plex Sans", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding: 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+        min-height: 100vh;
+      }
+
+      /* ===== TYPOGRAPHY ===== */
+      h1 {
+        font-size: 1.05rem;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 1rem;
+      }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .section-header h2 {
+        margin: 0; /* remplace le margin-bottom du h2 */
+      }
+
+      .section-header .note {
+        opacity: 0.5;
+        font-size: 0.72rem;
+        font-family: "IBM Plex Mono", monospace;
+        white-space: nowrap;
+      }
+      /* ===== HEADER ===== */
+      header {
+        border-bottom: 2px solid var(--text);
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .subtitle {
+        font-size: 0.78rem;
+        color: var(--muted);
+        font-style: italic;
+      }
+
+      .meta {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--muted);
+        text-align: right;
+        line-height: 1.8;
+        white-space: nowrap;
+      }
+
+      /* ===== SECTIONS ===== */
+      section {
+        margin-bottom: 2.5rem;
+      }
+
+      /* ===== TABLES ===== */
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .data-table tr {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .data-table tr:last-child {
+        border-bottom: none;
+      }
+
+      .data-table td {
+        padding: 0.65rem 0.5rem;
+        font-size: 0.85rem;
+        vertical-align: middle;
+      }
+
+      .col-name {
+        width: 34%;
+      }
+
+      .col-ds {
+        width: 12%;
+        font-family: "IBM Plex Mono", monospace;
+        text-align: right;
+        padding-right: 1.2rem;
+      }
+
+      .col-bar {
+        width: 54%;
+      }
+
+      /* ===== BAR CHART ===== */
+      .bar-track {
+        position: relative;
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+      }
+
+      .bar-fill {
+        position: absolute;
+        top: 1px;
+        height: 6px;
+        border-radius: 3px;
+      }
+
+      .bar-zero {
+        position: absolute;
+        top: -5px;
+        width: 1.5px;
+        height: 17px;
+        background: var(--text);
+        opacity: 0.25;
+      }
+
+      .bar-dot {
+        position: absolute;
+        top: 50%;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        border: 2px solid white;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+      }
+
+      /* ===== LEGEND ===== */
+      .legend {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.72rem;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .legend span {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      /* ===== ITEMS TABLE ===== */
+      .raw-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .raw-table th {
+        text-align: left;
+        padding: 0.4rem 0.5rem;
+        border-bottom: 2px solid var(--text);
+        font-weight: 500;
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        background: var(--bg);
+        position: sticky;
+        top: 0;
+      }
+
+      .raw-table td {
+        padding: 0.32rem 0.5rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+
+      .raw-table tr:hover td {
+        background: rgba(0, 0, 0, 0.025);
+      }
+
+      /* ===== BADGES ===== */
+      .q-badge {
+        display: inline-block;
+        font-size: 0.62rem;
+        font-weight: 600;
+        padding: 1px 5px;
+        border-radius: 3px;
+        letter-spacing: 0.04em;
+      }
+
+      .q-RE {
+        background: #faece7;
+        color: var(--re);
+      }
+      .q-EV {
+        background: #e6f1fb;
+        color: var(--ev);
+      }
+      .q-SE {
+        background: #eaf3de;
+        color: var(--se);
+      }
+      .q-EN {
+        background: #faeeda;
+        color: var(--en);
+      }
+
+      .na-flag {
+        font-size: 0.62rem;
+        color: var(--muted);
+        font-style: italic;
+      }
+
+      /* ===== COMMENTS ===== */
+      .comment-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+
+      .comment-item {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--text);
+        border-radius: 4px;
+        padding: 0.75rem 1rem;
+      }
+
+      .comment-domain {
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 0.3rem;
+      }
+
+      .comment-text {
+        font-size: 0.85rem;
+        line-height: 1.5;
+      }
+
+      /* ===== ACTIONS ===== */
+      .actions {
+        display: flex;
+        gap: 0.65rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+      }
+
+      button {
+        font-family: "IBM Plex Sans", sans-serif;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        padding: 0.5rem 1.1rem;
+        border-radius: 3px;
+        cursor: pointer;
+        border: 1px solid var(--text);
+        background: var(--surface);
+        color: var(--text);
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+
+      button:hover {
+        background: var(--text);
+        color: var(--surface);
+      }
+
+      button.primary {
+        background: var(--text);
+        color: var(--surface);
+      }
+
+      button.primary:hover {
+        background: #333;
+      }
+
+      /* ===== TOAST ===== */
+      .toast {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        background: var(--text);
+        color: var(--surface);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.76rem;
+        padding: 0.65rem 1.3rem;
+        border-radius: 4px;
+        opacity: 0;
+        transition: opacity 0.25s;
+        pointer-events: none;
+        z-index: 100;
+      }
+
+      .toast.show {
+        opacity: 1;
+      }
+
+      /* ===== EMPTY STATE ===== */
+      .empty-state {
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-style: italic;
+        padding: 1rem 0;
+      }
+
+      /* ===== PRINT ===== */
+      @media print {
+        body {
+          padding: 1rem;
+          background: white;
+        }
+        .actions {
+          display: none;
+        }
+        .toast {
+          display: none;
+        }
+        .raw-table th {
+          background: white;
+        }
+      }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 640px) {
+        body {
+          padding: 1rem;
+        }
+
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .meta {
+          text-align: left;
+          white-space: normal;
+        }
+
+        .col-name {
+          width: 30%;
+        }
+        .col-ds {
+          width: 15%;
+        }
+        .col-bar {
+          width: 55%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ===== HEADER ===== -->
+    <header>
+      <div>
+        <p class="subtitle" id="report-subtitle">
+          Profil Sensoriel 2 – Winnie Dunn
+        </p>
+        <h1 id="report-title">Profil Sensoriel</h1>
+      </div>
+      <div class="meta" id="report-meta"></div>
+    </header>
+
+    <!-- ===== ACTIONS ===== -->
+    <div class="actions">
+      <button onclick="copyResume()">Copier le résumé</button>
+      <button onclick="window.print()">Imprimer / PDF</button>
+      <button class="primary" onclick="toggleRaw()" id="toggle-raw-btn">
+        Afficher les items
+      </button>
+    </div>
+
+    <!-- ===== QUADRANTS ===== -->
+    <section>
+      <div class="section-header">
+        <h2>Quadrants sensoriels — écarts-types</h2>
+        <span class="note"> | trait vertical = moyenne normative (DS 0) </span>
+      </div>
+
+      <table class="data-table">
+        <tbody id="quadrants-body"></tbody>
+      </table>
+    </section>
+
+    <!-- ===== DOMAINS ===== -->
+    <section>
+      <div class="section-header">
+        <h2>Domaines sensoriels — écarts-types</h2>
+        <span class="note"> | trait vertical = moyenne normative (DS 0) </span>
+      </div>
+
+      <table class="data-table">
+        <tbody id="domain-body"></tbody>
+      </table>
+    </section>
+
+    <!-- ===== SCHOOL COMPONENTS ===== -->
+    <section id="composantes-section" style="display: none">
+      <div class="section-header">
+        <h2>Composantes scolaires — écarts-types</h2>
+        <span class="note"> | trait vertical = moyenne normative (DS 0) </span>
+      </div>
+
+      <table class="data-table">
+        <tbody id="composantes-body"></tbody>
+      </table>
+    </section>
+
+    <!-- ===== COMMENTS ===== -->
+    <section id="comments-section" style="display: none">
+      <h2>Commentaires</h2>
+      <div class="comment-list" id="comments-list"></div>
+    </section>
+
+    <!-- ===== RAW ITEMS ===== -->
+    <section id="raw-section" style="display: none">
+      <h2>Détail des réponses par item</h2>
+      <table class="raw-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Domaine</th>
+            <th>Q</th>
+            <th>Item</th>
+            <th>Val</th>
+          </tr>
+        </thead>
+        <tbody id="raw-body"></tbody>
+      </table>
+    </section>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast">Copié ✓</div>
+
+    <script>
+      /* ===================================================================
+       DONNÉES INJECTÉES
+       =================================================================== */
+      const REPORT_DATA = __DATA_JSON__;
+      const REFERENCE = __REFERENCE_JSON__;
+
+      /* ===================================================================
+       CONFIGURATION
+       =================================================================== */
+      const COLORS = {
+        // Couleurs de base
+        text: "#1A1916",
+        muted: "#6B6860",
+
+        blueDark: "#185FA5",
+        blueLight: "#6B9FD4",
+
+        greenLight: "#32A836",
+        greenDark: "#5FAE61",
+
+        yellow: "#D6B43C",
+
+        orangeLight: "#D88932",
+        orangeDark: "#C96F1F",
+
+        redLight: "#C94A3F",
+        redDark: "#A32D2D",
+      };
+      const CONFIG = {
+        quadrants: {
+          order: ["recherche", "evitement", "sensibilite", "enregistrement"],
+          code: {
+            recherche: "RE",
+            evitement: "EV",
+            sensibilite: "SE",
+            enregistrement: "EN",
+          },
+          label: {
+            recherche: "Recherche",
+            evitement: "Évitement",
+            sensibilite: "Sensibilité",
+            enregistrement: "Enregistrement",
+          },
+        },
+        domains: {
+          label: {
+            auditif: "Auditif",
+            visuel: "Visuel",
+            tactile: "Tactile",
+            mouvement: "Mouvement",
+            position_corps: "Position du corps",
+            oral: "Sensoriel oral",
+            comportemental: "Comportemental",
+            conduites: "Conduites",
+            "socio-émotionnel": "Socio-émotionnel",
+            attentionnel: "Attentionnel",
+            traitement_global: "Traitement global",
+            global_scolaire: "Global (scolaire)",
+            global_enfant: "Global (enfant)",
+            global_jeune_enfant: "Global (jeune enfant)",
+          },
+        },
+        schoolComponents: {
+          label: {
+            1: "Composante scolaire 1",
+            2: "Composante scolaire 2",
+            3: "Composante scolaire 3",
+            4: "Composante scolaire 4",
+          },
+        },
+        bar: {
+          maxDs: 3,
+          colors: [
+            { limit: 0.5, color: COLORS.greenLight },
+            { limit: 1.0, color: COLORS.greenDark },
+            { limit: 1.5, color: COLORS.yellow },
+            { limit: 2.0, color: COLORS.orangeLight },
+            { limit: 2.5, color: COLORS.redLight },
+            { limit: Infinity, color: COLORS.redDark },
+          ],
+          neutral: COLORS.greenDark,
+          low: COLORS.yellow,
+          medium: COLORS.orangeLight,
+          high: COLORS.redLight,
+        },
+        itemColors: {
+          0: COLORS.text, // Noir - Non répondue
+          1: COLORS.blueDark, // Bleu foncé - Très bas
+          2: COLORS.blueLight, // Bleu clair - Bas
+          3: COLORS.muted, // Gris - Neutre
+          4: COLORS.orangeLight, // Orange - Élevé
+          5: COLORS.redLight, // Rouge - Très élevé
+        },
+      };
+
+      /* ===================================================================
+       HELPERS
+       =================================================================== */
+      function getBarColor(z) {
+        const abs = Math.abs(z);
+        for (const level of CONFIG.bar.colors) {
+          if (abs < level.limit) return level.color;
+        }
+        return CONFIG.bar.colors[CONFIG.bar.colors.length - 1].color;
+      }
+
+      function fmtDS(z) {
+        const v = Number(z);
+        return (v >= 0 ? "+" : "") + v.toFixed(2);
+      }
+
+      function formatDate(isoStr) {
+        if (!isoStr) return "—";
+        const d = new Date(isoStr);
+        if (isNaN(d)) return isoStr;
+        return d.toLocaleDateString("fr-FR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      }
+
+      function getAgeLabel(patient) {
+        if (patient.age_group) return `tranche ${patient.age_group}`;
+        if (patient.age != null) return `${patient.age} ans`;
+        return "—";
+      }
+
+      function getLabel(key, map, fallback) {
+        return (map && map[key]) || fallback || key;
+      }
+
+      function getItemColor(value) {
+        const num = Number(value);
+        return CONFIG.itemColors[num] || "#1A1916";
+      }
+
+      /* ===================================================================
+       RENDER : HEADER
+       =================================================================== */
+      function renderHeader(patient) {
+        const fullName = [patient.prenom, patient.nom]
+          .filter(Boolean)
+          .join(" ");
+        document.getElementById("report-title").textContent = fullName
+          ? `${fullName} · ${patient.form_type || "Profil Sensoriel"}`
+          : "Profil Sensoriel";
+
+        document.getElementById("report-meta").innerHTML = `
+<!--        <div>Population : ${patient.form_type || "—"}</div>
+-->
+        <div>Évaluation du ${formatDate(patient.evaluation_date)}</div>
+        <div>Né·e le ${formatDate(patient.birth_date)}</div>
+        <div>Âge : ${getAgeLabel(patient)}</div>
+        ${patient.niveau ? `<div>Niveau : ${patient.niveau}</div>` : ""}
+      `;
+      }
+
+      /* ===================================================================
+       RENDER : BAR TABLE (générique)
+       =================================================================== */
+      function renderBarTable(tbodyId, data, labelMap, fallbackPrefix) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+
+        const entries = Object.entries(data || {});
+        if (entries.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="3" class="empty-state">Aucune donnée disponible</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = entries
+          .map(([key, vals]) => {
+            const z = Number(vals.z || 0);
+            const dsStr = fmtDS(z);
+            const pctZero = 50;
+            const pctFill = Math.min((Math.abs(z) / CONFIG.bar.maxDs) * 50, 50);
+            const barLeft = z >= 0 ? pctZero : pctZero - pctFill;
+            const barColor = getBarColor(z);
+            const label = getLabel(
+              key,
+              labelMap,
+              `${fallbackPrefix || ""}${key}`,
+            );
+
+            return `
+          <tr>
+            <td class="col-name">${label}</td>
+            <td class="col-ds" style="color:${barColor}">${dsStr}</td>
+            <td class="col-bar">
+              <div class="bar-track">
+                <div class="bar-fill" style="left:${barLeft.toFixed(1)}%;width:${pctFill.toFixed(1)}%;background:${barColor}"></div>
+                <div class="bar-zero" style="left:50%"></div>
+              </div>
+            </td>
+          </tr>
+        `;
+          })
+          .join("");
+      }
+      /* ===================================================================
+       RENDER : QUADRANTS (ordre spécifique)
+       =================================================================== */
+      function renderQuadrants(quadrants) {
+        const tbody = document.getElementById("quadrants-body");
+        if (!tbody) return;
+
+        const { order, code, label } = CONFIG.quadrants;
+
+        tbody.innerHTML = order
+          .map((key) => {
+            const q = quadrants?.[key];
+            if (!q) return "";
+
+            const z = Number(q.z || 0);
+            const dsStr = fmtDS(z);
+            const pctZero = 50;
+            const pctFill = Math.min((Math.abs(z) / CONFIG.bar.maxDs) * 50, 50);
+            const barLeft = z >= 0 ? pctZero : pctZero - pctFill;
+            const barColor = getBarColor(z);
+            const dotLeft = z >= 0 ? pctZero + pctFill : pctZero - pctFill;
+
+            return `
+          <tr>
+            <td class="col-name">
+              ${label[key]}
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted);margin-left:.5rem;">
+                (${code[key]})
+              </span>
+            </td>
+            <td class="col-ds" style="color:${barColor}">${dsStr}</td>
+            <td class="col-bar">
+              <div class="bar-track">
+                <div class="bar-fill" style="left:${barLeft.toFixed(1)}%;width:${pctFill.toFixed(1)}%;background:${barColor}"></div>
+                <div class="bar-dot" style="left:${dotLeft.toFixed(1)}%;background:${barColor}"></div>
+                <div class="bar-zero" style="left:50%"></div>
+              </div>
+            </td>
+          </tr>
+        `;
+          })
+          .join("");
+      }
+
+      /* ===================================================================
+       RENDER : COMMENTS
+       =================================================================== */
+      function renderComments(comments) {
+        const section = document.getElementById("comments-section");
+        const list = document.getElementById("comments-list");
+        if (!section || !list) return;
+
+        const entries = Object.entries(comments || {}).filter(
+          ([, txt]) => txt && txt.trim(),
+        );
+
+        if (entries.length === 0) {
+          section.style.display = "none";
+          return;
+        }
+
+        section.style.display = "block";
+        list.innerHTML = entries
+          .map(
+            ([domain, text]) => `
+        <div class="comment-item">
+          <div class="comment-domain">${getLabel(domain, CONFIG.domains.label, domain)}</div>
+          <div class="comment-text">${text}</div>
         </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
-}
+      `,
+          )
+          .join("");
+      }
 
-/* =========================================================
-   RENDU : TABLEAU GÉNÉRIQUE AVEC BARRE (domaines / composantes)
-   ========================================================= */
-function renderBarTable(tbody, dataObj, labelMap, fallbackPrefix) {
-  tbody.innerHTML = "";
+      /* ===================================================================
+       RENDER : RAW ITEMS
+       =================================================================== */
+      function renderRawItems(responses, formType) {
+        const tbody = document.getElementById("raw-body");
+        if (!tbody) return;
 
-  const entries = Object.entries(dataObj || {});
-  if (entries.length === 0) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="3" class="empty-state">Aucune donnée disponible</td>`;
-    tbody.appendChild(tr);
-    return;
-  }
+        const refForm =
+          (REFERENCE && REFERENCE[formType] && REFERENCE[formType].questions) ||
+          {};
+        const ids = Object.keys(responses || {}).sort(
+          (a, b) => Number(a) - Number(b),
+        );
 
-  entries.forEach(([key, vals]) => {
-    const z = Number(vals.z ?? 0);
-    const dsStr = fmtDS(z);
-    const cls = dsClass(z);
+        if (ids.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Aucune réponse disponible</td></tr>`;
+          return;
+        }
 
-    const pctZero = 50;
-    const pctFill = Math.min(Math.abs(z) / 3 * 50, 50);
-    const barLeft = z >= 0 ? pctZero : pctZero - pctFill;
-    const barColor = z >= 0 ? "#C04828" : "#185FA5";
+        const { code } = CONFIG.quadrants;
 
-    const label = (labelMap && labelMap[key]) || `${fallbackPrefix || ""}${key}`;
+        tbody.innerHTML = ids
+          .map((id) => {
+            const val = responses[id];
+            const meta = refForm[id];
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="col-name">${label}</td>
-      <td class="col-ds ${cls}">${dsStr}</td>
-      <td class="col-bar">
-        <div class="bar-track">
-          <div class="bar-fill" style="left:${barLeft.toFixed(1)}%;width:${pctFill.toFixed(1)}%;background:${barColor}"></div>
-          <div class="bar-zero" style="left:50%"></div>
-        </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
-}
+            const domaineLabel = meta
+              ? meta.domaine_label || meta.domaine_sensoriel
+              : "—";
+            const quadrantKey = meta ? meta.quadrant : null;
+            const badge =
+              quadrantKey && code[quadrantKey]
+                ? `<span class="q-badge q-${code[quadrantKey]}">${code[quadrantKey]}</span>`
+                : "";
+            const label = meta
+              ? meta.label
+              : "(question introuvable dans la référence)";
+            const naFlag =
+              meta && meta.pour_calcul === false
+                ? ' <span class="na-flag">(hors calcul)</span>'
+                : "";
 
-/* =========================================================
-   RENDU : COMMENTAIRES
-   ========================================================= */
-function renderComments(comments) {
-  const section = document.getElementById("comments-section");
-  const list = document.getElementById("comments-list");
-  list.innerHTML = "";
+            // Couleur de la valeur
+            const color = getItemColor(val);
+            const fontWeight = val === 3 ? "bold" : "normal";
 
-  const entries = Object.entries(comments || {}).filter(([, txt]) => txt && txt.trim());
+            return `
+          <tr>
+            <td>${id}</td>
+            <td>${domaineLabel}</td>
+            <td>${badge}</td>
+            <td>${label}${naFlag}</td>
+            <td style="color:${color};font-weight:${fontWeight}">${val}</td>
+          </tr>
+        `;
+          })
+          .join("");
+      }
 
-  if (entries.length === 0) {
-    section.style.display = "none";
-    return;
-  }
+      /* ===================================================================
+       INTERACTIONS
+       =================================================================== */
+      function toggleRaw() {
+        const section = document.getElementById("raw-section");
+        const btn = document.getElementById("toggle-raw-btn");
+        if (!section || !btn) return;
 
-  section.style.display = "block";
-  entries.forEach(([domain, text]) => {
-    const div = document.createElement("div");
-    div.className = "comment-item";
-    div.innerHTML = `
-      <div class="comment-domain">${DOMAIN_LABEL[domain.toLowerCase()] || domain}</div>
-      <div class="comment-text"></div>
-    `;
-    // textContent pour échapper tout HTML dans les commentaires libres
-    div.querySelector(".comment-text").textContent = text;
-    list.appendChild(div);
-  });
-}
+        const hidden = section.style.display === "none";
+        section.style.display = hidden ? "block" : "none";
+        btn.textContent = hidden ? "Masquer les items" : "Afficher les items";
+      }
 
-/* =========================================================
-   RENDU : ITEMS DÉTAILLÉS (jointure responses + reference)
-   ========================================================= */
-function renderRawItems(responses, formType) {
-  const tbody = document.getElementById("raw-body");
-  tbody.innerHTML = "";
+      function copyResume() {
+        const patient = REPORT_DATA.patient || {};
+        const fullName = [patient.prenom, patient.nom]
+          .filter(Boolean)
+          .join(" ");
 
-  const refForm = (REFERENCE && REFERENCE[formType] && REFERENCE[formType].questions) || {};
+        const lines = [
+          `PROFIL SENSORIEL – ${fullName || "Patient"}`,
+          `Évaluation du ${formatDate(patient.evaluation_date)} | Âge : ${getAgeLabel(patient)}`,
+          "",
+          "QUADRANTS (écarts-types)",
+        ];
 
-  const ids = Object.keys(responses || {}).sort((a, b) => Number(a) - Number(b));
+        const { order, code, label } = CONFIG.quadrants;
+        order.forEach((key) => {
+          const q = REPORT_DATA.quadrants?.[key];
+          if (!q) return;
+          const sig = Math.abs(q.z) >= 2 ? "  ← significatif" : "";
+          lines.push(
+            `  ${label[key].padEnd(14)} (${code[key]}) : ${fmtDS(q.z)}${sig}`,
+          );
+        });
 
-  if (ids.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Aucune réponse disponible</td></tr>`;
-    return;
-  }
+        lines.push("", "DOMAINES (écarts-types)");
+        Object.entries(REPORT_DATA.domains || {}).forEach(([key, d]) => {
+          const l = getLabel(key, CONFIG.domains.label, key);
+          const sig = Math.abs(d.z) >= 2 ? "  ← significatif" : "";
+          lines.push(`  ${l.padEnd(18)} : ${fmtDS(d.z)}${sig}`);
+        });
 
-  ids.forEach(id => {
-    const val = responses[id];
-    const meta = refForm[id];
+        const comments = Object.entries(REPORT_DATA.comments || {}).filter(
+          ([, t]) => t && t.trim(),
+        );
+        if (comments.length) {
+          lines.push("", "COMMENTAIRES");
+          comments.forEach(([domain, text]) => {
+            const l = getLabel(domain, CONFIG.domains.label, domain);
+            lines.push(`  ${l} : ${text}`);
+          });
+        }
 
-    const domaineLabel = meta ? (meta.domaine_label || meta.domaine_sensoriel) : "—";
-    const quadrantKey = meta ? meta.quadrant : null;
-    const code = quadrantKey ? (QUADRANT_CODE[quadrantKey] || quadrantKey.toUpperCase()) : "";
-    const badge = code ? `<span class="q-badge q-${code}">${code}</span>` : "";
-    const label = meta ? meta.label : "(question introuvable dans la référence)";
-    const naFlag = (meta && meta.pour_calcul === false) ? ` <span class="na-flag">(hors calcul)</span>` : "";
+        const text = lines.join("\n");
+        navigator.clipboard
+          .writeText(text)
+          .then(showToast)
+          .catch(() => {
+            // Fallback: prompt with selectable text
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            textarea.remove();
+            showToast();
+          });
+      }
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${id}</td>
-      <td>${domaineLabel}</td>
-      <td>${badge}</td>
-      <td>${label}${naFlag}</td>
-      <td>${val}</td>`;
-    tbody.appendChild(tr);
-  });
-}
+      function showToast() {
+        const toast = document.getElementById("toast");
+        if (!toast) return;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2500);
+      }
 
-/* =========================================================
-   INTERACTIONS
-   ========================================================= */
-function toggleRaw() {
-  const s = document.getElementById("raw-section");
-  const btn = document.getElementById("toggle-raw-btn");
-  const hidden = s.style.display === "none";
-  s.style.display = hidden ? "block" : "none";
-  btn.textContent = hidden ? "Masquer les items" : "Afficher les items";
-}
+      /* ===================================================================
+       INIT
+       =================================================================== */
+      function init() {
+        const data = REPORT_DATA;
+        const patient = data.patient || {};
 
-function copyResume() {
-  const p = REPORT_DATA.patient || {};
-  const fullName = [p.prenom, p.nom].filter(Boolean).join(" ");
+        renderHeader(patient);
+        renderQuadrants(data.quadrants || {});
+        renderBarTable("domain-body", data.domains, CONFIG.domains.label);
 
-  const lines = [
-    `PROFIL SENSORIEL – ${fullName || "Patient"}`,
-    `Évaluation du ${formatDate(p.evaluation_date)} | Âge : ${p.age ?? "—"} ans | ${ageLabel(p)}`,
-    "",
-    "QUADRANTS (écarts-types)"
-  ];
+        // School components
+        const composantes = data.composantes_scolaires;
+        if (composantes && Object.keys(composantes).length > 0) {
+          document.getElementById("composantes-section").style.display =
+            "block";
+          renderBarTable(
+            "composantes-body",
+            composantes,
+            CONFIG.schoolComponents.label,
+            "Composante ",
+          );
+        }
 
-  const order = ["recherche", "evitement", "sensibilite", "enregistrement"];
-  order.forEach(key => {
-    const q = (REPORT_DATA.quadrants || {})[key];
-    if (!q) return;
-    const code = QUADRANT_CODE[key];
-    const label = QUADRANT_LABEL[key].padEnd(14, " ");
-    const sig = Math.abs(q.z) >= 2 ? "  ← significatif" : "";
-    lines.push(`  ${label} (${code}) : ${fmtDS(q.z)}${sig}`);
-  });
+        renderComments(data.comments);
+        renderRawItems(data.responses, patient.form_type);
+      }
 
-  lines.push("", "DOMAINES (écarts-types)");
-  Object.entries(REPORT_DATA.domains || {}).forEach(([key, d]) => {
-    const label = (DOMAIN_LABEL[key] || key).padEnd(18, " ");
-    const sig = Math.abs(d.z) >= 2 ? "  ← significatif" : "";
-    lines.push(`  ${label} : ${fmtDS(d.z)}${sig}`);
-  });
+      // Expose functions to global scope
+      window.copyResume = copyResume;
+      window.toggleRaw = toggleRaw;
 
-  const comments = Object.entries(REPORT_DATA.comments || {}).filter(([, t]) => t && t.trim());
-  if (comments.length) {
-    lines.push("", "COMMENTAIRES");
-    comments.forEach(([domain, text]) => {
-      lines.push(`  ${DOMAIN_LABEL[domain.toLowerCase()] || domain} : ${text}`);
-    });
-  }
-
-  const text = lines.join("\n");
-  navigator.clipboard.writeText(text)
-    .then(showToast)
-    .catch(() => { prompt("Copier ce texte :", text); });
-}
-
-function showToast() {
-  const t = document.getElementById("toast");
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2500);
-}
-
-/* =========================================================
-   INITIALISATION
-   ========================================================= */
-function init() {
-  const data = REPORT_DATA;
-
-  renderHeader(data.patient || {});
-  renderQuadrants(data.quadrants || {});
-
-  renderBarTable(
-    document.getElementById("domain-body"),
-    data.domains,
-    DOMAIN_LABEL
-  );
-
-  const composantes = data.composantes_scolaires;
-  if (composantes && Object.keys(composantes).length > 0) {
-    document.getElementById("composantes-section").style.display = "block";
-    renderBarTable(
-      document.getElementById("composantes-body"),
-      composantes,
-      COMPOSANTE_LABEL,
-      "Composante "
-    );
-  }
-
-  renderComments(data.comments);
-  renderRawItems(data.responses, (data.patient || {}).form_type);
-}
-
-init();
-</script>
-</body>
+      // Run
+      init();
+    </script>
+  </body>
 </html>

@@ -1,8 +1,10 @@
+#reporting\report.py
+
 import json
-from pprint import pprint
+#from pprint import pprint
 from pathlib import Path
 from datetime import datetime
-from reporting.generate_html import generate_html_report  # Nouvel import
+from reporting.generate_html import generate_html_report
 
 """
 Export du résultat final de scoring vers report.json et HTML.
@@ -77,7 +79,7 @@ def export_report(report: dict, patient: dict, output_dir="data/report", generat
 def _export_json(report: dict, patient: dict, output_dir: str) -> Path:
     """Sauvegarde le rapport en JSON."""
     filename = build_report_filename(patient, "json")
-    path = Path(output_dir) / filename
+    path = Path(output_dir) / "json" / filename
     path.parent.mkdir(parents=True, exist_ok=True)
     
     path.write_text(
@@ -88,7 +90,7 @@ def _export_json(report: dict, patient: dict, output_dir: str) -> Path:
     print(f"✓ JSON exported: {path}")
     return path
 
-def _export_html(report: dict, patient: dict, output_dir: str) -> Path:
+def _export_html(report: dict, patient: dict, output_dir: str) -> Path | None:
     """Sauvegarde le rapport en HTML."""
     # Charger la référence
     reference_path = Path("data/reference/reference.json")

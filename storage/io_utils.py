@@ -1,177 +1,80 @@
+# storage/io_utils.py
+
 import json
 from pathlib import Path
-from datetime import datetime
-from storage.data_fingerprint import json_hash #dataframe_hash,
-from storage.state import load_state, save_state
+from typing import List #, Optional
+from storage.last_seen import update_last_seen
+
+#from datetime import datetime
+#from storage.data_fingerprint import json_hash
+#from storage.state import load_state, save_state
 
 RAW_DIR = Path("data/raw")
-MAPPED_DIR = Path("data/mapped")
-SCORED_DIR = Path("data/scored")
 
-
-def save_scored_json(data: dict, form_name: str):
+def save_raw_json(raw: dict, form_name: str, full_refresh: bool = False):
     """
-    Sauvegarde les données scored dans data/mapped/.
-
-    Args:
-        data: dict (scored output du pipeline)
-        form_name: str (nom du formulaire)
+    Sauvegarde les données brutes avec suivi des derniers IDs.
     """
-
-    # =========================================================
-    # 1. création dossier si besoin
-    # =========================================================
-    SCORED_DIR.mkdir(parents=True, exist_ok=True)
-
-    # =========================================================
-    # 2. timestamp
-    # =========================================================
-    #timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
-    # =========================================================
-    # 3. nom de fichier
-    # =========================================================
-    filename = f"{form_name}.json" #_{timestamp}.json"
-    path = SCORED_DIR / filename
-
-    # =========================================================
-    # 4. sauvegarde JSON
-    # =========================================================
-    path.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2),
-        encoding="utf-8"
-    )
-
-    print(f"💾 SCORED JSON sauvegardé : {path}")
-
-    return path
-
-def save_mapped_json(data: dict, form_name: str):
-    """
-    Sauvegarde les données mappées dans data/mapped/.
-
-    Args:
-        data: dict (mapped output du pipeline)
-        form_name: str (nom du formulaire)
-    """
-
-    # =========================================================
-    # 1. création dossier si besoin
-    # =========================================================
-    MAPPED_DIR.mkdir(parents=True, exist_ok=True)
-
-    # =========================================================
-    # 2. timestamp
-    # =========================================================
-    #timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
-    # =========================================================
-    # 3. nom de fichier
-    # =========================================================
-    filename = f"{form_name}.json" #_{timestamp}.json"
-    path = MAPPED_DIR / filename
-
-    # =========================================================
-    # 4. sauvegarde JSON
-    # =========================================================
-    path.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2),
-        encoding="utf-8"
-    )
-
-    print(f"💾 MAPPED JSON sauvegardé : {path}")
-
-    return path
-
-def normalize_raw(raw: dict) -> dict:
-
-    normalized = {
-        "submissions": []
-    }
-
-    for sub in raw.get("submissions", []):
-
-        cleaned_sub = {
-            "id": sub.get("id"),
-            "formId": sub.get("formId"),
-            "submittedAt": sub.get("submittedAt"),
-            "responses": []
-        }
-
-        for r in sub.get("responses", []):
-
-            cleaned_sub["responses"].append({
-                "questionId": r.get("questionId"),
-                "answer": r.get("answer")
-            })
-
-        # IMPORTANT: tri stable des responses
-        cleaned_sub["responses"] = sorted(
-            cleaned_sub["responses"],
-            key=lambda x: x["questionId"]
-        )
-
-        normalized["submissions"].append(cleaned_sub)
-
-    # IMPORTANT: tri stable des submissions aussi
-    normalized["submissions"] = sorted(
-        normalized["submissions"],
-        key=lambda x: x["id"]
-    )
-
-    return normalized
-
-def save_raw_json(raw, form_name: str, full_refresh: bool = False):
     RAW_DIR.mkdir(parents=True, exist_ok=True)
-
-    current_hash = json_hash(normalize_raw(raw))
-
-    state = load_state()
-    last_hash = state.get(form_name)
-
-    # =========================================================
-    # FULL REFRESH → ignore hash
-    # =========================================================
-    if not full_refresh and last_hash == current_hash:
-        print(f"\n⏭️  {form_name} inchangé → skip RAW")
-        return None
-
-    # =========================================================
-    #  NOMS DE FICHIERS
-    # =========================================================
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
-    file_last = RAW_DIR / f"{form_name}.json"
-    file_archived = RAW_DIR / f"{form_name}_{timestamp}.json"
-
-    # =========================================================
-    # 1. ARCHIVE (timestamp)
-    # =========================================================
-    file_archived.write_text(
-        json.dumps(raw, ensure_ascii=False, indent=2),
-        encoding="utf-8"
-    )
-
-    # =========================================================
-    # 2. LAST (overwrite)
-    # =========================================================
-    file_last.write_text(
-        json.dumps(raw, ensure_ascii=False, indent=2),
-        encoding="utf-8"
-    )
-    # =========================================================
-    # UPDATE STATE
-    # =========================================================
-    state[form_name] = current_hash
-    save_state(state)
-
-    print(f"💾 RAW JSON sauvegardé : {file_last}")
-    print(f"   - archive : {file_archived}")
-    print(f"   - last    : {file_last}")
     
-    print("\n=== HASH DEBUG ===")
-    print("FORM:", form_name)
-    print("CURRENT:", current_hash)
-    print("LAST:", last_hash)
-    print("==================\n")
-    return file_last
+    submissions = raw.get("submissions", [])
+    
+    if not submissions:
+        print(f"⚠️ Aucune soumission pour {form_name}")
+        return None
+    
+    # Lire le fichier existant
+    file_path = RAW_DIR / f"{form_name}.json"
+    existing_data = {"submissions": []}
+    
+    if file_path.exists() and not full_refresh:
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                existing_data = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            pass
+    
+    # Récupérer les IDs existants
+    existing_ids = {s.get("id") for s in existing_data.get("submissions", [])}
+    
+    # Ajouter les nouvelles soumissions (éviter les doublons)
+    new_count = 0
+    for sub in submissions:
+        sub_id = sub.get("id")
+        if sub_id and sub_id not in existing_ids:
+            existing_data["submissions"].append(sub)
+            new_count += 1
+    
+    # Sauvegarder
+    file_path.write_text(
+        json.dumps(existing_data, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+    
+    # Mettre à jour le dernier ID vu
+    if submissions:
+        last_sub = submissions[-1]  # Dernière soumission (la plus récente)
+        last_id = last_sub.get("id")
+        submitted_at = last_sub.get("submittedAt")
+        if last_id:
+            update_last_seen(form_name, last_id, submitted_at)
+    
+    print(f"💾 {form_name} sauvegardé")
+    print(f"   - Nouvelles: {new_count}")
+    print(f"   - Total: {len(existing_data['submissions'])}")
+    
+    return file_path
+
+def load_cached_submissions(form_name: str) -> List[dict]:
+    """Charge toutes les soumissions depuis le cache."""
+    file_path = RAW_DIR / f"{form_name}.json"
+    
+    if not file_path.exists():
+        return []
+    
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data.get("submissions", [])
+    except (OSError, json.JSONDecodeError):
+        return []

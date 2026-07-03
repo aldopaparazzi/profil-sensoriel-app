@@ -1,0 +1,328 @@
+{
+  "questions": {
+    "1": {
+      "label": "a besoin d’une routine pour rester apaisé(e) ou calme.",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement GLOBAL de l’information",
+      "pour_calcul": true
+    },
+    "2": {
+      "label": "agit d’une façon qui perturbe l’emploi du temps et les projets de la famille.",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement GLOBAL de l’information",
+      "pour_calcul": true
+    },
+    "3": {
+      "label": "ne veut pas jouer lorsqu’il/elle se trouve parmi d’autres enfants.",
+      "quadrant": "evitement",
+      "domaine_sensoriel": "Traitement GLOBAL de l’information",
+      "pour_calcul": true
+    },
+    "4": {
+      "label": "prend plus de temps que les enfants de son âge à répondre aux questions ou à réagir aux actions.",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement GLOBAL de l’information",
+      "pour_calcul": true
+    },
+    "5": {
+      "label": "se retire ou isolé de certaines situations.",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement GLOBAL de l’information",
+      "pour_calcul": true
+    },
+    "6": {
+      "label": "a des habitudes de sommeil non prévisibles.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement GLOBAL de l’information",
+      "pour_calcul": true
+    },
+    "7": {
+      "label": "a des habitudes alimentaires non prévisibles.",
+      "quadrant": "evitement",
+      "domaine_sensoriel": "Traitement GLOBAL de l’information",
+      "pour_calcul": true
+    },
+    "8": {
+      "label": "a le sommeil léger.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement GLOBAL de l’information",
+      "pour_calcul": true
+    },
+    "9": {
+      "label": "manque les occasions de contact visuel avec moi au cours des interactions de tous les jours.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement GLOBAL de l’information",
+      "pour_calcul": true
+    },
+    "10": {
+      "label": "devient anxieux(se) face aux situations nouvelles.",
+      "quadrant": "evitement",
+      "domaine_sensoriel": "Traitement GLOBAL de l’information",
+      "pour_calcul": true
+    },
+    "11": {
+      "label": "n’est attentif(ve) que si je parle fort.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "pour_calcul": true
+    },
+    "12": {
+      "label": "n’est attentif(ve) que lorsque je le/la touche (alors que son audition est bonne).",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "pour_calcul": true
+    },
+    "13": {
+      "label": "sursaute au moindre bruit par rapport aux enfants de son âge (par exemple, chien qui aboie, enfants qui crient).",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "pour_calcul": true
+    },
+    "14": {
+      "label": "est distrait(e) dans un environnement bruyant.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "pour_calcul": true
+    },
+    "15": {
+      "label": "ignore les sons, y compris ma voix.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "pour_calcul": true
+    },
+    "16": {
+      "label": "devient perturbé(e) ou irritable dans des environnements bruyants ou essaie de les fuir.",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "pour_calcul": true
+    },
+    "17": {
+      "label": "met beaucoup de temps à réagir à l’appel de son prénom.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information AUDITIVE",
+      "pour_calcul": true
+    },
+    "18": {
+      "label": "aime regarder les objets qui bougent ou qui tournoient (par exemple, machine à laver, toupies, jouets avec des roues).",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "pour_calcul": true
+    },
+    "19": {
+      "label": "aime regarder les objets qui brillent.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "pour_calcul": true
+    },
+    "20": {
+      "label": "est attiré(e) par les écrans (télévision, tablette ou smartphone) comportant des images aux couleurs vives et brillantes ou animées avec un rythme rapide.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "pour_calcul": true
+    },
+    "21": {
+      "label": "réagit vivement aux lumières fortes ou inattendues (par exemple, lorsqu’elle/il sort à l’extérieur).",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "pour_calcul": true
+    },
+    "22": {
+      "label": "est gêné(e) par les lumières vives (par exemple, se cache de la lumière du soleil qui passe par la fenêtre de la voiture).",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "pour_calcul": true
+    },
+    "23": {
+      "label": "est davantage incommodé(e) par des lumières vives que les enfants de son âge.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "pour_calcul": true
+    },
+    "24": {
+      "label": "repousse les jouets aux couleurs vives.*",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "pour_calcul": false
+    },
+    "25": {
+      "label": "ne réagit pas à sa propre image/son reflet dans le miroir.*",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information VISUELLE",
+      "pour_calcul": false
+    },
+    "26": {
+      "label": "devient irritable ou perturbé(e) lorsqu’on lui coupe les ongles.",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information TACTILE",
+      "pour_calcul": true
+    },
+    "27": {
+      "label": "évite les caillns.",
+      "quadrant": "evitement",
+      "domaine_sensoriel": "Traitement de l’information TACTILE",
+      "pour_calcul": true
+    },
+    "28": {
+      "label": "est irritable ou perturbé(e) lorsqu’il/elle passe successivement dans des endroits comportant de grands écarts de température (par exemple, contraste chaud/froid en sortant d’un bain).",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information TACTILE",
+      "pour_calcul": true
+    },
+    "29": {
+      "label": "évite le contact ou se dégage rapidement des surfaces rugueuses, froides ou collantes (par exemple, tapis, plan de travail).",
+      "quadrant": "evitement",
+      "domaine_sensoriel": "Traitement de l’information TACTILE",
+      "pour_calcul": true
+    },
+    "30": {
+      "label": "se cogne aux choses ou aux gens, ne remarquant pas ce qui se trouve sur son chemin.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information TACTILE",
+      "pour_calcul": true
+    },
+    "31": {
+      "label": "tire sur les vêtements qu’elle/il porte ou résiste à enfiler des vêtements.",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information TACTILE",
+      "pour_calcul": true
+    },
+    "32": {
+      "label": "aime faire des éclaboussures dans le bain ou à la piscine.*",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information TACTILE",
+      "pour_calcul": false
+    },
+    "33": {
+      "label": "devient contrarié(e) ou irritable lorsque ses vêtements, ses mains ou son visage sont sales.",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information TACTILE",
+      "pour_calcul": false
+    },
+    "34": {
+      "label": "devient anxieux(se) lorsqu’il/elle marche ou rampe ou se déplace à quatre pattes sur certaines surfaces (par exemple, herbe, sable, tapis, carrelage).*",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information TACTILE",
+      "pour_calcul": false
+    },
+    "35": {
+      "label": "évite ou se dégage d’un contact ou d’un toucher inattendu.*",
+      "quadrant": "evitement",
+      "domaine_sensoriel": "Traitement de l’information TACTILE",
+      "pour_calcul": false
+    },
+    "36": {
+      "label": "aime l’activité physique (par exemple, sautiller, être soulevé(e) en l’air).",
+      "quadrant": "recherche",
+      "domaine_sensoriel": "Traitement de l’information relative au MOUVEMENT",
+      "pour_calcul": true
+    },
+    "37": {
+      "label": "aime les activités rythmiques (par exemple, balancements, bercements, promenades en voiture).",
+      "quadrant": "recherche",
+      "domaine_sensoriel": "Traitement de l’information relative au MOUVEMENT",
+      "pour_calcul": true
+    },
+    "38": {
+      "label": "prend des risques en bougeant ou en grimpant.",
+      "quadrant": "recherche",
+      "domaine_sensoriel": "Traitement de l’information relative au MOUVEMENT",
+      "pour_calcul": true
+    },
+    "39": {
+      "label": "devient irritable ou perturbé(e) lorsqu’on le/la couche sur le dos (par exemple, pour changer sa couche).",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information relative au MOUVEMENT",
+      "pour_calcul": true
+    },
+    "40": {
+      "label": "semble maladroit(e) ou sujet(te) aux accidents (par exemple, tombe ou se cogne).",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information relative au MOUVEMENT",
+      "pour_calcul": true
+    },
+    "41": {
+      "label": "devient irritable lorsqu’on le/la déplace (par exemple, lorsqu’on le/la promène, lorsqu’il/elle passe des bras d’une personne à ceux d’une autre).*",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information relative au MOUVEMENT",
+      "pour_calcul": true
+    },
+    "42": {
+      "label": "manifeste une aversion claire pour toute nourriture, à l’exception de quelques rares aliments de son choix.",
+      "quadrant": "evitement",
+      "domaine_sensoriel": "Traitement de l’information SENSORIELLE ORALE",
+      "pour_calcul": true
+    },
+    "43": {
+      "label": "bave.",
+      "quadrant": "NA",
+      "domaine_sensoriel": "Traitement de l’information SENSORIELLE ORALE",
+      "pour_calcul": true
+    },
+    "44": {
+      "label": "préfère une certaine texture d’aliments (par exemple, moelleux, croquant).",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information SENSORIELLE ORALE",
+      "pour_calcul": true
+    },
+    "45": {
+      "label": "boit pour se calmer.",
+      "quadrant": "enregistrement",
+      "domaine_sensoriel": "Traitement de l’information SENSORIELLE ORALE",
+      "pour_calcul": true
+    },
+    "46": {
+      "label": "a des haut-le-cœur avec de la nourriture ou des boissons.",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information SENSORIELLE ORALE",
+      "pour_calcul": true
+    },
+    "47": {
+      "label": "garde la nourriture dans ses joues avant de l’avaler.",
+      "quadrant": "NA",
+      "domaine_sensoriel": "Traitement de l’information SENSORIELLE ORALE",
+      "pour_calcul": true
+    },
+    "48": {
+      "label": "éprouve des difficultés à passer aux aliments solides (sevrage).",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Traitement de l’information SENSORIELLE ORALE",
+      "pour_calcul": true
+    },
+    "49": {
+      "label": "fait des crises de colère.",
+      "quadrant": "evitement",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle",
+      "pour_calcul": true
+    },
+    "50": {
+      "label": "est « collant(e) ».",
+      "quadrant": "NA",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle",
+      "pour_calcul": true
+    },
+    "51": {
+      "label": "ne reste calme que lorsqu’il/elle est pris(e) dans les bras.",
+      "quadrant": "NA",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle",
+      "pour_calcul": true
+    },
+    "52": {
+      "label": "est difficile ou irritable.",
+      "quadrant": "sensibilite",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle",
+      "pour_calcul": true
+    },
+    "53": {
+      "label": "est gêné(e) ou perturbé(e) par les nouveaux environnements.",
+      "quadrant": "evitement",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle",
+      "pour_calcul": true
+    },
+    "54": {
+      "label": "devient si perturbé(e) ou anxieux(se) dans les nouveaux environnements qu’il est difficile de le/la calmer.",
+      "quadrant": "evitement",
+      "domaine_sensoriel": "Réponses COMPORTEMENTALES relatives au traitement de l’information sensorielle",
+      "pour_calcul": true
+    }
+  }
+}

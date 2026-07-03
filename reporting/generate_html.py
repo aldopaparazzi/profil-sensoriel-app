@@ -4,7 +4,7 @@
 
 import json
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any #, Optional
 
 TEMPLATE_PATH = Path(__file__).resolve().parent / "template_resultat.html"
 

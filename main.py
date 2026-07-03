@@ -8,21 +8,23 @@
 # 5. Scoring
 # 6. Report
 
-import json
-
+# import json
 # from pprint import pprint
+# from pathlib import Path
+
 from config.settings import load_config, replace_tally_token
-from ingestion.fetch_tally import fetch_tally, TallyAPIError
-from storage.io_utils import save_raw_json
+from storage.io_utils import save_raw_json, load_cached_submissions
+from storage.last_seen import get_last_seen
 from pipeline.validate import filter_empty_submissions
 from pipeline.split import split_dataset
 from pipeline.mapping import map_submission, enrich_patient
 from pipeline.scoring import compute_all_scores  # compute_domain_scores
 from reporting.report import build_final_report, export_report
 from core.age import load_age_bands
+from utils.json_cache import load_json_cached
+from ingestion.fetch_tally import fetch_new_submissions, fetch_all_submissions_with_pagination, TallyAPIError
 
-
-def main():
+def main(force_refresh: bool = False, use_cached=True):
     print("\n=== PROFIL SENSORIEL V1 ===\n")
 
     config = load_config()
@@ -39,28 +41,65 @@ def main():
 
     token = config["tally_token"]
 
-    # 1. FETCH
     print("1.📥 Récupération des données sur Tally")
+
 
     for form_name, form_id in config["forms"].items():
         try:
-            raw = fetch_tally(form_id, token)
+            if force_refresh:
+                # Mode refresh : tout recharger
+                print(f"🔄 Refresh forcé pour {form_name}")
+                raw = fetch_all_submissions_with_pagination(form_id, token)
+                save_raw_json(raw, form_name, full_refresh=True)
+                context["raw"][form_name] = raw
+                print(f"✔ {form_name} (refresh complet)")
+            else:
+                # Mode incrémental : uniquement les nouvelles
+                last_seen = get_last_seen(form_name)
+                after_id = last_seen.get("last_id") if last_seen else None
+                
+                if after_id:
+                    print(f"📥 {form_name}: après ID {after_id[:8]}...")
+                    raw = fetch_new_submissions(form_id, token, after_id)
+                else:
+                    print(f"📥 {form_name}: premier chargement (aucun ID connu)")
+                    raw = fetch_all_submissions_with_pagination(form_id, token)
+                
+                submissions = raw.get("submissions", [])
+                
+                if submissions:
+                    save_raw_json(raw, form_name)
+                    context["raw"][form_name] = raw
+                    print(f"✔ {form_name} ({len(submissions)} nouvelles)")
+                else:
+                    print(f"⏭️ {form_name}: aucune nouvelle soumission")
+                    # Charger depuis le cache pour le traitement
+                    cached = load_cached_submissions(form_name)
+                    if cached:
+                        context["raw"][form_name] = {"submissions": cached}
+                        print(f"   📦 Utilisation du cache ({len(cached)} soumissions)")
+                    else:
+                        print(f"   ⚠️ Aucune donnée disponible pour {form_name}")
+
         except TallyAPIError as e:
             if e.status_code == 401:
                 token = replace_tally_token()
-                raw = fetch_tally(form_id, token)
+                # Réessayer avec nouveau token
+                try:
+                    raw = fetch_all_submissions_with_pagination(form_id, token)
+                    save_raw_json(raw, form_name, full_refresh=True)
+                    context["raw"][form_name] = raw
+                    print(f"✔ {form_name} (après renouvellement token)")
+                except Exception as e2:
+                    context["errors"].append(str(e2))
             else:
                 context["errors"].append(str(e))
-                continue
-
-        save_raw_json(raw, form_name)
-        context["raw"][form_name] = raw
-
-        print(f"✔ {form_name}")
+                print(f"✗ Erreur pour {form_name}: {e}")
 
     if not context["raw"]:
-        print("⛔ aucun data")
+        print("⛔ aucun data à traiter")
         return
+
 
     # 2. VALIDATE
     print("\n2.🧹 Validation")
@@ -75,9 +114,12 @@ def main():
     # 4. MAP + SCORE + REPORT
     print("\n4.🧠 Mapping + Scoring + Report")
 
+    '''
     reference = json.load(open("data/reference/reference.json", encoding="utf-8"))
-
     normes = json.load(open("data/reference/normes.json", encoding="utf-8"))
+    '''
+    reference = load_json_cached("data/reference/reference.json")
+    normes = load_json_cached("data/reference/normes.json")
 
     for form_name, submissions in context["split"].items():
         form_ref = reference.get(form_name)
@@ -109,7 +151,14 @@ def main():
             )
 
     print("\n=== DONE ===")
+    return len(submissions)
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    force_refresh = "--refresh" in sys.argv or "-r" in sys.argv
+    main(force_refresh=force_refresh)
+
+def import_forms(force_refresh: bool = False,):
+    n = main(force_refresh)
+    return n

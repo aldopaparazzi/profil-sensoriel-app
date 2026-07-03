@@ -1,7 +1,9 @@
 # core\age.py
 from dateutil import parser
 import json
+from functools import lru_cache
 
+@lru_cache(maxsize=1)
 def load_age_bands():
     with open("data/reference/ages.json", "r", encoding="utf-8") as f:
         return json.load(f)
