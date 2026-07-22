@@ -1,0 +1,416 @@
+{
+  "recherche": {
+    "plus": {
+      "objectif": "Augmenter l'intensité des expériences sensorielles dans les activités quotidiennes",
+      "items": {
+        "visuel": [
+          "Sélectionnez des couleurs vives ou des formes diverses et marquées.",
+          "Utilisez un éclairage lumineux.",
+          "Recherchez un environnement avec de nombreux intérêts et activités visuelles.",
+          "Variez la place de l'enfant dans la salle de classe.",
+          "Parlez à l'enfant de ce que vous voyez et demandez-lui ce qu'il voit."
+        ],
+        "auditif": [
+          "Intégrez des éléments sonores dans les activités quotidiennes (exemples: fredonner/chanter, jouez de la musique) pendant que vous accomplissez vos tâches.",
+          "Utilisez des sons ambiants.",
+          "Trouvez/créez des environnements de travail et de loisirs dans lesquels faire du bruit est acceptable ou dans lesquels l'environnement est rempli de stimuli sonores intéressants.",
+          "Apportez des jouets qui font des sons lorsque l'on joue avec. Parlez avec l'enfant de ce que vous entendez; demandez-lui ce qu'il entend."
+        ],
+        "toucher": [
+          "Choisissez des activités qui favorisent le toucher avec les autres (exemples danse, massage) ou avec l'environnement (exemples: jardinage, cuisine).",
+          "Choisissez des vêtements, des meubles ou des ustensiles qui présentent une variété de textures.",
+          "Ajoutez des accessoires tels que des serre-têtes, des bracelets ou des ceintures.",
+          "Faites marcher l'enfant pieds nus.",
+          "Utilisez des tapis, serviettes, couvertures aux textures variées.",
+          "Utilisez des lotions, des crèmes, des savons texturés."
+        ],
+        "mouvement": [
+          "Faites des activités qui intègrent des déplacements (exemple: dans un groupe, demandez à l'enfant de distribuer des choses, de pousser les chaises plus loin).",
+          "Aidez l'enfant à participer à une activité physique avant une tâche qui nécessite du raisonnement (exemple: distribuer des livres dans la classe).",
+          "Sélectionnez des activités qui incluent de se pencher et/ou de changer le niveau de rapidité.",
+          "Placez des jouets dans des endroits difficiles d'accès pour favoriser le fait de devoir escalader ou ramper, etc."
+        ],
+        "oralite/gout/odorat": [
+          "L'enfant peut mâcher des chewing-gums ou sucer des bonbons à la menthe lorsque vous le sentez agité.",
+          "Utilisez des savons, des nettoyants parfumés etc.",
+          "Préparez des sauces épicées, chaudes, etc., et mettez-les à disposition lors des repas.",
+          "Ajoutez de nouvelles saveurs et goûts à la nourriture.",
+          "Parfumez l'oreiller d'une odeur qui aide à s'endormir.",
+          "Parlez à l'enfant de ce qu'il sent."
+        ],
+        "position_du_corps": [
+          "Ajoutez des bouées aux membres de l'enfant pendant les jeux qui l'engagent dans une activité.",
+          "Ajoutez des lests aux chevilles de l'enfant quand vous partez vous promener.",
+          "Demandez à l'enfant de porter des choses lors des temps de transition (exemple: pour aller à la voiture)."
+        ],
+        "general": [
+          "Cherchez des activités de groupe.",
+          "Trouvez des occasions qui permettent de s'exprimer.",
+          "Intégrez de la nouveauté dans la routine quotidienne de l'enfant.",
+          "Offrez à l'enfant l'opportunité d'effectuer une même tâche de différentes manières.",
+          "Variez les routines."
+        ]
+      }
+    },
+    "moins": {
+      "objectif": "Augmenter la variété des expériences sensorielles dans les activités quotidiennes",
+      "items": {
+        "visuel": [
+          "Mettez des décorations colorées dans la chambre de l'enfant.",
+          "Mettez la table (ou le bureau) de l'enfant face au tableau d'affichage.",
+          "Réorganisez les meubles pour fournir de nouveaux contextes visuels à explorer.",
+          "Visitez les musées et parlez de tout ce qui est exposé.",
+          "Variez la disposition des sièges pendant les repas ou à l'école pour fournir différentes perspectives visuelles."
+        ],
+        "auditif": [
+          "Laissez l'enfant écouter de la musique avec des écouteurs de sorte qu'il ne dérange pas les autres.",
+          "Assistez à des spectacles musicaux.",
+          "Lisez à voix haute.",
+          "Encouragez l'enfant à écouter des livres audio.",
+          "Mettez différentes musiques pendant les routines quotidiennes.",
+          "Gardez les portes ouvertes pour favoriser la présence d'un bruit ambiant."
+        ],
+        "toucher": [
+          "Pour l'hygiène, adoptez des gants de toilette, des éponges luffa ou naturelles, des serviettes hautement texturées.",
+          "Ajoutez des textures sur les objets utilisés lors des apprentissages et des jeux, y compris sur les outils scripteurs.",
+          "Fournissez des vêtements composés d'une variété de textures.",
+          "Installez des aires de jeux composées de différentes textures."
+        ],
+        "mouvement": [
+          "Adoptez différentes activités qui favorisent les déplacements (exemples: un sport, un jeu d'équipe).",
+          "Trouvez de nouvelles façons de jouer à la bagarre.",
+          "Envoyez l'enfant faire des missions utiles à la classe pendant le temps scolaire.",
+          "Placez les objets dans différents endroits pendant les tâches quotidiennes, de sorte que l'enfant se déplace pendant les tâches.",
+          "Demandez à l'enfant d'aider à mettre la table."
+        ],
+        "oralite/gout/odorat": [
+          "Présentez de nouveaux aliments et parlez de leur caractéristiques.",
+          "Intégrez des produits d'hygiène parfumés à votre quotidien.",
+          "Pensez à ajouter des bougies parfumées à votre routine quotidienne.",
+          "Demandez à l'enfant de reconnaître les aliments à leur odeur.",
+          "Fournissez du matériel et des feutres parfumés pour les activités de dessin et d'écriture."
+        ],
+        "position_du_corps": [
+          "Jouez à des jeux de danse et récréatifs sur une console de jeux qui nécessitent des mouvements très amples.",
+          "Inscrivez l'enfant à des cours d'arts martiaux ou de danse.",
+          "Attribuez à l'enfant le rôle d'enlever/de replacer des documents sur le tableau d'affichage à l'école."
+        ],
+        "general": [
+          "Variez la routine d'hygiène personnelle de l'enfant.",
+          "Envoyez l'enfant faire des missions dans toute la maison et dans toute la classe.",
+          "Jouez au parc sur des équipements de jeux différents.",
+          "Donnez à l'enfant des occasions de participer à des interactions sociales (exemples: activités de groupes, activités de jeux)."
+        ]
+      }
+    }
+  },
+  "evitement": {
+    "plus": {
+      "objectif": "Diminuer les expériences sensorielles dans les activités quotidiennes",
+      "items": {
+        "visuel": [
+          "Apprenez à l'enfant à fermer les yeux de temps à autre pour réduire les stimulations visuelles.",
+          "Utilisez des lunettes de soleil pour l'enfant.",
+          "Utilisez un éclairage faible ou naturel, voire l'obscurité, dans vos activités.",
+          "Réduisez l'encombrement (exemple: gardez les jouets ou rangez-les dans les espaces de jeu).",
+          "Permettez à l'enfant d'avoir un seul aliment à la fois dans son assiette."
+        ],
+        "auditif": [
+          "Diminuez les sons/ conversations ambiants (exemple: éteignez la télévision/ la radio).",
+          "Apprenez à l'enfant à se retirer dans un coin calme lorsqu'il a vraiment besoin de se concentrer.",
+          "Utilisez le bruit blanc ou des sons calmes, répétitifs pour noyer les sons distracteurs.",
+          "Fermez la porte.",
+          "Utilisez des bouchons d'oreilles pour l'enfant.",
+          "Limitez les longues périodes sans aucune occupation planifiée dans l'espace public.",
+          "Choisissez de partir aux périodes plus calmes (en dehors des heures de pointe) pour faire les courses.",
+          "Fournissez des instructions écrites ou des images pour compléter l'information verbale."
+        ],
+        "toucher": [
+          "Expliquez le besoin d'espace personnel aux autres personnes.",
+          "Sélectionnez des textures non irritantes et des styles qui ne seront pas lors des achats de vêtements.",
+          "Positionnez les ventilateurs/ aérations de façon à ce qu'ils ne soufflent pas directement sur l'enfant.",
+          "Donnez des gants à l'enfant lorsqu'il participe à des activités « salissantes ».",
+          "Réchauffez les lingettes avant de les utiliser pour nettoyer l'enfant.",
+          "Fournissez des sous-vêtements bien ajustés sans qu'ils ne soient trop « serrés » par endroits (exemple: sous-vêtements élastiques).",
+          "Utilisez de l'eau tiède pour l'hygiène personnelle."
+        ],
+        "mouvement": [
+          "Prenez les escaliers avec l'enfant quand cela est adapté (exemples: les ascenseurs, les escaliers roulants et la hauteur peuvent générer de l'inconfort).",
+          "Prenez vos dispositions pour que l'enfant puisse faire une pause, s'asseoir si besoin, lorsqu'il participe à une activité physique.",
+          "Intégrez des rituels et des actions à répéter dans les activités physiques.",
+          "Placez les objets fréquemment utilisés à portée de bras dans les armoires et dans les tiroirs, afin que l'enfant puisse éviter de se pencher ou de se hisser vers le haut pour les atteindre.",
+          "Utilisez des sièges ou des chaises afin que le bébé ou le jeune enfant n'ait pas besoin d'être porté tout le temps.",
+          "Utilisez une poussette qui offre la possibilité d'asseoir l'enfant droit."
+        ],
+        "oralite/gout/odorat": [
+          "Servez la nourriture en disposant les sauces et les vinaigrettes à part.",
+          "Utilisez des mouchoirs, savons, etc. non parfumés.",
+          "Permettez à l'enfant de choisir le restaurant lorsque vous sortez manger.",
+          "Retirez les désodorisants de la pièce."
+        ],
+        "position_du_corps": [
+          "Identifiez les places assises et les positions préférées de l'enfant pour les rendre disponibles facilement.",
+          "Établissez des routines stables pour se préparer.",
+          "Apprenez à l'enfant à s'asseoir pour enlever ou retirer son pantalon et/ou ses chaussures."
+        ],
+        "general": [
+          "Évitez les secteurs embouteillés, les foules et les horaires de forte fréquentation des lieux que vous visitez.",
+          "Maintenez de la régularité dans vos habitudes et essayez de réduire les changements.",
+          "Établissez des routines qui soient rassurantes et etayantes.",
+          "Trouvez des endroits calmes pour que votre enfant puisse s'isoler.",
+          "Encouragez les temps « calmes » ou les opportunités de faire des activités sédentaires.",
+          "Limitez l'exposition à d'importants groupes de personnes, trouvez des opportunités pour être en petits groupes ou pour interagir en situation duelle."
+        ]
+      }
+    },
+    "moins": {
+      "objectif": "Organiser les expériences sensorielles dans les activités quotidiennes",
+      "items": {
+        "visuel": [
+          "Réduisez les décorations de la chambre.",
+          "Disposez le bureau de l'enfant face à un mur/un coin.",
+          "Encouragez l'enfant à porter des lunettes de soleil.",
+          "Placez les vêtements en un seul endroit.",
+          "Utilisez des étagères et des armoires fermées pour stocker les jouets, afin de réduire l'encombrement.",
+          "Prévoyez des lumières douces et de faible intensité."
+        ],
+        "auditif": [
+          "Créez un temps calme dans vos routines quotidiennes.",
+          "Demandez à votre enfant quels sont les sons qui le distraient et ceux qui sont agréables pour faire son travail.",
+          "Utilisez un ventilateur pour créer un bruit blanc dans la pièce.",
+          "Fermez les fenêtres pour réduire les bruits de l'environnement.",
+          "Réduisez ou éliminez les stimulations auditives qui pourraient distraire l'enfant."
+        ],
+        "toucher": [
+          "Expliquez à l'enfant pourquoi vous ajoutez des couches de vêtements par mauvais temps.",
+          "Parlez d'espace physique personnel et de ce qui est acceptable à ce sujet dans chaque environnement social.",
+          "Utilisez de l'eau tiède pour les bains.",
+          "Servez des plats uniques ou des plats mijotés dans un seul contenant pour garder la texture et la température des aliments plus homogènes."
+        ],
+        "mouvement": [
+          "Créez des activités de loisirs qui incluent des pauses.",
+          "Observez les activités physiques afin d'identifier le niveau de risque acceptable.",
+          "Disposez des sièges de manière agréable/ confortable de façon à réduire le besoin de déplacement pendant les repas.",
+          "Créez des routines régulières de mouvements autour des tâches de la vie quotidienne."
+        ],
+        "oralite/gout/odorat": [
+          "Créez un journal alimentaire pour déterminer quels sont les aliments problématiques/ difficiles pour l'enfant.",
+          "Observez si les eaux de toilette de certaines personnes ou si certains savons sont associés à des changements de comportements de type comportement-défi.",
+          "Préparez l'enfant préalablement au goût de la nourriture, associez les goûts avec des images."
+        ],
+        "position_du_corps": [
+          "Créez un plan de routines à l'intérieur de la maison et de l'école avec des informations détaillées sur la place de l'enfant et sur ses responsabilités.",
+          "Inventez des jeux qui contiennent des schémas de mouvements attendus."
+        ],
+        "general": [
+          "Insérez de nombreuses pauses dans l'emploi du temps que vous créez.",
+          "Planifiez à l'avance des emplois du temps à domicile et à l'école et discutez à l'avance des changements pour gérer l'impulsivité.",
+          "Apprenez à l'enfant à méditer ou à employer des stratégies de relaxation et envoyez-lui des signaux pour qu'il les utilise.",
+          "Développez des routines pour les excursions que vous faites dans des lieux familiers."
+        ]
+      }
+    }
+  },
+  "sensibilite": {
+    "plus": {
+      "objectif": "Fournir des schémas structurés d'expérience sensorielle dans les activités quotidiennes",
+      "items": {
+        "visuel": [
+          "Apprenez à l'enfant l'utilisation de méthodes systématiques de recherche visuelle (exemples: de gauche à droite, du haut vers le bas).",
+          "Recouvrez ou masquez visuellement les informations non pertinentes.",
+          "Organisez les tiroirs, les placards, etc. de sorte que cela soit facile pour l'enfant d'y prendre ce qu'il cherche.",
+          "Éliminez les stimuli visuels en arrière-plan (exemple: disposez les objets de sorte qu'ils ne se répartissent que sur une seule couche).",
+          "Servez les aliments en les espaçant entre eux.",
+          "Otez de la pièce toutes les sources lumineuses à l'heure du coucher."
+        ],
+        "auditif": [
+          "Limitez la quantité d'informations/étapes dans les explications qui sont fournies à n'importe quel moment.",
+          "Réduisez le volume ou le nombre de stimuli auditifs.",
+          "Fournissez des instructions écrites ou des images pour accompagner les informations verbales.",
+          "Apprenez à l'enfant à demander à une autre personne de lui fournir des indices quand il semble qu'il perde le fil ou se déconcentre."
+        ],
+        "toucher": [
+          "Utilisez le toucher par pressions profondes plutôt qu'un toucher léger.",
+          "Faites porter à l'enfant des vêtements qui sont lourds ou bien ajustés.",
+          "Emmitouflez ou enveloppez votre enfant dans une couverture.",
+          "Utilisez de nombreuses couvertures ou des duvets lourds sur le lit.",
+          "Evitez que les aérations ou les ventilateurs ne soufflent sur l'enfant.",
+          "Prévoyez un espace de protection pour que l'enfant puisse jouer sans être facilement heurté par d'autres."
+        ],
+        "mouvement": [
+          "Utilisez les chaises à bascule pour leur effet calmant.",
+          "Limitez le nombre d'étapes à apprendre dans une nouvelle activité physique.",
+          "Sélectionnez des activités physiques qui permettent à l'enfant de se tenir droit et qui peuvent s'effectuer à vitesse régulière (exemple: vélo plutôt que des cours de karaté).",
+          "Utilisez une poussette qui permette d'être assis droit.",
+          "Créez une structure de siège qui soit confortable pour l'enfant lors des repas."
+        ],
+        "oralite/gout/odorat": [
+          "Identifiez les produits parfumés que l'enfant aime et favorisez leur utilisation.",
+          "Identifiez les arômes et les ingrédients que l'enfant préfère et trouvez un moyen de les incorporer dans vos repas quotidiens.",
+          "Introduisez de nouveaux aliments et nouvelles odeurs graduellement."
+        ],
+        "position_du_corps": [
+          "Assignez à l'enfant une place assise qui soit familière dans la salle de classe.",
+          "Encouragez l'enfant à pousser le caddie de courses au magasin ou les coffres-bibliothèques à roulettes à l'école.",
+          "Mettez à disposition des livres que l'enfant pourra placer sur ses genoux lors des repas et pendant le travail assis à l'école."
+        ],
+        "general": [
+          "Incorporez des pauses et des temps morts à l'emploi du temps.",
+          "Aidez l'enfant à décomposer les tâches en plus petites parties.",
+          "Apprenez à l'enfant à disposer le matériel dans un ordre séquentiel.",
+          "Notez les étapes d'une tâche à accomplir et demandez à l'enfant de les cocher au fur et à mesure qu'il les effectue.",
+          "Aidez l'enfant à établir un plan avant de commencer une tâche afin qu'il identifie les étapes ainsi que les éléments importants à examiner attentivement.",
+          "Établissez et maintenez des routines.",
+          "Rendez-vous dans les lieux dans lesquels les niveaux d'expériences sensorielles et leurs caractéristiques sont prévisibles (exemples: bibliothèques, musées)."
+        ]
+      }
+    },
+    "moins": {
+      "objectif": "Augmenter la sensibilité aux expériences sensorielles pendant les activités quotidiennes",
+      "items": {
+        "visuel": [
+          "Variez les couleurs ou les polices de caractère sur les fiches d'exercices.",
+          "Modifiez la position de l'enfant lors du change des couches afin qu'il puisse voir des choses différentes.",
+          "Déplacez les jouets et demandez à l'enfant de les retrouver.",
+          "Pointez du doigt des choses lorsque vous passez devant (exemples: les arbres, les fleurs, les bâtiments, les véhicules intéressants).",
+          "Fournissez des informations visuelles variées et imprévisibles."
+        ],
+        "auditif": [
+          "Changez le volume de la musique ou de la télévision.",
+          "Variez et répétez les consignes.",
+          "Essayez de demander à l'enfant de faire ses devoirs avec des bouchons d'oreilles ou un casque auditif.",
+          "Utilisez des jouets qui produisent des sons lorsque vous y jouez.",
+          "Inventez un jeu sonore ou un jeu d'actions avec l'eau, lors du bain."
+        ],
+        "toucher": [
+          "Sélectionnez des vêtements aux textures variées.",
+          "Choisissez des vêtements qui permettent de bouger facilement.",
+          "Fournissez une variété d'outils scripteurs de divers poids et/ou textures.",
+          "Variez les surfaces de jeu et nommez-les à mesure que l'enfant s'assoit/rampe/ marche dessus.",
+          "Rendez-vous dans un parc ou faites des sorties dans lesquels l'enfant peut toucher des objets et les nommer."
+        ],
+        "mouvement": [
+          "Inscrivez l'enfant à des activités de loisirs qui nécessitent l'apprentissage d'enchaînements nouveaux (exemples: karaté, danse).",
+          "Installez l'aire de jeu de sorte à favoriser de nouvelles manières d'y jouer.",
+          "Disposez les vêtements à différents endroits de la pièce pour que l'enfant se déplace pendant qu'il s'habille.",
+          "Demandez à l'enfant de s'asseoir sur un coussin lors des repas.",
+          "Encouragez les jeux de parcours d'obstacles."
+        ],
+        "oralite/gout/odorat": [
+          "Ajoutez des arômes aux aliments pour que l'enfant puisse différencier les goûts.",
+          "Dans des rayons de bougies/parfumerie ou chez des fleuristes, entraînez-vous à différencier les nuances des parfums.",
+          "Changez souvent de parfum de savon; demandez à l'enfant d'identifier la nouvelle odeur.",
+          "Commentez les choses que vous sentez dans l'environnement."
+        ],
+        "position_du_corps": [
+          "Jouez à des jeux qui nécessitent des changements fréquents de position du corps (exemples: au ballon-chasseur, à la balle au prisonnier ou au loup).",
+          "Donnez à l'enfant différentes surfaces sur lesquelles s'asseoir (exemples: tabourets, chaises plus hautes ou plus basses, coussins)."
+        ],
+        "general": [
+          "Discutez avec l'enfant des caractéristiques sensorielles lors des activités quotidiennes.",
+          "Changez l'endroit où l'enfant s'assoit au dîner ou en classe afin d'augmenter son attention à la vue de ces nouvelles perspectives.",
+          "Rendez-vous dans de nouveaux endroits et montrez les différentes caractéristiques sensorielles de cet environnement.",
+          "Trouvez des occasions d'explorer et de faire des activités interactives.",
+          "Variez les routines."
+        ]
+      }
+    }
+  },
+  "enregistrement": {
+    "plus": {
+      "objectif": "Augmenter l'intensité de l'expérience sensorielle lors des activités quotidiennes",
+      "items": {
+        "visuel": [
+          "Rendez les indices visuels plus saillants (exemples: soulignez, mettez en gras, surlignez en fluo, utilisez de la couleur).",
+          "Étiquetez les tiroirs et/ou les placards.",
+          "Faites prendre des notes à l'enfant afin qu'il les revoie et les traite ultérieurement.",
+          "Utilisez des miroirs pour vérifier l'apparence personnelle.",
+          "Placez les objets importants dans un endroit visible (exemples: manteau, fournitures scolaires).",
+          "Changer les couleurs, les polices de caractères et/ou la disposition des objets afin de diminuer l'effet de familiarité/ d'accoutumance.",
+          "Choisissez des vêtements ou des jouets aux couleurs vives.",
+          "Choisissez du matériel scolaire aux couleurs vives."
+        ],
+        "auditif": [
+          "Apprenez à l'enfant à demander aux autres de ralentir leur débit, de parler plus fort ou de répéter, quand cela est nécessaire.",
+          "Enregistrez les informations importantes à l'aide d'outils numériques.",
+          "Demandez à ce que les informations verbales soient écrites.",
+          "Apprenez à l'enfant à demander de nombreux exemples.",
+          "Demandez à l'enfant de vous répéter ou de vous expliquer l'information qui lui a été donnée, afin de vous assurer qu'il a bien intégré ce qui a été dit.",
+          "Demandez à l'enfant d'utiliser une alarme pour les rappels."
+        ],
+        "toucher": [
+          "Fournissez des textures de tissus variées (exemples: gants de toilette, serviettes, vêtements).",
+          "Apprenez à l'enfant à utiliser des indices visuels ou verbaux pour identifier quand des personnes ou des objets le touchent.",
+          "Réglez les chauffe-eaux à une température moins chaude ou tiède pour prévenir les brûlures.",
+          "Suivez les prévisions météo et l'évolution des températures, afin de discuter avec l'enfant de la tenue vestimentaire appropriée au climat.",
+          "Ajoutez de la texture sur les objets pour faciliter leur exploration (exemples: sur le matériel d'écriture scolaire, les boulons, les jouets)."
+        ],
+        "mouvement": [
+          "Faites réaliser des mouvements plus amples à l'enfant, avant d'affiner petit à petit les schèmes moteurs.",
+          "Choisissez des objets plus lourds pour le jeu.",
+          "Utilisez des indices visuels en soutien lors des activités physiques (exemple: regarder où l'on va).",
+          "Utilisez/ajoutez des rampes d'escalier ou des barres et d'autres repères pour signaler les marches, les portes, etc.",
+          "Disposez des tapis de bain antidérapants dans la baignoire/douche.",
+          "Faites porter des semelles de chaussures antidérapantes à l'enfant.",
+          "Veillez à ce que les allées ne soient pas encombrées d'objets sur lesquels on pourrait trébucher."
+        ],
+        "oralite/gout/odorat": [
+          "Rendez les repas plus intéressants en incorporant des aliments peu familiers, en cuisinant des associations inhabituelles ou en introduisant des aliments avec un goût fort ou aromatisé.",
+          "Sensibiliser l'enfant à être toujours particulièrement attentif lorsqu'il boit des boissons chaudes."
+        ],
+        "position_du_corps": [
+          "Variez la place de l'enfant dans la salle de classe.",
+          "Utilisez des couvertures lourdes pour dormir.",
+          "Fournissez à l'enfant des occasions de porter/de déplacer des objets lourds (exemple: porter des sacs d'épicerie).",
+          "Vérifiez la présence et le bon fonctionnement des détecteurs de fumée.",
+          "Utilisez des crèmes et des savons parfumés pour le bain."
+        ],
+        "general": [
+          "Variez les routines pour le bain et pour l'habillage.",
+          "Visitez des endroits qui offrent une variété d'expériences sensorielles (exemples: parcs, expositions interactives)."
+        ]
+      }
+    },
+    "moins": {
+      "objectif": "Augmenter la familiarité avec les expériences sensorielles dans la vie quotidienne",
+      "items": {
+        "visuel": [
+          "Identifiez le fait que les couleurs neutres puissent constituer un fond plus facile à percevoir lors d'une activité.",
+          "Utilisez une disposition symétrique ou avec des motifs pour ranger les jouets à la maison ou le matériel à l'école.",
+          "Créez un rangement de matériel d'hygiène selon un modèle repérable."
+        ],
+        "auditif": [
+          "Utilisez des modèles rythmiques faciles à répéter pour transmettre les consignes.",
+          "Donnez les consignes selon un ordre facile à anticiper.",
+          "Mettez un bruit de fond apaisant pour les activités plus exigeantes (exemples: bruit blanc tel que celui d'un ventilateur, sons de la nature)."
+        ],
+        "toucher": [
+          "Choisissez des gants de toilette et des serviettes composés de matières aux textures douces.",
+          "Identifiez les préférences parmi les chaussettes, les sous-vêtements et les textures de vêtements et choisissez-les pour remplir la garde-robe de l'enfant en conséquence.",
+          "Veillez à ce que les vêtements de l'enfant soient amples et sans serrage (exemple: sans élastiques trop serrés).",
+          "Identifiez une température agréable pour la chambre.",
+          "Autorisez l'enfant à apporter une couverture ou un jouet préféré lors des visites ou des voyages."
+        ],
+        "mouvement": [
+          "Élaborez un exercice ou une activité récréative qui comprenne un fonctionnement répétitif.",
+          "Faites participer l'enfant à une marche qui suit un itinéraire/un modèle facile à anticiper.",
+          "Encouragez l'enfant à s'asseoir dans un fauteuil à bascule.",
+          "Rassembler les vêtements en un seul endroit pour s'habiller."
+        ],
+        "oralite/gout/odorat": [
+          "Choisissez des aliments à la saveur douce ou peu relevée.",
+          "Utilisez des produits non parfumés ou choisissez des parfums peu intenses qui sont réconfortants pour l'enfant."
+        ],
+        "position_du_corps": [
+          "Utilisez en classe des sièges qui maintiennent les pieds de l'enfant de façon stable au sol.",
+          "Choisissez des tâches domestiques qui ont lieu régulièrement et qui comportent une part de travail soutenu (exemples: vider les poubelles de la maison, sortir les poubelles dans la rue pour qu'elles soient ramassées)."
+        ],
+        "general": [
+          "Identifiez les routines familières auxquelles revenir lorsque l'enfant semble dépassé.",
+          "Établissez des routines prévisibles.",
+          "Offrez à l'enfant des activités dans des lieux ou auprès des personnes et des expériences qui lui soient tous familiers."
+        ]
+      }
+    }
+  }
+}

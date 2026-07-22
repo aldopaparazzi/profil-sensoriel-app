@@ -37,26 +37,17 @@ def get_tally_token():
     Lit le token depuis .env.
 
     Règles :
-    - si .env n'existe pas → demande utilisateur
-    - si fichier invalide → erreur explicite
+    - si .env n'existe pas → retourne chaîne vide
+    - si fichier invalide → retourne chaîne vide
     """
 
-    # -----------------------------------------------------
-    # CAS 1 : fichier absent → création interactive
-    # -----------------------------------------------------
     if not ENV_FILE.exists():
-        token = input("🔑 Entrez votre token Tally : ").strip()
-        save_tally_token(token)
-        return token
+        return ""
 
-    # -----------------------------------------------------
-    # CAS 2 : lecture fichier existant
-    # -----------------------------------------------------
     content = ENV_FILE.read_text(encoding="utf-8").strip()
 
-    # sécurité minimale
     if "=" not in content:
-        raise ValueError("Fichier .env invalide (format attendu: TALLY_TOKEN=xxx)")
+        return ""
 
     return content.split("=", 1)[1]
 
@@ -68,7 +59,6 @@ def get_tally_token():
 def save_tally_token(token: str):
     """
     Écrit le token dans .env.
-
     Remplace entièrement le fichier.
     """
 
@@ -81,21 +71,48 @@ def save_tally_token(token: str):
 
 
 # =========================================================
+# SAUVEGARDE TOKEN (DEPUIS LE DASHBOARD)
+# =========================================================
+
+def sauvegarder_token(nouveau_token: str) -> bool:
+    """
+    Sauvegarde le token dans .env.
+    Fonction appelée depuis le dashboard Streamlit.
+    Retourne True si succès, False sinon.
+    """
+    if not nouveau_token or not nouveau_token.strip():
+        return False
+    
+    try:
+        save_tally_token(nouveau_token.strip())
+        return True
+    except Exception:
+        return False
+
+
+# =========================================================
 # REMPLACEMENT TOKEN (ERREUR 401)
 # =========================================================
 
 def replace_tally_token():
     """
-    Appelé quand l'API retourne 401.
+    Appelé quand l'API retourne 401 (mode CLI uniquement).
 
     Comportement :
     - demande un nouveau token
+    - possibilité d'abandonner (laisser vide)
     - écrase .env
-    - retourne le token immédiatement
+    - retourne le token ou None si abandon
     """
 
-    token = input("\n🔑 Token invalide. Nouveau token : ").strip()
+    print("\n🔑 Token Tally invalide ou expiré.")
+    print("   (Laissez vide pour abandonner)")
+    token = input("   Nouveau token : ").strip()
+
+    if not token:
+        print("❌ Abandon demandé.")
+        return None
 
     save_tally_token(token)
-
+    print("✅ Token sauvegardé.")
     return token

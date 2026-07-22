@@ -37,6 +37,7 @@ def main(force_refresh: bool = False, use_cached=True):
         "debug": config.get("debug", False),
         "age_bands": load_age_bands(),
         "generate_html": config.get("generate_html", True),  # Nouveau paramètre
+        "generate_odt": config.get("generate_odt", True),  # Nouveau paramètre
     }
 
     token = config["tally_token"]
@@ -83,19 +84,39 @@ def main(force_refresh: bool = False, use_cached=True):
 
         except TallyAPIError as e:
             if e.status_code == 401:
-                token = replace_tally_token()
-                # Réessayer avec nouveau token
-                try:
-                    raw = fetch_all_submissions_with_pagination(form_id, token)
-                    save_raw_json(raw, form_name, full_refresh=True)
-                    context["raw"][form_name] = raw
-                    print(f"✔ {form_name} (après renouvellement token)")
-                except Exception as e2:
-                    context["errors"].append(str(e2))
+                print("🔑 Token invalide ou expiré.")
+                success = False
+                max_attempts = 3
+                attempts = 0
+                
+                while not success and attempts < max_attempts:
+                    token = replace_tally_token()
+                    if token is None:
+                        print("❌ Aucun token fourni. Abandon pour ce formulaire.")
+                        context["errors"].append(f"Token manquant pour {form_name}")
+                        break
+                    
+                    attempts += 1
+                    try:
+                        raw = fetch_all_submissions_with_pagination(form_id, token)
+                        save_raw_json(raw, form_name, full_refresh=True)
+                        context["raw"][form_name] = raw
+                        print(f"✔ {form_name} (après renouvellement token)")
+                        success = True
+                    except TallyAPIError as e2:
+                        if e2.status_code == 401:
+                            print(f"❌ Token toujours invalide (tentative {attempts}/{max_attempts}).")
+                        else:
+                            context["errors"].append(str(e2))
+                            print(f"✗ Erreur pour {form_name}: {e2}")
+                            break
+                
+                if not success and attempts >= max_attempts:
+                    print(f"⛔ Abandon après {max_attempts} tentatives pour {form_name}.")
+                    context["errors"].append(f"Échec authentification {form_name} après {max_attempts} tentatives")
             else:
                 context["errors"].append(str(e))
                 print(f"✗ Erreur pour {form_name}: {e}")
-
     if not context["raw"]:
         print("⛔ aucun data à traiter")
         return
@@ -148,6 +169,7 @@ def main(force_refresh: bool = False, use_cached=True):
                 report,
                 mapped["patient"],
                 generate_html=context.get("generate_html", True),
+                generate_odt=context.get("generate_odt", True),
             )
 
     print("\n=== DONE ===")

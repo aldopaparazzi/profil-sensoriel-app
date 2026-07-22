@@ -8,7 +8,7 @@ archives/
 .claude/
 .vscode/
 .continue
-
+node*/
 __pycache__/
 venv/
 .venv/

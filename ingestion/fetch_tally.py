@@ -90,7 +90,6 @@ def fetch_all_submissions_with_pagination(
     form_id: str,
     token: str
 ) -> dict[str, list[dict]]:
-#def fetch_all_submissions_with_pagination(form_id: str, token: str) -> List[dict]:
     """
     Récupère TOUTES les soumissions (toutes pages).
     Utilisé uniquement pour le premier run ou le refresh forcé.
@@ -109,8 +108,21 @@ def fetch_all_submissions_with_pagination(
             "page": page
         }
         
-        response = requests.get(url, headers=headers, params=params, timeout=30)
-        response.raise_for_status()
+        try:
+            response = requests.get(url, headers=headers, params=params, timeout=30)
+        except requests.RequestException as e:
+            raise TallyAPIError(f"Erreur réseau : {e}")
+        
+        # Convertir les erreurs HTTP en TallyAPIError
+        if response.status_code == 401:
+            raise TallyAPIError("Token invalide", status_code=401)
+        
+        if response.status_code != 200:
+            raise TallyAPIError(
+                f"Erreur API Tally: {response.status_code} - {response.text}",
+                status_code=response.status_code
+            )
+        
         data = response.json()
         
         submissions = data.get("submissions", [])
@@ -123,3 +135,26 @@ def fetch_all_submissions_with_pagination(
         page += 1
     
     return {"submissions": all_submissions}
+
+def check_token_valid(token: str) -> bool:
+    """
+    Vérifie si un token Tally est valide sans récupérer de données.
+    Appelle l'endpoint /me qui est léger.
+    
+    Args:
+        token: Le token Tally à vérifier
+    
+    Returns:
+        True si le token est valide, False sinon
+    """
+    if not token:
+        return False
+    
+    url = "https://api.tally.so/forms"
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        return response.status_code == 200
+    except requests.RequestException:
+        return False
