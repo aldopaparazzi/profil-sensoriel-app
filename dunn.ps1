@@ -1,15 +1,10 @@
-
-#Note importante
-# 
-# Si PowerShell bloque l'exécution des scripts (politique d'exécution), lancez d'abord :
-# 
-# Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-#
 # dunn.ps1
-# Lancement du dashboard Profil Sensoriel
-# Usage : .\dunn.ps1
-#        .\dunn.ps1 -NoBrowser  (n'ouvre pas le navigateur)
-#        .\dunn.ps1 -Port 8502   (port personnalisé)
+# Lance le dashboard Profil Sensoriel
+#
+# Usage :
+#   .\dunn.ps1
+#   .\dunn.ps1 -NoBrowser
+#   .\dunn.ps1 -Port 8502
 
 param(
     [switch]$NoBrowser,
@@ -18,17 +13,20 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Se placer dans le dossier du script (peu importe d'où on le lance)
+#----------------------------------------------------------
+# Se placer dans le dossier du script
+#----------------------------------------------------------
 Set-Location $PSScriptRoot
-Write-Host "📂 Dossier projet : $PSScriptRoot" -ForegroundColor Gray
-
-# --------------------------------------------------------
-# 1. Détection de Python
-# --------------------------------------------------------
-Write-Host "📊 Lancement du tableau de bord Profil Sensoriel..." -ForegroundColor Cyan
+Write-Host "📂 Projet : $PSScriptRoot" -ForegroundColor DarkGray
 Write-Host ""
 
+#----------------------------------------------------------
+# Détection de Python
+#----------------------------------------------------------
+Write-Host "🐍 Recherche de Python..." -ForegroundColor Cyan
+
 $pythonCmd = $null
+
 if (Get-Command python -ErrorAction SilentlyContinue) {
     $pythonCmd = "python"
 }
@@ -36,97 +34,172 @@ elseif (Get-Command py -ErrorAction SilentlyContinue) {
     $pythonCmd = "py"
 }
 else {
-    Write-Host "❌ Python introuvable. Installez-le depuis https://python.org" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "❌ Python n'est pas installé." -ForegroundColor Red
+    Write-Host "Téléchargement : https://www.python.org/downloads/"
     Read-Host "Appuyez sur Entrée pour quitter"
     exit 1
 }
 
-# --------------------------------------------------------
-# 2. Environnement virtuel
-# --------------------------------------------------------
-if (-not (Test-Path ".venv")) {
+#----------------------------------------------------------
+# Création du venv
+#----------------------------------------------------------
+if (-not (Test-Path ".\.venv\Scripts\python.exe")) {
+
+    Write-Host ""
     Write-Host "🔧 Création de l'environnement virtuel..." -ForegroundColor Yellow
+
     & $pythonCmd -m venv .venv
-    Write-Host "✅ Environnement créé" -ForegroundColor Green
+
+    Write-Host "✅ Environnement créé." -ForegroundColor Green
 }
 
-Write-Host "🔄 Activation de l'environnement..." -ForegroundColor Yellow
-. .\.venv\Scripts\Activate.ps1
+$python = Resolve-Path ".\.venv\Scripts\python.exe"
 
-# --------------------------------------------------------
-# 3. Dépendances
-# --------------------------------------------------------
+#----------------------------------------------------------
+# Mise à jour de pip
+#----------------------------------------------------------
+Write-Host ""
+Write-Host "📦 Vérification de pip..." -ForegroundColor Yellow
+
+& $python -m pip install --upgrade pip --quiet
+
+#----------------------------------------------------------
+# Vérification des dépendances
+#----------------------------------------------------------
 Write-Host "📦 Vérification des dépendances..." -ForegroundColor Yellow
-& python -m pip install --upgrade pip --quiet
-$streamlitInstalled = & python -c "import streamlit" 2>&1
+
+$needInstall = $false
+
+try {
+    & $python -c "import streamlit" 2>$null
+}
+catch {
+    $needInstall = $true
+}
+
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "📦 Installation des dépendances..." -ForegroundColor Yellow
-    & pip install -r requirements.txt
-    Write-Host "✅ Dépendances installées" -ForegroundColor Green
+    $needInstall = $true
 }
 
-# --------------------------------------------------------
-# 4. Tuer les anciens processus sur le port
-# --------------------------------------------------------
-Write-Host "🧹 Nettoyage des anciens processus..." -ForegroundColor Yellow
-$processOnPort = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
-foreach ($pidToKill in $processOnPort) {
-    Write-Host "   Arrêt du processus $pidToKill..." -ForegroundColor Gray
-    Stop-Process -Id $pidToKill -Force -ErrorAction SilentlyContinue
+if ($needInstall) {
+
+    Write-Host "Installation des dépendances..." -ForegroundColor Yellow
+
+    & $python -m pip install -r requirements.txt
+
+    Write-Host "✅ Dépendances installées." -ForegroundColor Green
+}
+else {
+
+    Write-Host "✅ Dépendances déjà présentes." -ForegroundColor Green
 }
 
-# Nettoyage des streamlit orphelins
-Get-Process -Name "streamlit" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-
-# --------------------------------------------------------
-# 5. Lancement
-# --------------------------------------------------------
+#----------------------------------------------------------
+# Nettoyage du port
+#----------------------------------------------------------
 Write-Host ""
-Write-Host "🚀 Lancement du dashboard sur http://localhost:$Port" -ForegroundColor Green
-Write-Host "   (Fermez cette fenêtre pour arrêter le serveur)" -ForegroundColor Gray
-Write-Host ""
+Write-Host "🧹 Vérification du port $Port..." -ForegroundColor Yellow
 
-# Lancer Streamlit en arrière-plan
-$streamlitProcess = `Start-Process -FilePath ".\.venv\Scripts\streamlit.exe" `
-    -ArgumentList "run", "dashboard.py", "--server.port", $Port `
-    -PassThru `
-    -NoNewWindow
+$processOnPort = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue |
+    Select-Object -ExpandProperty OwningProcess -Unique
 
-# Attendre le démarrage
-Start-Sleep -Seconds 3
+foreach ($pid in $processOnPort) {
 
-# Ouvrir le navigateur
-#if (-not $NoBrowser) {
-#    Start-Process "http://localhost:$Port"
-#}
+    Write-Host "Arrêt du processus PID $pid"
 
-# --------------------------------------------------------
-# 6. Attente et nettoyage à la fermeture
-# --------------------------------------------------------
-Write-Host "Appuyez sur Entrée pour arrêter le serveur..." -ForegroundColor Yellow
-Read-Host | Out-Null
-
-Write-Host ""
-Write-Host "🧹 Arrêt du serveur..." -ForegroundColor Yellow
-
-# Arrêter le processus Streamlit
-if ($streamlitProcess -and !$streamlitProcess.HasExited) {
-    $streamlitProcess.Kill()
+    Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
 }
 
-# Nettoyage final du port
-$processOnPort = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
-foreach ($pidToKill in $processOnPort) {
-    Stop-Process -Id $pidToKill -Force -ErrorAction SilentlyContinue
+$streamlitProcess = $null
+
+try {
+
+    #------------------------------------------------------
+    # Lancement
+    #------------------------------------------------------
+
+    Write-Host ""
+    Write-Host "🚀 Démarrage du dashboard..." -ForegroundColor Green
+
+    $streamlitProcess = Start-Process `
+        -FilePath $python `
+        -ArgumentList `
+            "-m",
+            "streamlit",
+            "run",
+            "dashboard.py",
+            "--server.port",
+            $Port `
+        -PassThru
+
+    Write-Host "⏳ Attente du démarrage..."
+
+    $timeout = 30
+    $elapsed = 0
+
+    do {
+
+        Start-Sleep 1
+        $elapsed++
+
+        $ready = Test-NetConnection `
+            -ComputerName localhost `
+            -Port $Port `
+            -InformationLevel Quiet
+
+    } until ($ready -or $elapsed -ge $timeout)
+
+    if (-not $ready) {
+        throw "Le serveur Streamlit ne répond pas après $timeout secondes."
+    }
+
+    Write-Host ""
+    Write-Host "✅ Dashboard disponible :" -ForegroundColor Green
+    Write-Host "   http://localhost:$Port"
+    Write-Host ""
+
+    if (-not $NoBrowser) {
+        Start-Process "http://localhost:$Port"
+    }
+
+    Write-Host "Fermez cette fenêtre ou appuyez sur Entrée pour arrêter le serveur." -ForegroundColor Yellow
+
+    Read-Host | Out-Null
+
 }
+finally {
 
-# Nettoyage de tous les processus Streamlit orphelins
-Get-Process -Name "streamlit" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-Get-Process | Where-Object { $_.MainWindowTitle -like "*Streamlit*" } | Stop-Process -Force -ErrorAction SilentlyContinue
+    Write-Host ""
+    Write-Host "🧹 Arrêt du serveur..." -ForegroundColor Yellow
 
-Write-Host "✅ Serveur arrêté.
-" -ForegroundColor Green
-Write-Host "Merci d'avoir utilisé le dashboard Profil Sensoriel !
-" -ForegroundColor Gray
+    if ($streamlitProcess) {
 
-deactivate
+        try {
+
+            if (-not $streamlitProcess.HasExited) {
+                Stop-Process -Id $streamlitProcess.Id -Force
+            }
+
+        }
+        catch {
+        }
+
+    }
+
+    $processOnPort = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty OwningProcess -Unique
+
+    foreach ($pid in $processOnPort) {
+
+        try {
+            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+        }
+        catch {
+        }
+
+    }
+
+    Write-Host ""
+    Write-Host "✅ Dashboard arrêté." -ForegroundColor Green
+}

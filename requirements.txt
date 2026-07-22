@@ -8,3 +8,5 @@ fastapi==0.136.3
 uvicorn==0.48.0
 GitPython==3.1.50
 pillow==12.2.0
+psutil==6.0.0
+pywebview==4.0.8
