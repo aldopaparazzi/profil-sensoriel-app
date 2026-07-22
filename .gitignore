@@ -22,6 +22,6 @@ venv/
 resultat.*
 convert_reference.py
 
-*.ps1
+#*.ps1
 *.~lock.*
 source_code*
