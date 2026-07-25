@@ -6,7 +6,7 @@ Dashboard Profil Sensoriel
 Usage :
     python dunn.py
         Démarrage rapide
-    python dunn.py --install
+    python dunn.py --no-install
         Installation / mise à jour environnement
     python dunn.py --port 8502
 """
@@ -26,9 +26,9 @@ import psutil
 # ---------------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--install",
+    "--no-install",
     action="store_true",
-    help="Créer / mettre à jour l'environnement"
+    help="Utiliser l'environnement existant"
 )
 parser.add_argument(
     "--port",
@@ -104,7 +104,7 @@ def install_environment():
 # ---------------------------------------------------------
 # Vérification minimale
 # ---------------------------------------------------------
-if args.install:
+if not args.install:
     install_environment()
 
 if not PYTHON.exists():

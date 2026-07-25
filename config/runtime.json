@@ -1,6 +1,7 @@
 {
   "debug": true,
   "generate_html": true,
+  "generate_odt": true,
   "forms": {
     "enfant": "QKzLAp",
     "jeune_enfant": "kdk7YJ",

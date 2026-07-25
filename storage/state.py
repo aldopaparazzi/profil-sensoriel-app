@@ -1,8 +1,5 @@
 import json
-from pathlib import Path
-
-STATE_PATH = Path("data/raw/.state.json")
-
+from storage.paths import STATE_PATH
 
 def load_state():
     if STATE_PATH.exists():

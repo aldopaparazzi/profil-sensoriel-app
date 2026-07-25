@@ -17,6 +17,13 @@ from reporting.paths import HTML_DIR, JSON_DIR, BILAN_DIR
 from config.settings import load_config, sauvegarder_token
 from ingestion.fetch_tally import check_token_valid
 
+import sys
+
+print("DASHBOARD START")
+print("EXEC:", sys.executable)
+print("PATH:", Path(__file__))
+
+
 st.set_page_config(
     page_title="Profil Sensoriel - Tableau de bord",
     page_icon="favicon_io/favicon.png",
@@ -360,18 +367,16 @@ def dashboard():
             )
             if selected_option:
                 st.session_state.selected_report = selected_option[0]
-                if st.button("🔄 Régénérer ce rapport", use_container_width=True):
-                    if regenerate_report(selected_option[0]):
-                        st.success("✅ Rapport régénéré")
-                        st.cache_data.clear()
-                        st.rerun()
-        
+                if st.button("🔄 Régénérer ce rapport", use_container_width=True) and regenerate_report(selected_option[0]):
+                    st.success("✅ Rapport régénéré")
+                    st.cache_data.clear()
+                    st.rerun()
+    
         if "selected_report" in st.session_state:
             filename = st.session_state.selected_report
             html_path = HTML_DIR / f"{filename}.html"
-            if html_path.exists():
-                if st.button("🌐 Ouvrir dans le navigateur", use_container_width=True):
-                    webbrowser.open(str(html_path))
+            if html_path.exists() and st.button("🌐 Ouvrir dans le navigateur", use_container_width=True):
+                webbrowser.open(str(html_path))
     
     # --- AFFICHAGE DU RAPPORT ---
     with col_view:

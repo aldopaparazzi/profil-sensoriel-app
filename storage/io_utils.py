@@ -1,15 +1,14 @@
 # storage/io_utils.py
 
 import json
-from pathlib import Path
 from typing import List #, Optional
 from storage.last_seen import update_last_seen
+from storage.paths import RAW_DIR
 
 #from datetime import datetime
 #from storage.data_fingerprint import json_hash
 #from storage.state import load_state, save_state
 
-RAW_DIR = Path("data/raw")
 
 def save_raw_json(raw: dict, form_name: str, full_refresh: bool = False):
     """

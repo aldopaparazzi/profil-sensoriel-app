@@ -10,7 +10,6 @@ from pathlib import Path
 CONFIG_PATH = Path(__file__).resolve().parent / "runtime.json"
 ENV_FILE = Path(__file__).resolve().parent / ".env"
 
-
 # =========================================================
 # CONFIG PRINCIPALE
 # =========================================================

@@ -1,9 +1,8 @@
 import json
-from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict
 
-LAST_SEEN_FILE = Path("data/raw/.last_seen.json")
+from storage.paths import LAST_SEEN_FILE
 
 def load_last_seen() -> Dict[str, dict]:
     """Charge les derniers IDs et dates pour chaque formulaire."""
