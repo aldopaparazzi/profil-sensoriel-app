@@ -1,27 +1,36 @@
 .env
 
+Plan d'action*
+
+dist/
+build/
 data/raw/
 data/mapped/
 data/scored/
 data/report/
+data/Rapports/
+reports/
 archives/
 .claude/
 .vscode/
 .continue
 node*/
+
 __pycache__/
 venv/
 .venv/
 
+*.log
 *_old*
 *old_*
 *.old
 *.pyc
 *.pyo
+#*.spec
+#*.ps1
 
+*.~lock.*
+
+source_code*
 resultat.*
 convert_reference.py
-
-#*.ps1
-*.~lock.*
-source_code*

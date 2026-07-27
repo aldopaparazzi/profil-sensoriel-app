@@ -1,356 +1,322 @@
-# storage/paths.py
 """
+storage.paths
+=============
+
 Gestion centralisée des chemins de l'application Profil Sensoriel.
 
-Architecture :
+Principe
+--------
 
-Application (lecture seule)
-│
-├── config/
-│   └── runtime.json
-│
-├── data/
-│   └── reference/
-│       ├── reference.json
-│       ├── normes.json
-│       ├── ages.json
-│       ├── template.html
-│       └── template.odt
-│
-├── reporting/
-│   └── code de génération des rapports
-│
-└── favicon_io/
-    └── favicon.png
+Toutes les parties de l'application utilisent uniquement
+l'objet global :
 
+    paths
 
-Données utilisateur (lecture / écriture)
-│
-└── Documents/
-    └── Profil Sensoriel/
-        ├── .env
-        ├── Raw/
-        │   ├── .state.json
-        │   └── .last_seen.json
-        │
-        └── Rapports/
-            ├── json/
-            ├── html/
-            └── bilan/
+Exemple :
 
+    from storage.paths import paths
 
-Convention :
+    paths.html_dir
+    paths.json_dir
+    paths.bilan_dir
+    paths.env_file
 
-APP_DIR
-    Dossier contenant l'application ou l'exécutable.
+Le workspace est relu automatiquement depuis
+config/runtime.json à chaque accès.
 
-RESOURCE_DIR
-    Ressources distribuées avec l'application.
-    Lecture seule.
-    Compatible développement et PyInstaller.
-
-USER_DIR
-    Données propres à l'utilisateur.
-    Lecture / écriture.
-
-Règle :
-
-Aucun module ne doit utiliser directement :
-
-    Path("data/...")
-    Path("config/...")
-    Path("reporting/...")
-
-Tous les chemins doivent être définis ici.
+Ainsi, si l'utilisateur change le dossier de travail
+dans l'interface, aucun redémarrage n'est nécessaire.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
+import json
+import shutil
 import sys
+from pathlib import Path
+
+# ============================================================
+# Classe Paths
+# ============================================================
 
 
-# =========================================================
-# Détection du mode d'exécution
-# =========================================================
+class Paths:
+    """
+    Fournit tous les chemins utilisés par l'application.
 
-if getattr(sys, "frozen", False):
-    # -----------------------------------------------------
-    # Application compilée PyInstaller
-    # -----------------------------------------------------
+    Les chemins dépendant du workspace sont recalculés
+    dynamiquement à chaque accès.
+    """
 
-    # Dossier contenant :
-    # Profil Sensoriel.exe
-    APP_DIR: Path = Path(
-        sys.executable
-    ).resolve().parent
+    # --------------------------------------------------------
+    # runtime.json
+    # --------------------------------------------------------
 
-    # Dossier temporaire contenant
-    # les ressources extraites par PyInstaller
-    RESOURCE_DIR: Path = Path(
-        getattr(
-            sys,
-            "_MEIPASS",
-            APP_DIR,
+    @property
+    def runtime(self) -> dict:
+        """
+        Charge runtime.json.
+
+        Retourne un dictionnaire vide si le fichier
+        est absent ou invalide.
+        """
+
+        try:
+            return json.loads(self.runtime_json.read_text(encoding="utf-8"))
+
+        except (
+            FileNotFoundError,
+            json.JSONDecodeError,
+            OSError,
+        ):
+            return {}
+
+    # --------------------------------------------------------
+    # Dossiers de l'application
+    # --------------------------------------------------------
+
+    @property
+    def app_dir(self) -> Path:
+        """
+        Dossier de  l'application.
+        """
+        if getattr(sys, "frozen", False):
+            dir = Path(sys.executable).resolve().parent
+        else:
+            dir = Path(__file__).resolve().parent.parent
+        return dir
+    
+    @property
+    def resource_dir(self) -> Path:
+        """
+        Dossier des ressources embarquées.
+        """
+        if getattr(sys, "frozen", False):
+            dir = Path(getattr(sys, "_MEIPASS", self.app_dir))
+        else:
+            dir = self.app_dir
+
+        return dir
+
+    @property
+    def config_dir(self) -> Path:
+        """
+        Dossier de configuration.
+        """
+        return self.resource_dir / "config"
+
+    @property
+    def runtime_json(self) -> Path:
+        """
+        Fichier runtime.json.
+        """
+        return self.config_dir / "runtime.json"    
+
+    # --------------------------------------------------------
+    # Workspace
+    # --------------------------------------------------------
+
+    @property
+    def workspace(self) -> Path:
+        """
+        Dossier de travail utilisateur.
+        """
+
+        ws = self.runtime.get("workspace")
+
+        if ws:
+            return Path(ws).expanduser()
+
+        return Path.home() / "Documents" / "Profil Sensoriel"
+
+    # --------------------------------------------------------
+    # Dossiers utilisateur
+    # --------------------------------------------------------
+
+    @property
+    def env_file(self) -> Path:
+        return self.workspace / ".env"
+
+    @property
+    def raw_dir(self) -> Path:
+        return self.workspace / "Raw"
+
+    @property
+    def last_seen_file(self) -> Path:
+        return self.raw_dir / ".last_seen.json"
+
+    @property
+    def state_file(self) -> Path:
+        return self.raw_dir / ".state.json"
+
+    @property
+    def report_dir(self) -> Path:
+        return self.workspace / "Rapports"
+
+    @property
+    def html_dir(self) -> Path:
+        return self.report_dir / "html"
+
+    @property
+    def json_dir(self) -> Path:
+        return self.report_dir / "json"
+
+    @property
+    def bilan_dir(self) -> Path:
+        return self.report_dir / "bilan"
+
+    # --------------------------------------------------------
+    # Ressources embarquées
+    # --------------------------------------------------------
+
+    @property
+    def data_dir(self) -> Path:
+        return self.resource_dir / "data"
+
+    @property
+    def reference_dir(self) -> Path:
+        return self.data_dir / "reference"
+
+    @property
+    def favicon_dir(self) -> Path:
+        return self.resource_dir / "favicon_io"
+
+    @property
+    def reporting_dir(self) -> Path:
+        return self.resource_dir / "reporting"
+
+    # --------------------------------------------------------
+    # Templates
+    # --------------------------------------------------------
+
+    @property
+    def html_template(self) -> Path:
+        return self.reference_dir / "template.html"
+
+    @property
+    def odt_template(self) -> Path:
+        return self.reference_dir / "template.odt"
+
+    # --------------------------------------------------------
+    # Références métier
+    # --------------------------------------------------------
+
+    @property
+    def reference_path(self) -> Path:
+        return self.reference_dir / "reference.json"
+
+    @property
+    def normes_path(self) -> Path:
+        return self.reference_dir / "normes.json"
+
+    @property
+    def ages_path(self) -> Path:
+        return self.reference_dir / "ages.json"
+
+    @property
+    def strategies_path(self) -> Path:
+        return self.reference_dir / "strategies.json"
+
+    @property
+    def enfant_path(self) -> Path:
+        return self.reference_dir / "enfant.json"
+
+    @property
+    def jeune_enfant_path(self) -> Path:
+        return self.reference_dir / "jeune_enfant.json"
+
+    @property
+    def scolaire_path(self) -> Path:
+        return self.reference_dir / "scolaire.json"
+
+    @property
+    def domaines_sensoriels_path(self) -> Path:
+        return self.reference_dir / "domaines_sensoriels.json"
+
+    # --------------------------------------------------------
+    # Ressources externes
+    # --------------------------------------------------------
+
+    @property
+    def libreoffice(self) -> Path | None:
+        """
+        Retourne LibreOffice.
+
+        Priorité :
+        1. chemin configuré par l'utilisateur ;
+        2. détection automatique.
+        """
+
+        configured = self.runtime.get("libreoffice")
+
+        if configured:
+            exe = Path(configured)
+            if exe.exists():
+                return exe
+
+        candidates = (
+            Path(r"C:\Program Files\LibreOffice\program\soffice.exe"),
+            Path(r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"),
         )
-    )
 
-else:
-    # -----------------------------------------------------
-    # Mode développement
-    # -----------------------------------------------------
-
-    APP_DIR: Path = Path(
-        __file__
-    ).resolve().parent.parent
-
-    RESOURCE_DIR: Path = APP_DIR
-
-
-# =========================================================
-# Fonctions utilitaires
-# =========================================================
-
-def resource_path(*parts: str) -> Path:
-    """
-    Retourne un chemin vers une ressource embarquée.
-
-    Exemple :
-
-        resource_path(
-            "data",
-            "reference",
-            "reference.json",
-        )
-    """
-
-    return RESOURCE_DIR.joinpath(*parts)
-
-
-def user_path(*parts: str) -> Path:
-    """
-    Retourne un chemin vers une donnée utilisateur.
-
-    Exemple :
-
-        user_path(
-            "Rapports",
-            "bilan",
-        )
-    """
-
-    return USER_DIR.joinpath(*parts)
-
-
-# =========================================================
-# Données utilisateur
-# =========================================================
-
-USER_DIR: Path = (
-    Path.home()
-    / "Documents"
-    / "Profil Sensoriel"
-)
-
-
-ENV_FILE: Path = USER_DIR / ".env"
-
-
-# =========================================================
-# Données brutes utilisateur
-# =========================================================
-
-RAW_DIR: Path = USER_DIR / "Raw"
-
-LAST_SEEN_FILE: Path = (
-    RAW_DIR
-    / ".last_seen.json"
-)
-
-STATE_PATH: Path = (
-    RAW_DIR
-    / ".state.json"
-)
-
-
-# =========================================================
-# Rapports utilisateur
-# =========================================================
-
-REPORT_DIR: Path = (
-    USER_DIR
-    / "Rapports"
-)
-
-JSON_DIR: Path = (
-    REPORT_DIR
-    / "json"
-)
-
-HTML_DIR: Path = (
-    REPORT_DIR
-    / "html"
-)
-
-BILAN_DIR: Path = (
-    REPORT_DIR
-    / "bilan"
-)
-
-
-def ensure_user_directories() -> None:
-    """
-    Crée les dossiers utilisateur nécessaires.
-    """
-
-    for directory in (
-        USER_DIR,
-        RAW_DIR,
-        REPORT_DIR,
-        JSON_DIR,
-        HTML_DIR,
-        BILAN_DIR,
-    ):
-        directory.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-
-
-# Création au chargement du module
-ensure_user_directories()
-
-
-# =========================================================
-# Ressources embarquées
-# =========================================================
-
-CONFIG_DIR: Path = (
-    RESOURCE_DIR
-    / "config"
-)
-
-DATA_DIR: Path = (
-    RESOURCE_DIR
-    / "data"
-)
-
-REFERENCE_DIR: Path = (
-    DATA_DIR
-    / "reference"
-)
-
-REPORTING_DIR: Path = (
-    RESOURCE_DIR
-    / "reporting"
-)
-
-FAVICON_DIR: Path = (
-    RESOURCE_DIR
-    / "favicon_io"
-)
-
-
-# =========================================================
-# Configuration embarquée
-# =========================================================
-
-RUNTIME_JSON: Path = (
-    CONFIG_DIR
-    / "runtime.json"
-)
-
-
-# =========================================================
-# Fichiers de référence métier
-# =========================================================
-
-REFERENCE_PATH: Path = (
-    REFERENCE_DIR
-    / "reference.json"
-)
-
-AGES_PATH: Path = (
-    REFERENCE_DIR
-    / "ages.json"
-)
-
-NORMES_PATH: Path = (
-    REFERENCE_DIR
-    / "normes.json"
-)
-
-DOMAINES_SENSORIELS_PATH: Path = (
-    REFERENCE_DIR
-    / "domaines_sensoriels.json"
-)
-
-ENFANT_PATH: Path = (
-    REFERENCE_DIR
-    / "enfant.json"
-)
-
-JEUNE_ENFANT_PATH: Path = (
-    REFERENCE_DIR
-    / "jeune_enfant.json"
-)
-
-SCOLAIRE_PATH: Path = (
-    REFERENCE_DIR
-    / "scolaire.json"
-)
-
-STRATEGIES_PATH: Path = (
-    REFERENCE_DIR
-    / "strategies.json"
-)
-
-
-# =========================================================
-# Templates de génération
-# =========================================================
-
-# Templates fixes embarqués
-# Utilisés par reporting/
-
-HTML_TEMPLATE: Path = (
-    REFERENCE_DIR
-    / "template.html"
-)
-
-ODT_TEMPLATE: Path = (
-    REFERENCE_DIR
-    / "template.odt"
-)
-
-
-# =========================================================
-# Diagnostic
-# =========================================================
-
-def debug_paths() -> None:
-    """
-    Affiche les chemins principaux.
-
-    Utilisation :
-
-        python test_paths.py
-    """
-
-    paths = {
-        "APP_DIR": APP_DIR,
-        "RESOURCE_DIR": RESOURCE_DIR,
-        "USER_DIR": USER_DIR,
-        "ENV_FILE": ENV_FILE,
-        "REPORT_DIR": REPORT_DIR,
-        "RAW_DIR": RAW_DIR,
-        "REFERENCE_PATH": REFERENCE_PATH,
-        "HTML_TEMPLATE": HTML_TEMPLATE,
-        "ODT_TEMPLATE": ODT_TEMPLATE,
-        "RUNTIME_JSON": RUNTIME_JSON,
-    }
-
-    for name, path in paths.items():
-        print(name)
-        print(path)
-        print()
+        for exe in candidates:
+            if exe.exists():
+                return exe
+
+        for name in ("soffice", "libreoffice"):
+            exe = shutil.which(name)
+            if exe:
+                return Path(exe)
+
+        return None
+
+    # --------------------------------------------------------
+    # Création des dossiers
+    # --------------------------------------------------------
+
+    def ensure_workspace(self):
+        """
+        Crée les dossiers utilisateur.
+        """
+
+        for directory in (
+            self.workspace,
+            self.raw_dir,
+            self.report_dir,
+            self.html_dir,
+            self.json_dir,
+            self.bilan_dir,
+        ):
+            directory.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+    # --------------------------------------------------------
+    # Diagnostic
+    # --------------------------------------------------------
+
+    def debug(self):
+
+        print("APP_DIR              :", self.app_dir)
+        print("RESOURCE_DIR         :", self.resource_dir)
+        print("WORKSPACE            :", self.workspace)
+        print("REPORT_DIR           :", self.report_dir)
+        print("HTML_DIR             :", self.html_dir)
+        print("JSON_DIR             :", self.json_dir)
+        print("BILAN_DIR            :", self.bilan_dir)
+        print("ENV_FILE             :", self.env_file)
+        print("RUNTIME_JSON         :", self.runtime_json)
+
+
+# ============================================================
+# Instance globale
+# ============================================================
+
+paths = Paths()
+
+paths.ensure_workspace()
+
+
+if __name__ == "__main__":
+    paths.debug()
