@@ -1,4 +1,6 @@
 {
+  "workspace": "C:/temp/profil-sensoriel-qt/data",
+  "libreoffice": "C:/Program Files/LibreOffice/program/soffice.exe",
   "debug": true,
   "generate_html": true,
   "generate_odt": true,
