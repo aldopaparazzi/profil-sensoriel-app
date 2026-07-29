@@ -1,15 +1,31 @@
 # -*- mode: python ; coding: utf-8 -*-  # noqa: UP009
 
+from PyInstaller.utils.hooks import collect_all
+
+datas, binaries, hiddenimports = collect_all("numpy")
+
+d2, b2, h2 = collect_all("scipy")
+
+datas += d2
+binaries += b2
+hiddenimports += h2
+
+datas += [
+    ("data/reference", "data/reference"),
+    ("favicon_io/icon.ico", "favicon_io"),
+    ("config/runtime.json", "config"),
+]
+
+hiddenimports += [
+    "numpy._core._exceptions",
+]
+
 a = Analysis(  # noqa: F821 # type: ignore
     ["ui.py"],
     pathex=[],
     binaries=[],
-    datas=[
-        #        ("data/Rapports/html", "data/Rapports/html"),
-        #        ("data/Rapports/json", "data/Rapports/json"),
-        ("favicon_io/icon.ico", "favicon_io"),
-    ],
-    hiddenimports=[],
+    datas=datas,
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -24,12 +40,12 @@ exe = EXE(  # noqa: F821 # type: ignore
     a.scripts,
     [],
     exclude_binaries=True,
-    name="Profil Sensoriel",
+    name="Dunn2",
     icon="favicon_io/icon.ico",
-    debug=False,
+    debug=True,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,

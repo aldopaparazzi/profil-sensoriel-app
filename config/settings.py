@@ -3,23 +3,19 @@
 import json
 from pathlib import Path
 
-# =========================================================
-# CHEMINS
-# =========================================================
-
-CONFIG_PATH = Path(__file__).resolve().parent / "runtime.json"
-ENV_FILE = Path(__file__).resolve().parent / ".env"
+from config import paths
 
 # =========================================================
 # CONFIG PRINCIPALE
 # =========================================================
+
 
 def load_config():
     """
     Charge runtime.json et injecte le token Tally.
     """
 
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+    with open(paths.runtime_json, "r", encoding="utf-8") as f:
         config = json.load(f)
 
     config["tally_token"] = get_tally_token()
@@ -31,6 +27,7 @@ def load_config():
 # TOKEN MANAGEMENT
 # =========================================================
 
+
 def get_tally_token():
     """
     Lit le token depuis .env.
@@ -40,10 +37,10 @@ def get_tally_token():
     - si fichier invalide → retourne chaîne vide
     """
 
-    if not ENV_FILE.exists():
+    if not paths.env_file.exists():
         return ""
 
-    content = ENV_FILE.read_text(encoding="utf-8").strip()
+    content = paths.env_file.read_text(encoding="utf-8").strip()
 
     if "=" not in content:
         return ""
@@ -55,23 +52,22 @@ def get_tally_token():
 # SAUVEGARDE TOKEN
 # =========================================================
 
+
 def save_tally_token(token: str):
     """
     Écrit le token dans .env.
     Remplace entièrement le fichier.
     """
 
-    ENV_FILE.parent.mkdir(parents=True, exist_ok=True)
+    paths.env_file.parent.mkdir(parents=True, exist_ok=True)
 
-    ENV_FILE.write_text(
-        f"TALLY_TOKEN={token}\n",
-        encoding="utf-8"
-    )
+    paths.env_file.write_text(f"TALLY_TOKEN={token}\n", encoding="utf-8")
 
 
 # =========================================================
 # SAUVEGARDE TOKEN (DEPUIS LE DASHBOARD)
 # =========================================================
+
 
 def sauvegarder_token(nouveau_token: str) -> bool:
     """
@@ -81,7 +77,7 @@ def sauvegarder_token(nouveau_token: str) -> bool:
     """
     if not nouveau_token or not nouveau_token.strip():
         return False
-    
+
     try:
         save_tally_token(nouveau_token.strip())
         return True
@@ -92,6 +88,7 @@ def sauvegarder_token(nouveau_token: str) -> bool:
 # =========================================================
 # REMPLACEMENT TOKEN (ERREUR 401)
 # =========================================================
+
 
 def replace_tally_token():
     """

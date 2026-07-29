@@ -10,7 +10,7 @@ from storage.paths import paths  # HTML_TEMPLATE, REFERENCE_PATH
 @cache
 def load_reference():
     """Charge la référence avec cache."""
-    with paths.reference_file.open(encoding="utf-8") as f:
+    with paths.reference_path.open(encoding="utf-8") as f:
         return json.load(f)
 
 

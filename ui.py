@@ -51,13 +51,20 @@ from PySide6.QtWidgets import (
 
 # from config.settings import load_config, sauvegarder_token
 # from ingestion.fetch_tally import check_token_valid
+# print("1 import forms")
 from main import import_forms
 
 # from reporting.html import generate_html_report
+# print("2 import generate bilan")
 from reporting.odt import generate_bilan
 
+# print("3 import paths")
 from storage.paths import paths
-from storage.init import load_runtime, save_runtime
+
+# print("4 import load_runtime, save_runtime")
+from storage.init import load_runtime, save_runtime, ensure_env
+
+# print("5 import logger")
 from utils.logger import logger
 
 
@@ -268,6 +275,7 @@ class ReportViewer(QMainWindow):
         workspace = config.get("workspace", "")
         if workspace and Path(workspace).exists():
             logger.info("Workspace utilisé : %s", workspace)
+            ensure_env()
             return Path(workspace)
 
         QMessageBox.information(
@@ -302,7 +310,7 @@ class ReportViewer(QMainWindow):
         # Recherche tous les fichiers terminant par .html
         # sorted() trie les résultats par ordre alphabétique
         reports = sorted(paths.html_dir.glob("*.html"))
-        print("Rapports trouvés :", len(reports))
+        # print("Rapports trouvés :", len(reports))
 
         # Parcourt chaque fichier trouvé
         for report in reports:
@@ -450,12 +458,14 @@ class ReportViewer(QMainWindow):
 
 # Point d'entrée classique d'un programme Python
 if __name__ == "__main__":
+    print("Début du programme")
     logger.info(  # Messages de diagnostic utiles uniquement en développement
         "Recherche rapports dans : %s", paths.html_dir
     )
     # Création de l'application Qt, QApplication doit exister avant tous les widgets
     app = QApplication(sys.argv)
     # Création de notre fenêtre principale
+    print("Création de la fenêtre")
     window = ReportViewer()
     # Rend la fenêtre visible
     window.showMaximized()
