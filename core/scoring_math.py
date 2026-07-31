@@ -2,6 +2,7 @@
 
 from scipy.stats import norm
 
+
 def compute_z_score(raw, m, sigma):
     """
     z = (raw - m) / sigma
@@ -9,11 +10,12 @@ def compute_z_score(raw, m, sigma):
 
     if sigma == 0:
         return None
-    '''
+    """
     print("\n--- Z SCORE ---")
     print("raw:", raw, "m:", m, "sigma:", sigma)
-    '''
+    """
     return round((raw - m) / sigma, 2)
+
 
 def z_to_percentile(z):
     """
@@ -23,6 +25,7 @@ def z_to_percentile(z):
         return None
 
     return round(float(norm.cdf(z) * 100), 1)
+
 
 def interpret_percentile(p):
     if p is None:

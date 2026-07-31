@@ -10,7 +10,7 @@ def compute_age(birth_date, submission_date):
         birth = parser.isoparse(str(birth_date)).replace(tzinfo=None)
         sub = parser.isoparse(str(submission_date)).replace(tzinfo=None)
         return (sub - birth).days / 365.25
-    except Exception:
+    except (ValueError, TypeError):
         return None
 
 
@@ -18,24 +18,14 @@ def age_to_months(age_years: float) -> float:
     return age_years * 12
 
 
-def get_patient_age(patient: dict, submission: dict, form_name: str):
+def get_patient_age(patient: dict, submission: dict):
     """
     Retourne l'âge en MOIS (standard pipeline scoring)
     """
 
     birth = patient.get("Date_naissance")
     submitted_at = submission.get("submitted_at")
-
-    """
-    print(
-        "===== AGE DEBUG =====",
-        "\nbirth=", birth,
-        "\nsubmitted_at=", submitted_at
-    )
-    """
-
     age_years = compute_age(birth, submitted_at)
-
     if age_years is None:
         return None
     return age_to_months(age_years)

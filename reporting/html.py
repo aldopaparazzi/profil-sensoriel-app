@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any  # , Dict
 
 from storage.paths import paths  # HTML_TEMPLATE, REFERENCE_PATH
+from utils.logger import logger
 
 
 @cache
@@ -64,7 +65,8 @@ def batch_generate_html(input_dir: str | Path, output_dir: str | Path):
         try:
             output_file = output_dir / json_file.with_suffix(".html").name
             generate_html_report(data, output_file)
-            print(f"✅ {output_file}")
-        except Exception as e:
-            print(f"❌ Erreur génération HTML {json_file.name}: {e}")
+            logger.info("HTML généré : %s", output_file)
+
+        except Exception:
+            logger.exception("Erreur génération HTML : %s", json_file.name)
             raise

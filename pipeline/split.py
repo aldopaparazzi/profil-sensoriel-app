@@ -1,6 +1,8 @@
-#from utils.logger import log
+# pipeline\split.py
 
-#from pprint import pprint
+# from utils.logger import log
+
+# from pprint import pprint
 from utils.age import get_patient_age
 
 # =========================================================
@@ -18,8 +20,9 @@ COMMENT_KEYS = {
     "Socio-émotionnel",
     "Attentionnel",
     "Global_Scolaire",
-    "Traitement_Global"
+    "Traitement_Global",
 }
+
 
 # =========================================================
 # SPLIT PRINCIPAL
@@ -28,17 +31,16 @@ def split_dataset(clean: dict, form_name: str):
     result = []
 
     submissions = clean.get("submissions", [])
-    #print(f"\n3.✂️ Split ({len(submissions)} submissions)")
+    # print(f"\n3.✂️ Split ({len(submissions)} submissions)")
 
     for sub in submissions:
-
         metadata = {
             "submission_id": sub.get("id"),
             "form_id": sub.get("formId"),
             "respondent_id": sub.get("respondentId"),
             "submitted_at": sub.get("submittedAt"),
             "is_completed": sub.get("isCompleted"),
-            "form_name": form_name
+            "form_name": form_name,
         }
 
         patient = {}
@@ -47,20 +49,17 @@ def split_dataset(clean: dict, form_name: str):
         comments = {}
         ignored_fields = []
         form_name = metadata["form_name"]
-        
 
         # -------------------------------------------------
         # parcours responses
         # -------------------------------------------------
         for response in sub.get("responses", []):
-
             answer = response.get("answer")
 
             if not isinstance(answer, dict):
                 continue
 
             for key, value in answer.items():
-
                 # -------------------------
                 # PATIENT
                 # -------------------------
@@ -78,10 +77,7 @@ def split_dataset(clean: dict, form_name: str):
                 # QUESTIONS
                 # -------------------------
                 elif str(key).isdigit():
-                    sensory_responses.append({
-                        "question_id": str(key),
-                        "score": value
-                    })
+                    sensory_responses.append({"question_id": str(key), "score": value})
 
                 # -------------------------
                 # COMMENTAIRES
@@ -103,27 +99,21 @@ def split_dataset(clean: dict, form_name: str):
         # -------------------------------------------------
         # AGE (sans hypothèse externe)
         # -------------------------------------------------
-        patient["age"] = get_patient_age(
-            patient,
-            metadata,
-            form_name
-        )
+        patient["age"] = get_patient_age(patient, metadata)
 
-        
         # -------------------------------------------------
         # LOGS PROPRES
         # -------------------------------------------------
-        print("\n"+patient["Nom"]+" "+patient["Prenom"])
+        print("\n" + patient["Nom"] + " " + patient["Prenom"])
         print(f"   └── {metadata['submission_id']}")
         print(f"       ├── patient: {len(patient)} champs")
         print(f"       ├── questions: {len(sensory_responses)}")
         print(f"       ├── commentaires: {len(comments)}")
         if ignored_fields:
             print(f"       ├── ignorés: {len(set(ignored_fields))}")
-#            pprint(ignored_fields)
-#        print("\n")
-        
-        
+        #            pprint(ignored_fields)
+        #        print("\n")
+
         # -------------------------------------------------
         # OUTPUT
         # -------------------------------------------------

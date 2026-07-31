@@ -3,10 +3,12 @@
 import json
 from functools import lru_cache
 
+from storage.paths import paths
+
 
 @lru_cache(maxsize=1)
 def load_age_bands():
-    with open("data/reference/ages.json", "r", encoding="utf-8") as f:
+    with paths.ages_path.open(encoding="utf-8") as f:
         return json.load(f)
 
 

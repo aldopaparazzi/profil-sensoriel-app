@@ -14,6 +14,7 @@ datas += [
     ("data/reference", "data/reference"),
     ("favicon_io/icon.ico", "favicon_io"),
     ("config/runtime.json", "config"),
+    ("data/reference/ages.json", "data/reference"),
 ]
 
 hiddenimports += [

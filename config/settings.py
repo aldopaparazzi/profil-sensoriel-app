@@ -1,9 +1,9 @@
 # config/settings.py
 
 import json
-from pathlib import Path
 
-from config import paths
+from storage.paths import paths
+from utils.logger import logger
 
 # =========================================================
 # CONFIG PRINCIPALE
@@ -17,9 +17,7 @@ def load_config():
 
     with open(paths.runtime_json, "r", encoding="utf-8") as f:
         config = json.load(f)
-
     config["tally_token"] = get_tally_token()
-
     return config
 
 
@@ -39,12 +37,9 @@ def get_tally_token():
 
     if not paths.env_file.exists():
         return ""
-
     content = paths.env_file.read_text(encoding="utf-8").strip()
-
     if "=" not in content:
         return ""
-
     return content.split("=", 1)[1]
 
 
@@ -58,9 +53,7 @@ def save_tally_token(token: str):
     Écrit le token dans .env.
     Remplace entièrement le fichier.
     """
-
     paths.env_file.parent.mkdir(parents=True, exist_ok=True)
-
     paths.env_file.write_text(f"TALLY_TOKEN={token}\n", encoding="utf-8")
 
 
@@ -77,11 +70,10 @@ def sauvegarder_token(nouveau_token: str) -> bool:
     """
     if not nouveau_token or not nouveau_token.strip():
         return False
-
     try:
         save_tally_token(nouveau_token.strip())
         return True
-    except Exception:
+    except OSError:
         return False
 
 
@@ -90,25 +82,27 @@ def sauvegarder_token(nouveau_token: str) -> bool:
 # =========================================================
 
 
-def replace_tally_token():
+def replace_tally_token(request_token=None):
     """
-    Appelé quand l'API retourne 401 (mode CLI uniquement).
+    Remplace le token Tally.
 
-    Comportement :
-    - demande un nouveau token
-    - possibilité d'abandonner (laisser vide)
-    - écrase .env
-    - retourne le token ou None si abandon
+    request_token:
+        fonction appelée pour demander un nouveau token
+        (Qt, Streamlit, CLI...)
+
+    Retourne le nouveau token ou None.
     """
 
-    print("\n🔑 Token Tally invalide ou expiré.")
-    print("   (Laissez vide pour abandonner)")
-    token = input("   Nouveau token : ").strip()
+    if request_token:
+        token = request_token()
+    else:
+        print("\n🔑 Token Tally invalide ou expiré.")
+        print("   (Laissez vide pour abandonner)")
+        token = input("   Nouveau token : ").strip()
 
     if not token:
-        print("❌ Abandon demandé.")
         return None
 
     save_tally_token(token)
-    print("✅ Token sauvegardé.")
+    logger.info("Token Tally sauvegardé dans : %s", paths.env_file)
     return token

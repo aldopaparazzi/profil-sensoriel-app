@@ -47,6 +47,7 @@ from PySide6.QtWidgets import (
     QWidget,  # Widget de base Qt
     QFileDialog,  # Fenêtre de dialogue pour sélectionner des fichiers ou dossiers
     QMessageBox,  # Fenêtre de dialogue pour afficher des messages à l'utilisateur
+    QInputDialog,  # Fenêtre de dialogue pour saisir des informations
 )
 
 # from config.settings import load_config, sauvegarder_token
@@ -66,39 +67,6 @@ from storage.init import load_runtime, save_runtime, ensure_env
 
 # print("5 import logger")
 from utils.logger import logger
-
-
-def get_app_path():
-    """
-    Retourne le dossier racine de l'application.
-
-    En développement :
-        utilise le dossier contenant ce fichier Python.
-
-    En version compilée :
-        utilise le dossier contenant l'exécutable créé par PyInstaller.
-
-    Organisation attendue :
-    Profil Sensoriel/
-    │
-    ├── favicon_io/
-    │   └── icon.ico
-    │
-    ├── main.py
-    └── data/
-        └── report/
-            ├── html/  -> rapports affichés dans l'application
-            ├── json/  -> métadonnées associées aux rapports
-            └── odt/   -> documents sources (prévu pour utilisation future)
-    """
-    if getattr(sys, "frozen", False):
-        # Mode EXE PyInstaller
-        return Path(sys.executable).parent
-
-    # Mode développement
-    return (
-        Path(__file__).resolve().parent
-    )  # resolve() transforme le chemin relatif en chemin absolu complet
 
 
 def load_report_metadata(html_file):
@@ -388,11 +356,23 @@ class ReportViewer(QMainWindow):
         """
         logger.info("Début récupération Tally")
         try:
-            count = import_forms()
+            count = import_forms(request_token=self.ask_tally_token)
             logger.info("%s formulaire(s) récupéré(s)", count)
             self.refresh_reports()
         except Exception:  # noqa: BLE001, RUF100
             logger.exception("Erreur lors de l'import Tally")
+
+    # fonction de saisir un token
+    def ask_tally_token(self):
+        """Demande à l'utilisateur de saisir un token"""
+        token, ok = QInputDialog.getText(
+            self,
+            "Token Tally",
+            "Nouveau token :",
+        )
+        if ok:
+            return token.strip()
+        return None
 
     # Fonction pour créer le bandeau de boutons
     def create_toolbar(self):
@@ -462,6 +442,7 @@ if __name__ == "__main__":
     logger.info(  # Messages de diagnostic utiles uniquement en développement
         "Recherche rapports dans : %s", paths.html_dir
     )
+    paths.debug()
     # Création de l'application Qt, QApplication doit exister avant tous les widgets
     app = QApplication(sys.argv)
     # Création de notre fenêtre principale

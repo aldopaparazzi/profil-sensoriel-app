@@ -1,16 +1,11 @@
 # main.py
 
-# raw → split → mapped → scores → report
-# 1. Fetch Tally json
-# 2. Validation
-# 3. Split
-# 4. Mapping
-# 5. Scoring
-# 6. Report
+"""
+Main script for the Profil Sensoriel application.
+**Ne plus dépendre de la racine de l'application pour les données utilisateur,
 
-# import json
-# from pprint import pprint
-# from pathlib import Path
+
+"""
 
 from config.settings import load_config, replace_tally_token
 from core.age import load_age_bands
@@ -26,10 +21,11 @@ from pipeline.validate import filter_empty_submissions
 from reporting.report import build_final_report, export_report
 from storage.io_utils import load_cached_submissions, save_raw_json
 from storage.last_seen import get_last_seen
+from storage.paths import paths
 from utils.json_cache import load_json_cached
 
 
-def main(force_refresh: bool = False, use_cached=True):
+def main(force_refresh: bool = False, request_token=None, use_cached=True):
     print("\n=== PROFIL SENSORIEL V1 ===\n")
 
     config = load_config()
@@ -94,7 +90,7 @@ def main(force_refresh: bool = False, use_cached=True):
                 attempts = 0
 
                 while not success and attempts < max_attempts:
-                    token = replace_tally_token()
+                    token = replace_tally_token(request_token)
                     if token is None:
                         print("❌ Aucun token fourni. Abandon pour ce formulaire.")
                         context["errors"].append(f"Token manquant pour {form_name}")
@@ -144,12 +140,8 @@ def main(force_refresh: bool = False, use_cached=True):
     # 4. MAP + SCORE + REPORT
     print("\n4.🧠 Mapping + Scoring + Report")
 
-    """
-    reference = json.load(open("data/reference/reference.json", encoding="utf-8"))
-    normes = json.load(open("data/reference/normes.json", encoding="utf-8"))
-    """
-    reference = load_json_cached("data/reference/reference.json")
-    normes = load_json_cached("data/reference/normes.json")
+    reference = load_json_cached(paths.reference_path)
+    normes = load_json_cached(paths.normes_path)
 
     for form_name, submissions in context["split"].items():
         form_ref = reference.get(form_name)
@@ -194,6 +186,10 @@ if __name__ == "__main__":
 
 def import_forms(
     force_refresh: bool = False,
+    request_token=None,
 ):
-    n = main(force_refresh)
+    n = main(
+        force_refresh,
+        request_token=request_token,
+    )
     return n
