@@ -1,6 +1,5 @@
 # utils/age.py
 from dateutil import parser
-# from pprint import pprint
 
 
 def compute_age(birth_date, submission_date):
@@ -36,13 +35,9 @@ def get_patient_age(patient: dict, submission: dict, form_name: str):
     """
 
     age_years = compute_age(birth, submitted_at)
-    # print("PATIENT KEYS:", patient.keys())
-    # print("BIRTH:", birth)
-    # print("SUBMITTED:", submitted_at)
 
     if age_years is None:
         return None
-
     return age_to_months(age_years)
 
 

@@ -1,5 +1,5 @@
 # core\age.py
-from dateutil import parser
+
 import json
 from functools import lru_cache
 
@@ -13,18 +13,6 @@ def load_age_bands():
 # =========================================================
 # AGE (optionnel, tolérant)
 # =========================================================
-def compute_age(birth_date, submission_date):
-    if not birth_date or not submission_date:
-        return None
-
-    try:
-        birth = parser.isoparse(str(birth_date)).replace(tzinfo=None)
-        sub = parser.isoparse(str(submission_date)).replace(tzinfo=None)
-        return (sub - birth).days // 365
-    except Exception:
-        return None
-
-
 def resolve_age_group(age_years, form_name, age_bands):
     if age_years is None:
         return None
@@ -44,7 +32,3 @@ def resolve_age_group(age_years, form_name, age_bands):
         print("AVAILABLE BANDS:", bands)
         """
     return bands[0]["key"] if age_years < bands[0]["min"] else bands[-1]["key"]
-
-
-if __name__ == "__main__":
-    print(compute_age("2018-01-01", "2020-01-01"))
