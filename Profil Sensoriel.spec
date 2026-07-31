@@ -1,32 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-  # noqa: UP009
 
-from PyInstaller.utils.hooks import collect_all
-
-datas, binaries, hiddenimports = collect_all("numpy")
-
-d2, b2, h2 = collect_all("scipy")
-
-datas += d2
-binaries += b2
-hiddenimports += h2
-
-datas += [
-    ("data/reference", "data/reference"),
-    ("favicon_io/icon.ico", "favicon_io"),
-    ("config/runtime.json", "config"),
-    ("data/reference/ages.json", "data/reference"),
-]
-
-hiddenimports += [
-    "numpy._core._exceptions",
-]
-
 a = Analysis(  # noqa: F821 # type: ignore
     ["ui.py"],
     pathex=[],
     binaries=[],
-    datas=datas,
-    hiddenimports=hiddenimports,
+    datas=[
+        ("data/reference", "data/reference"),
+        ("favicon_io/icon.ico", "favicon_io"),
+        ("config/runtime.json", "config"),
+    ],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
