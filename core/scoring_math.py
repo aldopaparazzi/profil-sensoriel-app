@@ -1,6 +1,18 @@
 # core\scoring_math.py
 
-from scipy.stats import norm
+from statistics import NormalDist
+
+_normal = NormalDist()
+
+
+def z_to_percentile(z):
+    """
+    Convertit un z-score en percentile (0-100)
+    """
+    if z is None:
+        return None
+
+    return round(_normal.cdf(z) * 100, 1)
 
 
 def compute_z_score(raw, m, sigma):
@@ -15,16 +27,6 @@ def compute_z_score(raw, m, sigma):
     print("raw:", raw, "m:", m, "sigma:", sigma)
     """
     return round((raw - m) / sigma, 2)
-
-
-def z_to_percentile(z):
-    """
-    Convertit un z-score en percentile (0-100)
-    """
-    if z is None:
-        return None
-
-    return round(float(norm.cdf(z) * 100), 1)
 
 
 def interpret_percentile(p):

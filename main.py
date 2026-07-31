@@ -1,9 +1,17 @@
 # main.py
 
 """
-Main script for the Profil Sensoriel application.
-**Ne plus dépendre de la racine de l'application pour les données utilisateur,
-
+- **Description**: Ce script est le point d'entrée principal de l'application Profil Sensoriel. Il gère la récupération, la validation, le traitement et la génération des rapports pour les soumissions de données.
+- **Fonctionnalités principales**:
+  - Récupération des données depuis Tally.
+  - Validation des données pour supprimer les soumissions vides.
+  - Séparation des données en différents groupes selon certaines critères.
+  - Mapping et scoring des données pour calculer les indicateurs de santé.
+  - Génération de rapports HTML et ODT basés sur les résultats du scoring.
+- **Paramètres**:
+  - `force_refresh`: Option pour forcer la récupération complète des données, plutôt que d'utiliser le mode incrémental.
+  - `request_token`: Token d'authentification optionnel pour accéder aux données de Tally.
+- **Utilisation**: Ce script est appelé directement depuis la ligne de commande et peut être lancé avec l'option `--refresh` ou `-r` pour forcer une mise à jour complète des données. Les résultats sont exportés dans des fichiers HTML et ODT selon les configurations du script.
 
 """
 
