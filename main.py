@@ -39,7 +39,9 @@ logger = get_logger(__name__)
 def main(force_refresh: bool = False, request_token=None, use_cached=True):
     config = load_config()
     configure_logging(config.get("debug", False))
-    logger.info("=== PROFIL SENSORIEL V1 ===")
+
+    logger.info("=== PROFIL SENSORIEL V1 ===", extra={"status": True})
+
     context = {
         "raw": {},
         "validated": {},
@@ -47,13 +49,13 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
         "errors": [],
         "debug": config.get("debug", False),
         "age_bands": load_age_bands(),
-        "generate_html": config.get("generate_html", True),  # Nouveau paramètre
-        "generate_odt": config.get("generate_odt", True),  # Nouveau paramètre
+        "generate_html": config.get("generate_html", True),
+        "generate_odt": config.get("generate_odt", True),
     }
 
     token = config["tally_token"]
 
-    logger.info("1. 📥 Récupération des données sur Tally")
+    logger.info("1. 📥 Récupération des données sur Tally", extra={"status": True})
 
     for form_name, form_id in config["forms"].items():
         try:
@@ -147,17 +149,17 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
         return
 
     # 2. VALIDATE
-    logger.info("2. 🧹 Validation")
+    logger.info("2. 🧹 Validation", extra={"status": True})
     for form_name, raw in context["raw"].items():
         context["validated"][form_name] = filter_empty_submissions(raw, context)
 
     # 3. SPLIT
-    logger.info("3. ✂️ Split")
+    logger.info("3. ✂️ Split", extra={"status": True})
     for form_name, clean in context["validated"].items():
         context["split"][form_name] = split_dataset(clean, form_name)
 
     # 4. MAP + SCORE + REPORT
-    logger.info("4. 🧠 Mapping + Scoring + Report")
+    logger.info("4. 🧠 Mapping + Scoring + Report", extra={"status": True})
 
     reference = load_json_cached(paths.reference_path)
     normes = load_json_cached(paths.normes_path)
@@ -192,7 +194,7 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
                 generate_odt=context.get("generate_odt", True),
             )
 
-    logger.info("=== DONE ===")
+    logger.info("=== DONE ===", extra={"status": True})
     return len(submissions)
 
 

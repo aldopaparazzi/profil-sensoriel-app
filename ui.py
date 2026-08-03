@@ -12,6 +12,7 @@ Il est prévu pour être utilisé sur un ordinateur local, sans serveur web.
 """
 
 import json  # Importe le module JSON pour lire et écrire des fichiers JSON  # noqa: I001
+import logging  # Importe le module logging pour gérer les messages de journalisation
 import sys  # Importe le module système Python pour gérer les arguments et la fermeture de l'application
 
 # Permet de manipuler facilement les chemins de fichiers et dossiers
@@ -56,14 +57,11 @@ from main import import_forms
 
 # from reporting.html import generate_html_report
 from reporting.odt import generate_bilan
-
 from storage.paths import paths
-
 from storage.init import load_runtime, save_runtime, ensure_env
-
 from ui_logging import StatusBarLogger
 from ui_settings import SettingsDialog
-
+from ui_worker import FetchWorker
 from utils.logger import logger, configure_logging
 
 
@@ -84,6 +82,14 @@ def load_report_metadata(html_file):
             return json.load(f)
     except (json.JSONDecodeError, OSError):
         return None
+
+
+def reload_reports():
+    """
+    Recharge la liste des rapports HTML.
+    """
+    window.report_list.clear()
+    window.load_reports()
 
 
 def create_tooltip(data):
@@ -137,10 +143,10 @@ class ReportViewer(QMainWindow):
         # Appelle le constructeur de la classe parent QMainWindow
         super().__init__()  # Appelle le constructeur de la classe parent QMainWindow pour initialiser la fenêtre principale
         runtime = load_runtime()
-        configure_logging(runtime.get("debug", False))
+        configure_logging(runtime.get("debug", False))  # 1. configure le niveau d'abord
         self.status_logger = StatusBarLogger(
-            self, logger
-        )  # Crée un logger pour afficher les messages dans la barre de statut
+            self, logging.getLogger()
+        )  # 2. puis on branche
         self.ensure_workspace()  # Vérifie qu'un dossier de travail est défini
         self.current_report = None
         self.setWindowTitle("Profil Sensoriel")  # Titre de la fenêtre principale
@@ -349,22 +355,31 @@ class ReportViewer(QMainWindow):
         """
         Recharge la liste des rapports.
         """
-        self.report_list.clear()
-        self.load_reports()
-        logger.info("Liste des rapports actualisée")
+        reload_reports()
+        logger.info("Liste des rapports actualisée", extra={"status": True})
 
     # Fonction du bouton "Récupérer formulaires"
     def fetch_reports(self):
         """
-        Récupère les nouveaux formulaires Tally.
+        Récupère les nouveaux formulaires Tally (en arrière-plan,
+        pour que la status bar affiche chaque étape en direct).
         """
-        logger.info("Début récupération Tally")
-        try:
-            count = import_forms(request_token=self.ask_tally_token)
-            logger.info("%s formulaire(s) récupéré(s)", count)
-            self.refresh_reports()
-        except Exception:  # noqa: BLE001, RUF100
-            logger.exception("Erreur lors de l'import Tally")
+        self.btn_fetch.setEnabled(False)
+        self.worker = FetchWorker()
+        self.worker.finished_ok.connect(self._on_fetch_done)
+        self.worker.finished_error.connect(self._on_fetch_error)
+        self.worker.start()
+
+    # Fonctions de callback pour le worker
+    def _on_fetch_done(self, count):
+        logger.info("%s formulaire(s) récupéré(s)", count, extra={"status": True})
+        self.btn_fetch.setEnabled(True)
+        reload_reports()
+
+    # Fonction de callback pour le worker en cas d'erreur
+    def _on_fetch_error(self, message):
+        logger.error("Erreur lors de l'import Tally : %s", message)
+        self.btn_fetch.setEnabled(True)
 
     # fonction de saisir un token
     def ask_tally_token(self):
@@ -427,7 +442,22 @@ class ReportViewer(QMainWindow):
         filename = html_path.stem
         try:
             result = generate_bilan(filename)
-            logger.info("Résultat génération ODT : %s", result)
+            # Détail complet (dict) -> debug uniquement
+            logger.debug("Résultat génération ODT : %s", result)
+            # Version courte -> status bar / console normale
+            if result.get("status") == "ok":
+                logger.info(
+                    "✓ Bilan ODT généré : %s",
+                    paths.bilan_dir,  # afficher le chemin complet sans le fichier
+                    extra={"status": True},
+                )
+            elif result.get("status") == "warning":
+                logger.warning(
+                    "⚠ Bilan généré avec avertissement : %s", result.get("file")
+                )
+            else:
+                logger.error("✗ Échec génération ODT : %s", result.get("error"))
+
         except Exception:  # noqa: BLE001
             logger.exception("Erreur génération ODT")
 
@@ -439,10 +469,10 @@ class ReportViewer(QMainWindow):
         """
         dialog = SettingsDialog(self)
         if dialog.exec():
-            logger.info("Configuration mise à jour")
-            self.refresh_reports()  # optionnel : si le workspace a changé
+            logger.info("Configuration mise à jour", extra={"status": True})
+            reload_reports()  # optionnel : si le workspace a changé
 
-        logger.info("Ouverture des paramètres")
+        logger.info("Ouverture des paramètres", extra={"status": True})
 
 
 # Point d'entrée classique d'un programme Python

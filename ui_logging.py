@@ -24,7 +24,9 @@ import logging
 from collections import deque
 
 from PySide6.QtCore import QObject, Signal
-from PySide6.QtWidgets import QDialog, QPlainTextEdit, QStatusBar, QVBoxLayout
+from PySide6.QtWidgets import QStatusBar, QDialog, QVBoxLayout, QPlainTextEdit
+
+from utils.logger import logger
 
 MAX_HISTORY = 1000  # nb de lignes conservées pour la console
 
@@ -33,7 +35,25 @@ MAX_HISTORY = 1000  # nb de lignes conservées pour la console
 # Signal Qt (thread-safe) alimenté par le handler logging
 # ==========================================================
 class _LogSignal(QObject):
-    new_record = Signal(str, int)  # message formaté, levelno
+    """
+    Signal émis par le QtLogHandler à chaque log.
+    Le signal traverse la boucle d'évènements Qt -> thread-safe,
+    même si le log vient d'un thread secondaire.
+    """
+
+    new_record = Signal(str, int, bool)  # message formaté, levelno, is_status
+
+    def log(self, message, levelno):
+        if levelno == 10:  # DEBUG
+            logger.debug(message)
+        elif levelno == 20:  # INFO
+            logger.info(message)
+        elif levelno == 30:  # WARNING
+            logger.warning(message)
+        elif levelno == 40:  # ERROR
+            logger.error(message)
+        elif levelno == 50:  # CRITICAL
+            logger.critical(message)
 
 
 class QtLogHandler(logging.Handler):
@@ -41,6 +61,11 @@ class QtLogHandler(logging.Handler):
     Handler logging standard qui émet un signal Qt à chaque log.
     Le signal traverse la boucle d'évènements Qt -> thread-safe,
     même si le log vient d'un thread secondaire.
+
+    "is_status" distingue les messages "étape" (destinés à la status bar)
+    des messages normaux (console uniquement). Pour marquer un message :
+
+        logger.info("Téléchargement des données", extra={"status": True})
     """
 
     def __init__(self, level=logging.INFO):
@@ -55,7 +80,8 @@ class QtLogHandler(logging.Handler):
             msg = self.format(record)
         except Exception:  # noqa: BLE001
             msg = record.getMessage()
-        self.signals.new_record.emit(msg, record.levelno)
+        is_status = getattr(record, "status", False)
+        self.signals.new_record.emit(msg, record.levelno, is_status)
 
 
 # ==========================================================
@@ -136,15 +162,17 @@ class StatusBarLogger:
         self.handler.signals.new_record.connect(self._on_record)
         logger.addHandler(self.handler)
 
-    def _on_record(self, message: str, levelno: int):
+    def _on_record(self, message: str, levelno: int, is_status: bool):
         self.history.append(message)
 
-        # 1 ligne visible dans la barre de statut, colorée selon la gravité
-        self.status_bar.showMessage(message, 8000)  # reste affiché 8s
-        color = LEVEL_COLORS.get(levelno, "white")
-        self.status_bar.setStyleSheet(f"color: {color};")
+        # Status bar : uniquement les messages "étape" (extra={"status": True})
+        # + toujours les warnings/erreurs (trop important pour les rater)
+        if is_status or levelno >= logging.WARNING:
+            self.status_bar.showMessage(message, 8000)  # reste affiché 8s
+            color = LEVEL_COLORS.get(levelno, "white")
+            self.status_bar.setStyleSheet(f"color: {color};")
 
-        # Si la console est ouverte, on l'alimente en direct
+        # Console : tout, sans exception
         if self.console_dialog is not None:
             self.console_dialog.append_line(message)
 
