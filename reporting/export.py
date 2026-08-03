@@ -1,4 +1,5 @@
 # reporting/export.py
+
 import json
 from pathlib import Path
 from typing import Any
@@ -7,6 +8,10 @@ from reporting.html import generate_html_report
 from reporting.odt import export_odt
 from reporting.utils import build_report_filename
 from storage.paths import paths
+from utils.logger import get_logger
+from utils.privacy import anonymize_patient
+
+logger = get_logger(__name__)
 
 
 def export_json(
@@ -27,7 +32,8 @@ def export_json(
         json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
-    print(f"✓ JSON exported: {output_path}")
+    logger.info("✓ JSON exporté (%s)", anonymize_patient(patient))
+    logger.debug("Chemin complet : %s", output_path)
     return output_path
 
 
@@ -46,9 +52,14 @@ def export_html(
     output_path = output_dir / filename
 
     try:
-        return generate_html_report(report, output_path)
+        result = generate_html_report(report, output_path)
+        logger.info("✓ HTML exporté (%s)", anonymize_patient(patient))
+        logger.debug("Chemin complet : %s", output_path)
+        return result
     except Exception as e:  # noqa: BLE001
-        print(f"✗ Erreur génération HTML: {e}")
+        logger.error(
+            "✗ Erreur génération HTML (%s) : %s", anonymize_patient(patient), e
+        )
         return None
 
 
@@ -59,9 +70,11 @@ def export_odt_report(
     Exporte le rapport en ODT.
     """
     try:
-        return export_odt(patient, output_dir)
+        result = export_odt(patient, output_dir)
+        logger.info("✓ ODT exporté (%s)", anonymize_patient(patient))
+        return result
     except Exception as e:  # noqa: BLE001
-        print(f"✗ Erreur génération ODT: {e}")
+        logger.error("✗ Erreur génération ODT (%s) : %s", anonymize_patient(patient), e)
         return None
 
 

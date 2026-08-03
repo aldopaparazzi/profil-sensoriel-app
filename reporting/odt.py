@@ -1,10 +1,15 @@
 # reporting/odt.py
+
 import shutil
 import subprocess
 from pathlib import Path
 
 from reporting.utils import build_report_filename
 from storage.paths import paths
+from utils.logger import get_logger
+from utils.privacy import anonymize_patient
+
+logger = get_logger(__name__)
 
 
 def generate_bilan(filename: str) -> dict:
@@ -58,11 +63,13 @@ def export_odt(patient: dict, output_dir: str | Path = paths.bilan_dir) -> Path 
     output_path = output_dir / filename
 
     if not paths.odt_template.exists():
-        print(f"⚠️ Template ODT introuvable: {paths.odt_template}")
+        logger.warning("⚠️ Template ODT introuvable : %s", paths.odt_template)
         return None
 
     shutil.copy2(paths.odt_template, output_path)
-    print(f"✓ ODT exported: {output_path}")
+    logger.debug(
+        "Chemin complet ODT (%s) : %s", anonymize_patient(patient), output_path
+    )
     return output_path
 
 

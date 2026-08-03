@@ -52,21 +52,19 @@ from PySide6.QtWidgets import (
 
 # from config.settings import load_config, sauvegarder_token
 # from ingestion.fetch_tally import check_token_valid
-# print("1 import forms")
 from main import import_forms
 
 # from reporting.html import generate_html_report
-# print("2 import generate bilan")
 from reporting.odt import generate_bilan
 
-# print("3 import paths")
 from storage.paths import paths
 
-# print("4 import load_runtime, save_runtime")
 from storage.init import load_runtime, save_runtime, ensure_env
 
-# print("5 import logger")
-from utils.logger import logger
+from ui_logging import StatusBarLogger
+from ui_settings import SettingsDialog
+
+from utils.logger import logger, configure_logging
 
 
 def load_report_metadata(html_file):
@@ -138,6 +136,11 @@ class ReportViewer(QMainWindow):
 
         # Appelle le constructeur de la classe parent QMainWindow
         super().__init__()  # Appelle le constructeur de la classe parent QMainWindow pour initialiser la fenêtre principale
+        runtime = load_runtime()
+        configure_logging(runtime.get("debug", False))
+        self.status_logger = StatusBarLogger(
+            self, logger
+        )  # Crée un logger pour afficher les messages dans la barre de statut
         self.ensure_workspace()  # Vérifie qu'un dossier de travail est défini
         self.current_report = None
         self.setWindowTitle("Profil Sensoriel")  # Titre de la fenêtre principale
@@ -279,6 +282,7 @@ class ReportViewer(QMainWindow):
         # sorted() trie les résultats par ordre alphabétique
         reports = sorted(paths.html_dir.glob("*.html"))
         # print("Rapports trouvés :", len(reports))
+        logger.info("Rapports trouvés : %s", len(reports))
 
         # Parcourt chaque fichier trouvé
         for report in reports:
@@ -433,6 +437,11 @@ class ReportViewer(QMainWindow):
         Ouvre la fenêtre de configuration.
         Placeholder en attendant le dialogue Qt complet.
         """
+        dialog = SettingsDialog(self)
+        if dialog.exec():
+            logger.info("Configuration mise à jour")
+            self.refresh_reports()  # optionnel : si le workspace a changé
+
         logger.info("Ouverture des paramètres")
 
 
@@ -447,6 +456,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     # Création de notre fenêtre principale
     print("Création de la fenêtre")
+    logger.info("Création de la fenêtre principale")
     window = ReportViewer()
     # Rend la fenêtre visible
     window.showMaximized()

@@ -4,6 +4,7 @@ import json
 from functools import lru_cache
 
 from storage.paths import paths
+from utils.logger import logger
 
 
 @lru_cache(maxsize=1)
@@ -27,10 +28,12 @@ def resolve_age_group(age_years, form_name, age_bands):
     for band in bands:
         if band["min"] <= age_years <= band["max"]:
             return band["key"]
-        """
-        print("\nAGE DEBUG:", age_years, form_name)
-        print("age:", age_years)
-        print("form:", form_name)
-        print("AVAILABLE BANDS:", bands)
-        """
+
+        logger.debug(
+            "AGE DEBUG: %s years, form: %s, available bands: %s",
+            age_years,
+            form_name,
+            bands,
+        )
+
     return bands[0]["key"] if age_years < bands[0]["min"] else bands[-1]["key"]

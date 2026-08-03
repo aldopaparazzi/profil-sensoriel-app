@@ -31,13 +31,15 @@ from storage.io_utils import load_cached_submissions, save_raw_json
 from storage.last_seen import get_last_seen
 from storage.paths import paths
 from utils.json_cache import load_json_cached
+from utils.logger import configure_logging, get_logger
+
+logger = get_logger(__name__)
 
 
 def main(force_refresh: bool = False, request_token=None, use_cached=True):
-    print("\n=== PROFIL SENSORIEL V1 ===\n")
-
     config = load_config()
-
+    configure_logging(config.get("debug", False))
+    logger.info("=== PROFIL SENSORIEL V1 ===")
     context = {
         "raw": {},
         "validated": {},
@@ -51,27 +53,27 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
 
     token = config["tally_token"]
 
-    print("1.📥 Récupération des données sur Tally")
+    logger.info("1. 📥 Récupération des données sur Tally")
 
     for form_name, form_id in config["forms"].items():
         try:
             if force_refresh:
                 # Mode refresh : tout recharger
-                print(f"🔄 Refresh forcé pour {form_name}")
+                logger.info("🔄 Refresh forcé pour %s", form_name)
                 raw = fetch_all_submissions_with_pagination(form_id, token)
                 save_raw_json(raw, form_name, full_refresh=True)
                 context["raw"][form_name] = raw
-                print(f"✔ {form_name} (refresh complet)")
+                logger.info("✔ %s (refresh complet)", form_name)
             else:
                 # Mode incrémental : uniquement les nouvelles
                 last_seen = get_last_seen(form_name)
                 after_id = last_seen.get("last_id") if last_seen else None
 
                 if after_id:
-                    print(f"📥 {form_name}: après ID {after_id[:8]}...")
+                    logger.info("📥 %s: après ID %s...", form_name, after_id[:8])
                     raw = fetch_new_submissions(form_id, token, after_id)
                 else:
-                    print(f"📥 {form_name}: premier chargement (aucun ID connu)")
+                    logger.info("📥 %s: premier chargement (aucun ID connu)", form_name)
                     raw = fetch_all_submissions_with_pagination(form_id, token)
 
                 submissions = raw.get("submissions", [])
@@ -79,28 +81,32 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
                 if submissions:
                     save_raw_json(raw, form_name)
                     context["raw"][form_name] = raw
-                    print(f"✔ {form_name} ({len(submissions)} nouvelles)")
+                    logger.info("✔ %s (%d nouvelles)", form_name, len(submissions))
                 else:
-                    print(f"⏭️ {form_name}: aucune nouvelle soumission")
+                    logger.info("⏭️ %s: aucune nouvelle soumission", form_name)
                     # Charger depuis le cache pour le traitement
                     cached = load_cached_submissions(form_name)
                     if cached:
                         context["raw"][form_name] = {"submissions": cached}
-                        print(f"   📦 Utilisation du cache ({len(cached)} soumissions)")
+                        logger.info(
+                            "📦 Utilisation du cache (%d soumissions)", len(cached)
+                        )
                     else:
-                        print(f"   ⚠️ Aucune donnée disponible pour {form_name}")
+                        logger.warning("⚠️ Aucune donnée disponible pour %s", form_name)
 
         except TallyAPIError as e:
             if e.status_code == 401:
-                print("🔑 Token invalide ou expiré.")
+                logger.warning("🔑 Token invalide ou expiré.")
                 success = False
                 max_attempts = 3
                 attempts = 0
 
                 while not success and attempts < max_attempts:
-                    token = replace_tally_token(request_token)
+                    token = replace_tally_token()
                     if token is None:
-                        print("❌ Aucun token fourni. Abandon pour ce formulaire.")
+                        logger.error(
+                            "❌ Aucun token fourni. Abandon pour ce formulaire."
+                        )
                         context["errors"].append(f"Token manquant pour {form_name}")
                         break
 
@@ -109,44 +115,49 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
                         raw = fetch_all_submissions_with_pagination(form_id, token)
                         save_raw_json(raw, form_name, full_refresh=True)
                         context["raw"][form_name] = raw
-                        print(f"✔ {form_name} (après renouvellement token)")
+                        logger.info("✔ %s (après renouvellement token)", form_name)
                         success = True
                     except TallyAPIError as e2:
                         if e2.status_code == 401:
-                            print(
-                                f"❌ Token toujours invalide (tentative {attempts}/{max_attempts})."
+                            logger.warning(
+                                "❌ Token toujours invalide (tentative %d/%d).",
+                                attempts,
+                                max_attempts,
                             )
                         else:
                             context["errors"].append(str(e2))
-                            print(f"✗ Erreur pour {form_name}: {e2}")
+                            logger.error("✗ Erreur pour %s: %s", form_name, e2)
                             break
 
                 if not success and attempts >= max_attempts:
-                    print(
-                        f"⛔ Abandon après {max_attempts} tentatives pour {form_name}."
+                    logger.error(
+                        "⛔ Abandon après %d tentatives pour %s.",
+                        max_attempts,
+                        form_name,
                     )
                     context["errors"].append(
                         f"Échec authentification {form_name} après {max_attempts} tentatives"
                     )
             else:
                 context["errors"].append(str(e))
-                print(f"✗ Erreur pour {form_name}: {e}")
+                logger.error("✗ Erreur pour %s: %s", form_name, e)
+
     if not context["raw"]:
-        print("⛔ aucun data à traiter")
+        logger.warning("⛔ aucun data à traiter")
         return
 
     # 2. VALIDATE
-    print("\n2.🧹 Validation")
+    logger.info("2. 🧹 Validation")
     for form_name, raw in context["raw"].items():
         context["validated"][form_name] = filter_empty_submissions(raw, context)
 
     # 3. SPLIT
-    print("\n3.✂️ Split")
+    logger.info("3. ✂️ Split")
     for form_name, clean in context["validated"].items():
         context["split"][form_name] = split_dataset(clean, form_name)
 
     # 4. MAP + SCORE + REPORT
-    print("\n4.🧠 Mapping + Scoring + Report")
+    logger.info("4. 🧠 Mapping + Scoring + Report")
 
     reference = load_json_cached(paths.reference_path)
     normes = load_json_cached(paths.normes_path)
@@ -155,7 +166,7 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
         form_ref = reference.get(form_name)
 
         if not form_ref:
-            print(f"\n⚠ référence absente : {form_name}")
+            logger.warning("⚠ référence absente : %s", form_name)
             continue
 
         for submission in submissions:
@@ -181,7 +192,7 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
                 generate_odt=context.get("generate_odt", True),
             )
 
-    print("\n=== DONE ===")
+    logger.info("=== DONE ===")
     return len(submissions)
 
 

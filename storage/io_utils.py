@@ -4,10 +4,7 @@ import json
 
 from storage.last_seen import update_last_seen
 from storage.paths import paths
-
-# from datetime import datetime
-# from storage.data_fingerprint import json_hash
-# from storage.state import load_state, save_state
+from utils.logger import logger
 
 
 def save_raw_json(raw: dict, form_name: str, full_refresh: bool = False):
@@ -19,7 +16,7 @@ def save_raw_json(raw: dict, form_name: str, full_refresh: bool = False):
     submissions = raw.get("submissions", [])
 
     if not submissions:
-        print(f"⚠️ Aucune soumission pour {form_name}")
+        logger.warning(f"Aucune soumission pour {form_name}")
         return None
 
     # Lire le fichier existant
@@ -57,9 +54,9 @@ def save_raw_json(raw: dict, form_name: str, full_refresh: bool = False):
         if last_id:
             update_last_seen(form_name, last_id, submitted_at)
 
-    print(f"💾 {form_name} sauvegardé")
-    print(f"   - Nouvelles: {new_count}")
-    print(f"   - Total: {len(existing_data['submissions'])}")
+    logger.info(f"💾 {form_name} sauvegardé")
+    logger.info(f"   - Nouvelles: {new_count}")
+    logger.info(f"   - Total: {len(existing_data['submissions'])}")
 
     return file_path
 

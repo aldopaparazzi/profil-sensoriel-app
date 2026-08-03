@@ -1,9 +1,10 @@
 # pipeline\split.py
 
-# from utils.logger import log
-
-# from pprint import pprint
 from utils.age import get_patient_age
+from utils.logger import get_logger
+from utils.privacy import anonymize_patient
+
+logger = get_logger(__name__)
 
 # =========================================================
 # DOMAINES COMMENTAIRES VALIDES
@@ -31,7 +32,7 @@ def split_dataset(clean: dict, form_name: str):
     result = []
 
     submissions = clean.get("submissions", [])
-    # print(f"\n3.✂️ Split ({len(submissions)} submissions)")
+    logger.debug("Split (%d submissions)", len(submissions))
 
     for sub in submissions:
         metadata = {
@@ -84,9 +85,10 @@ def split_dataset(clean: dict, form_name: str):
                 # -------------------------
                 elif key in COMMENT_KEYS and value:
                     if key in comments:
-                        print(
-                            f"⚠️ commentaire dupliqué "
-                            f"({metadata['submission_id']}) : {key}"
+                        logger.warning(
+                            "Commentaire dupliqué (submission %s) : %s",
+                            metadata["submission_id"],
+                            key,
                         )
                     comments[key] = value
 
@@ -102,17 +104,27 @@ def split_dataset(clean: dict, form_name: str):
         patient["age"] = get_patient_age(patient, metadata)
 
         # -------------------------------------------------
-        # LOGS PROPRES
+        # LOGS ANONYMISÉS
         # -------------------------------------------------
-        print("\n" + patient["Nom"] + " " + patient["Prenom"])
-        print(f"   └── {metadata['submission_id']}")
-        print(f"       ├── patient: {len(patient)} champs")
-        print(f"       ├── questions: {len(sensory_responses)}")
-        print(f"       ├── commentaires: {len(comments)}")
+        logger.info(
+            "Traitement %s — submission %s",
+            anonymize_patient(patient),
+            metadata["submission_id"],
+        )
+        logger.debug(
+            "  patient: %d champs, questions: %d, commentaires: %d",
+            len(patient),
+            len(sensory_responses),
+            len(comments),
+        )
         if ignored_fields:
-            print(f"       ├── ignorés: {len(set(ignored_fields))}")
-        #            pprint(ignored_fields)
-        #        print("\n")
+            logger.debug(
+                "  champs ignorés (%d): %s",
+                len(set(ignored_fields)),
+                sorted(set(ignored_fields)),
+            )
+        # Le nom complet reste accessible en debug uniquement, si besoin ponctuel :
+        # logger.debug("Nom complet : %s %s", patient.get("Nom"), patient.get("Prenom"))
 
         # -------------------------------------------------
         # OUTPUT
