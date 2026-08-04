@@ -49,6 +49,7 @@ from PySide6.QtWidgets import (
     QFileDialog,  # Fenêtre de dialogue pour sélectionner des fichiers ou dossiers
     QMessageBox,  # Fenêtre de dialogue pour afficher des messages à l'utilisateur
     QInputDialog,  # Fenêtre de dialogue pour saisir des informations
+    QProgressBar,  # Fenêtre de dialogue pour afficher une barre de progression
 )
 
 # from config.settings import load_config, sauvegarder_token
@@ -60,7 +61,9 @@ from reporting.odt import generate_bilan
 from storage.paths import paths
 from storage.init import load_runtime, save_runtime, ensure_env
 from ui_logging import StatusBarLogger
+from ui_progress_dialog import ProgressDialog
 from ui_settings import SettingsDialog
+from ui_splash import show_splash
 from ui_worker import FetchWorker
 from utils.logger import logger, configure_logging
 
@@ -147,6 +150,7 @@ class ReportViewer(QMainWindow):
         self.status_logger = StatusBarLogger(
             self, logging.getLogger()
         )  # 2. puis on branche
+        self._setup_progress_bar()  # configure la barre de progression dans la status bar
         self.ensure_workspace()  # Vérifie qu'un dossier de travail est défini
         self.current_report = None
         self.setWindowTitle("Profil Sensoriel")  # Titre de la fenêtre principale
@@ -358,28 +362,40 @@ class ReportViewer(QMainWindow):
         reload_reports()
         logger.info("Liste des rapports actualisée", extra={"status": True})
 
-    # Fonction du bouton "Récupérer formulaires"
     def fetch_reports(self):
         """
         Récupère les nouveaux formulaires Tally (en arrière-plan,
         pour que la status bar affiche chaque étape en direct).
         """
+        self.progress_dialog = ProgressDialog(self)
+        self.status_logger.set_progress_dialog(self.progress_dialog)  # branche les logs
+        self.progress_dialog.show()
         self.btn_fetch.setEnabled(False)
+        self.progress_bar.setVisible(True)
         self.worker = FetchWorker()
         self.worker.finished_ok.connect(self._on_fetch_done)
         self.worker.finished_error.connect(self._on_fetch_error)
+        # Branche les logs à la popup
+        # self.status_logger.log_signal.connect(self._on_log_for_progress)
         self.worker.start()
 
-    # Fonctions de callback pour le worker
     def _on_fetch_done(self, count):
         logger.info("%s formulaire(s) récupéré(s)", count, extra={"status": True})
+        if self.progress_dialog:
+            self.progress_dialog.accept()
+            self.status_logger.set_progress_dialog(None)  # débranche
         self.btn_fetch.setEnabled(True)
+        self.progress_bar.setVisible(False)
         reload_reports()
 
     # Fonction de callback pour le worker en cas d'erreur
     def _on_fetch_error(self, message):
         logger.error("Erreur lors de l'import Tally : %s", message)
+        if self.progress_dialog:
+            self.progress_dialog.reject()
+            self.status_logger.set_progress_dialog(None)  # débranche
         self.btn_fetch.setEnabled(True)
+        self.progress_bar.setVisible(False)
 
     # fonction de saisir un token
     def ask_tally_token(self):
@@ -414,6 +430,16 @@ class ReportViewer(QMainWindow):
         toolbar.addStretch()
         toolbar.addWidget(self.btn_settings)
         return toolbar
+
+    # Fonction pour créer la barre de progression
+    def _setup_progress_bar(self):
+        """Barre de progression indéterminée, dans la status bar."""
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 0)  # mode indéterminé (va-et-vient)
+        self.progress_bar.setMaximumWidth(160)
+        self.progress_bar.setMaximumHeight(14)
+        self.progress_bar.setVisible(False)
+        self.status_logger.status_bar.addPermanentWidget(self.progress_bar)
 
     # Fonction pour créer la barre de filtre
     def create_filterbar(self):
@@ -478,12 +504,13 @@ class ReportViewer(QMainWindow):
 # Point d'entrée classique d'un programme Python
 if __name__ == "__main__":
     print("Début du programme")
+    # Création de l'application Qt, QApplication doit exister avant tous les widgets
+    app = QApplication(sys.argv)
+    splash = show_splash(app, "Chargement de l'interface...")
     logger.info(  # Messages de diagnostic utiles uniquement en développement
         "Recherche rapports dans : %s", paths.html_dir
     )
     paths.debug()
-    # Création de l'application Qt, QApplication doit exister avant tous les widgets
-    app = QApplication(sys.argv)
     # Création de notre fenêtre principale
     print("Création de la fenêtre")
     logger.info("Création de la fenêtre principale")
@@ -491,4 +518,5 @@ if __name__ == "__main__":
     # Rend la fenêtre visible
     window.showMaximized()
     # Lance la boucle événementielle Qt, L'application reste active jusqu'à fermeture de la fenêtre
+    splash.finish(window)  # ferme le splash dès que la fenêtre principale est prête
     sys.exit(app.exec())

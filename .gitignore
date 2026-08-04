@@ -32,6 +32,6 @@ venv/
 
 *.~lock.*
 
-source_code*
+source*
 resultat.*
 convert_reference.py

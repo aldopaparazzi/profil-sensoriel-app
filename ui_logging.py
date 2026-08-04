@@ -26,8 +26,6 @@ from collections import deque
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QStatusBar, QDialog, QVBoxLayout, QPlainTextEdit
 
-from utils.logger import logger
-
 MAX_HISTORY = 1000  # nb de lignes conservées pour la console
 
 
@@ -35,25 +33,7 @@ MAX_HISTORY = 1000  # nb de lignes conservées pour la console
 # Signal Qt (thread-safe) alimenté par le handler logging
 # ==========================================================
 class _LogSignal(QObject):
-    """
-    Signal émis par le QtLogHandler à chaque log.
-    Le signal traverse la boucle d'évènements Qt -> thread-safe,
-    même si le log vient d'un thread secondaire.
-    """
-
     new_record = Signal(str, int, bool)  # message formaté, levelno, is_status
-
-    def log(self, message, levelno):
-        if levelno == 10:  # DEBUG
-            logger.debug(message)
-        elif levelno == 20:  # INFO
-            logger.info(message)
-        elif levelno == 30:  # WARNING
-            logger.warning(message)
-        elif levelno == 40:  # ERROR
-            logger.error(message)
-        elif levelno == 50:  # CRITICAL
-            logger.critical(message)
 
 
 class QtLogHandler(logging.Handler):
@@ -146,12 +126,14 @@ class StatusBarLogger:
     Branche un QtLogHandler sur un logger Python et alimente :
     - une ClickableStatusBar (1 ligne, la plus récente)
     - un LogConsoleDialog (historique complet, ouvert au clic sur la barre)
+    - optionnellement une ProgressDialog (via set_progress_dialog)
     """
 
     def __init__(self, main_window, logger: logging.Logger, level=logging.INFO):
         self.main_window = main_window
         self.history = deque(maxlen=MAX_HISTORY)
         self.console_dialog = None
+        self.progress_dialog = None  # optionnel, à brancher via set_progress_dialog()
 
         self.status_bar = ClickableStatusBar()
         self.status_bar.setToolTip("Cliquer pour voir la console complète")
@@ -162,19 +144,28 @@ class StatusBarLogger:
         self.handler.signals.new_record.connect(self._on_record)
         logger.addHandler(self.handler)
 
+    def set_progress_dialog(self, progress_dialog):
+        """Branche une popup de progression pour recevoir les logs en direct."""
+        self.progress_dialog = progress_dialog
+
     def _on_record(self, message: str, levelno: int, is_status: bool):
         self.history.append(message)
 
-        # Status bar : uniquement les messages "étape" (extra={"status": True})
-        # + toujours les warnings/erreurs (trop important pour les rater)
+        # Status bar : uniquement les messages "étape" ou warnings/erreurs
         if is_status or levelno >= logging.WARNING:
-            self.status_bar.showMessage(message, 8000)  # reste affiché 8s
+            self.status_bar.showMessage(message, 8000)
             color = LEVEL_COLORS.get(levelno, "white")
             self.status_bar.setStyleSheet(f"color: {color};")
 
-        # Console : tout, sans exception
+        # Console live
         if self.console_dialog is not None:
             self.console_dialog.append_line(message)
+
+        # Popup de progression (si branchée)
+        if self.progress_dialog is not None:
+            self.progress_dialog.append_log(message)
+            if is_status:
+                self.progress_dialog.set_message(message)
 
     def show_console(self):
         if self.console_dialog is None:
