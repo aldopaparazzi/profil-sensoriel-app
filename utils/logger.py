@@ -38,6 +38,7 @@ def configure_logging(debug: bool = False) -> None:
         level=level,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%H:%M:%S",
+        force=True,
     )
     _CONFIGURED = True
 
@@ -61,13 +62,25 @@ logger = logging.getLogger("profil_sensoriel")
 # Anciens helpers (context["debug"]) — conservés mais dépréciés.
 # Migrer progressivement vers logger.debug() / logger.info().
 # ----------------------------------------------------------
+
+
 def short_log(context, *args):
+    """
+    Log debug court conditionné par le mode debug.
+    """
     if context.get("debug"):
-        print(*args)
+        logger.debug(" ".join(str(arg) for arg in args))
 
 
 def log(context, *args, tag=None, level="info"):
-    if not context.get("debug") and level == "debug":
+    """
+    Wrapper de logging compatible avec l'ancien appel.
+    """
+    if level == "debug" and not context.get("debug"):
         return
-    prefix = f"[{tag}]" if tag else ""
-    print(prefix, *args)
+
+    prefix = f"[{tag}] " if tag else ""
+    message = prefix + " ".join(str(arg) for arg in args)
+
+    log_method = getattr(logger, level, logger.info)
+    log_method(message)

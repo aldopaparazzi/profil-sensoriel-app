@@ -54,17 +54,17 @@ from PySide6.QtWidgets import (
 
 # from config.settings import load_config, sauvegarder_token
 # from ingestion.fetch_tally import check_token_valid
-from main import import_forms
+# from main import import_forms
 
 # from reporting.html import generate_html_report
 from reporting.odt import generate_bilan
 from storage.paths import paths
 from storage.init import load_runtime, save_runtime, ensure_env
-from ui_logging import StatusBarLogger
-from ui_progress_dialog import ProgressDialog
-from ui_settings import SettingsDialog
-from ui_splash import show_splash
-from ui_worker import FetchWorker
+from ui.ui_logging import StatusBarLogger
+from ui.ui_progress_dialog import ProgressDialog
+from ui.ui_settings import SettingsDialog
+from ui.ui_splash import show_splash
+from ui.ui_worker import FetchWorker
 from utils.logger import logger, configure_logging
 
 
@@ -503,7 +503,7 @@ class ReportViewer(QMainWindow):
 
 # Point d'entrée classique d'un programme Python
 if __name__ == "__main__":
-    print("Début du programme")
+    logger.info("Début du programme")
     # Création de l'application Qt, QApplication doit exister avant tous les widgets
     app = QApplication(sys.argv)
     splash = show_splash(app, "Chargement de l'interface...")
@@ -512,7 +512,7 @@ if __name__ == "__main__":
     )
     paths.debug()
     # Création de notre fenêtre principale
-    print("Création de la fenêtre")
+    logger.info("Création de la fenêtre")
     logger.info("Création de la fenêtre principale")
     window = ReportViewer()
     # Rend la fenêtre visible

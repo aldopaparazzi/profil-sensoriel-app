@@ -23,8 +23,8 @@ def compute_z_score(raw, m, sigma):
     if sigma == 0:
         return None
     """
-    print("\n--- Z SCORE ---")
-    print("raw:", raw, "m:", m, "sigma:", sigma)
+    logger.debug("\n--- Z SCORE ---")
+    logger.debug("raw: %s, m: %s, sigma: %s", raw, m, sigma)
     """
     return round((raw - m) / sigma, 2)
 

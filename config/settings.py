@@ -96,8 +96,8 @@ def replace_tally_token(request_token=None):
     if request_token:
         token = request_token()
     else:
-        print("\n🔑 Token Tally invalide ou expiré.")
-        print("   (Laissez vide pour abandonner)")
+        logger.warning("\n🔑 Token Tally invalide ou expiré.")
+        logger.info("   (Laissez vide pour abandonner)")
         token = input("   Nouveau token : ").strip()
 
     if not token:

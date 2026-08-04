@@ -52,14 +52,13 @@ def batch_generate_html(input_dir: str | Path, output_dir: str | Path):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     reference = load_reference()
-    print(f"Référence chargée avec {len(reference)} entrées.")
-
+    logger.info("Référence chargée avec %d entrées", len(reference))
     for json_file in input_dir.glob("*.json"):
         try:
             with open(json_file, encoding="utf-8") as f:
                 data = json.load(f)
         except (json.JSONDecodeError, OSError) as e:
-            print(f"❌ Erreur lecture JSON {json_file.name}: {e}")
+            logger.error("❌ Erreur lecture JSON %s: %s", json_file.name, e)
             raise ValueError(f"Impossible de lire {json_file.name}") from e
 
         try:

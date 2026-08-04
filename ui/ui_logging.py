@@ -24,7 +24,7 @@ import logging
 from collections import deque
 
 from PySide6.QtCore import QObject, Signal
-from PySide6.QtWidgets import QStatusBar, QDialog, QVBoxLayout, QPlainTextEdit
+from PySide6.QtWidgets import QDialog, QPlainTextEdit, QStatusBar, QVBoxLayout
 
 MAX_HISTORY = 1000  # nb de lignes conservées pour la console
 

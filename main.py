@@ -164,6 +164,8 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
     reference = load_json_cached(paths.reference_path)
     normes = load_json_cached(paths.normes_path)
 
+    exported_count = 0
+
     for form_name, submissions in context["split"].items():
         form_ref = reference.get(form_name)
 
@@ -174,19 +176,33 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
         for submission in submissions:
             submission_id = submission["metadata"]["submission_id"]
 
-            mapped = map_submission(submission, form_ref["questions"], context=context)
+            mapped = map_submission(
+                submission,
+                form_ref["questions"],
+                context=context,
+            )
 
             patient = mapped["patient"]
+            mapped["patient"] = enrich_patient(
+                patient,
+                form_name,
+                context["age_bands"],
+            )
 
-            mapped["patient"] = enrich_patient(patient, form_name, context["age_bands"])
-
-            all_scores = compute_all_scores({submission_id: mapped}, normes, form_name)
+            all_scores = compute_all_scores(
+                {submission_id: mapped},
+                normes,
+                form_name,
+            )
 
             scores = all_scores[submission_id]
 
-            report = build_final_report(mapped, scores, submission_id)
+            report = build_final_report(
+                mapped,
+                scores,
+                submission_id,
+            )
 
-            # Export avec génération HTML optionnelle
             export_report(
                 report,
                 mapped["patient"],
@@ -194,8 +210,12 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
                 generate_odt=context.get("generate_odt", True),
             )
 
+            exported_count += 1
+
     logger.info("=== DONE ===", extra={"status": True})
-    return len(submissions)
+    logger.info("Exported %d patients", exported_count)
+
+    return exported_count
 
 
 if __name__ == "__main__":
