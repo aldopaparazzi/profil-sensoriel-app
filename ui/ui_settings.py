@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
     QDialogButtonBox,
+    QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
     QHBoxLayout,
@@ -104,6 +105,13 @@ class SettingsDialog(QDialog):
         self.chk_odt.setChecked(bool(self.runtime.get("generate_odt", True)))
         self.chk_debug = QCheckBox("Mode debug")
         self.chk_debug.setChecked(bool(self.runtime.get("debug", False)))
+        self.threshold_field = QDoubleSpinBox()
+        self.threshold_field.setRange(0.5, 3.0)
+        self.threshold_field.setSingleStep(0.1)
+        self.threshold_field.setValue(
+            float(self.runtime.get("strategy_threshold", 1.5))
+        )
+        form.addRow("Seuil stratégies (|z| ≥) :", self.threshold_field)
         layout.addWidget(self.chk_html)
         layout.addWidget(self.chk_odt)
         layout.addWidget(self.chk_debug)
@@ -179,7 +187,7 @@ class SettingsDialog(QDialog):
         self.runtime["generate_html"] = self.chk_html.isChecked()
         self.runtime["generate_odt"] = self.chk_odt.isChecked()
         self.runtime["debug"] = self.chk_debug.isChecked()
-
+        self.runtime["strategy_threshold"] = self.threshold_field.value()
         save_runtime(self.runtime)
         logger.info("runtime.json mis à jour : %s", self.runtime)
 

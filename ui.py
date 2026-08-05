@@ -50,6 +50,7 @@ from PySide6.QtWidgets import (
     QMessageBox,  # Fenêtre de dialogue pour afficher des messages à l'utilisateur
     QInputDialog,  # Fenêtre de dialogue pour saisir des informations
     QProgressBar,  # Fenêtre de dialogue pour afficher une barre de progression
+    QDialog,  # Fenêtre de dialogue modale Qt
 )
 
 # from config.settings import load_config, sauvegarder_token
@@ -57,7 +58,7 @@ from PySide6.QtWidgets import (
 # from main import import_forms
 
 # from reporting.html import generate_html_report
-from reporting.odt import generate_bilan
+from reporting.odt import generate_bilan, open_odt
 from storage.paths import paths
 from storage.init import load_runtime, save_runtime, ensure_env
 from ui.ui_logging import StatusBarLogger
@@ -66,6 +67,8 @@ from ui.ui_settings import SettingsDialog
 from ui.ui_splash import show_splash
 from ui.ui_worker import FetchWorker
 from utils.logger import logger, configure_logging
+from reporting.bilan_odt import build_bilan_odt, select_strategy_candidates
+from ui.ui_strategies_dialog import StrategiesDialog
 
 
 def load_report_metadata(html_file):
@@ -455,8 +458,73 @@ class ReportViewer(QMainWindow):
         filter_bar.addWidget(self.clear_button)
         return filter_bar
 
-    # Fonction du bouton "Générer / ouvrir ODT"
     def generate_odt(self):
+        """
+        Génère et/ou ouvre le bilan ODT, selon le choix du praticien.
+        """
+        item = self.report_list.currentItem()
+        if not item:
+            logger.warning("Aucun rapport sélectionné")
+            return
+
+        html_path = item.data(Qt.UserRole)
+        filename = html_path.stem
+        output_path = paths.bilan_dir / f"{filename}_bilan.odt"
+
+        data = load_report_metadata(html_path)
+        if not data:
+            QMessageBox.warning(
+                self, "Bilan ODT", "Données JSON introuvables pour ce rapport."
+            )
+            return
+
+        patient = data.get("patient", {})
+        scores = {
+            "domains": data.get("domains", {}),
+            "quadrants": data.get("quadrants", {}),
+            "composantes_scolaires": data.get("composantes_scolaires", {}),
+        }
+
+        runtime = load_runtime()
+        threshold = float(runtime.get("strategy_threshold", 1.5))
+        candidates = select_strategy_candidates(scores, threshold)
+
+        dialog = StrategiesDialog(candidates, self)
+        if dialog.exec() != QDialog.Accepted:
+            logger.info("Génération ODT annulée")
+            return
+
+        # --- Ouvrir seulement : pas de génération ---
+        if dialog.action == StrategiesDialog.OPEN_ONLY:
+            if not output_path.exists():
+                QMessageBox.warning(
+                    self,
+                    "Bilan ODT",
+                    "Aucun bilan existant à ouvrir. Générez-le d'abord.",
+                )
+                return
+            open_odt(output_path)
+            return
+
+        # --- Génération ---
+        selected = dialog.selected_strategies()
+        try:
+            build_bilan_odt(patient, scores, output_path, selected)
+            logger.info("✓ Bilan ODT généré : %s", output_path, extra={"status": True})
+        except Exception:  # noqa: BLE001
+            logger.exception("Erreur génération bilan ODT")
+            QMessageBox.critical(
+                self,
+                "Bilan ODT",
+                "Échec de la génération. Voir la console pour le détail.",
+            )
+            return
+
+        if dialog.action == StrategiesDialog.GENERATE_AND_OPEN:
+            open_odt(output_path)
+
+    # Fonction obsolette du bouton "Générer / ouvrir ODT"
+    def open_odt(self):
         """
         Génère le bilan ODT du rapport sélectionné.
         """

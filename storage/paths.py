@@ -35,6 +35,8 @@ import shutil
 import sys
 from pathlib import Path
 
+from utils.logger import logger
+
 # ============================================================
 # Classe Paths
 # ============================================================
@@ -85,7 +87,7 @@ class Paths:
         else:
             dir = Path(__file__).resolve().parent.parent
         return dir
-    
+
     @property
     def resource_dir(self) -> Path:
         """
@@ -110,7 +112,7 @@ class Paths:
         """
         Fichier runtime.json.
         """
-        return self.config_dir / "runtime.json"    
+        return self.config_dir / "runtime.json"
 
     # --------------------------------------------------------
     # Workspace
@@ -297,16 +299,19 @@ class Paths:
     # --------------------------------------------------------
 
     def debug(self):
-
-        print("APP_DIR              :", self.app_dir)
-        print("RESOURCE_DIR         :", self.resource_dir)
-        print("WORKSPACE            :", self.workspace)
-        print("REPORT_DIR           :", self.report_dir)
-        print("HTML_DIR             :", self.html_dir)
-        print("JSON_DIR             :", self.json_dir)
-        print("BILAN_DIR            :", self.bilan_dir)
-        print("ENV_FILE             :", self.env_file)
-        print("RUNTIME_JSON         :", self.runtime_json)
+        """
+        Affiche les chemins dans le log.
+        """
+        logger.debug("DEBUG MODE ENABLED")
+        logger.debug("APP_DIR              :", self.app_dir)
+        logger.debug("RESOURCE_DIR         :", self.resource_dir)
+        logger.debug("WORKSPACE            :", self.workspace)
+        logger.debug("REPORT_DIR           :", self.report_dir)
+        logger.debug("HTML_DIR             :", self.html_dir)
+        logger.debug("JSON_DIR             :", self.json_dir)
+        logger.debug("BILAN_DIR            :", self.bilan_dir)
+        logger.debug("ENV_FILE             :", self.env_file)
+        logger.debug("RUNTIME_JSON         :", self.runtime_json)
 
 
 # ============================================================

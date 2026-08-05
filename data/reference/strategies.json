@@ -16,7 +16,7 @@
           "Trouvez/créez des environnements de travail et de loisirs dans lesquels faire du bruit est acceptable ou dans lesquels l'environnement est rempli de stimuli sonores intéressants.",
           "Apportez des jouets qui font des sons lorsque l'on joue avec. Parlez avec l'enfant de ce que vous entendez; demandez-lui ce qu'il entend."
         ],
-        "toucher": [
+        "tactile": [
           "Choisissez des activités qui favorisent le toucher avec les autres (exemples danse, massage) ou avec l'environnement (exemples: jardinage, cuisine).",
           "Choisissez des vêtements, des meubles ou des ustensiles qui présentent une variété de textures.",
           "Ajoutez des accessoires tels que des serre-têtes, des bracelets ou des ceintures.",
@@ -30,7 +30,7 @@
           "Sélectionnez des activités qui incluent de se pencher et/ou de changer le niveau de rapidité.",
           "Placez des jouets dans des endroits difficiles d'accès pour favoriser le fait de devoir escalader ou ramper, etc."
         ],
-        "oralite/gout/odorat": [
+        "sensoriel_oral": [
           "L'enfant peut mâcher des chewing-gums ou sucer des bonbons à la menthe lorsque vous le sentez agité.",
           "Utilisez des savons, des nettoyants parfumés etc.",
           "Préparez des sauces épicées, chaudes, etc., et mettez-les à disposition lors des repas.",
@@ -38,7 +38,7 @@
           "Parfumez l'oreiller d'une odeur qui aide à s'endormir.",
           "Parlez à l'enfant de ce qu'il sent."
         ],
-        "position_du_corps": [
+        "position_corps": [
           "Ajoutez des bouées aux membres de l'enfant pendant les jeux qui l'engagent dans une activité.",
           "Ajoutez des lests aux chevilles de l'enfant quand vous partez vous promener.",
           "Demandez à l'enfant de porter des choses lors des temps de transition (exemple: pour aller à la voiture)."
@@ -70,7 +70,7 @@
           "Mettez différentes musiques pendant les routines quotidiennes.",
           "Gardez les portes ouvertes pour favoriser la présence d'un bruit ambiant."
         ],
-        "toucher": [
+        "tactile": [
           "Pour l'hygiène, adoptez des gants de toilette, des éponges luffa ou naturelles, des serviettes hautement texturées.",
           "Ajoutez des textures sur les objets utilisés lors des apprentissages et des jeux, y compris sur les outils scripteurs.",
           "Fournissez des vêtements composés d'une variété de textures.",
@@ -83,14 +83,14 @@
           "Placez les objets dans différents endroits pendant les tâches quotidiennes, de sorte que l'enfant se déplace pendant les tâches.",
           "Demandez à l'enfant d'aider à mettre la table."
         ],
-        "oralite/gout/odorat": [
+        "sensoriel_oral": [
           "Présentez de nouveaux aliments et parlez de leur caractéristiques.",
           "Intégrez des produits d'hygiène parfumés à votre quotidien.",
           "Pensez à ajouter des bougies parfumées à votre routine quotidienne.",
           "Demandez à l'enfant de reconnaître les aliments à leur odeur.",
           "Fournissez du matériel et des feutres parfumés pour les activités de dessin et d'écriture."
         ],
-        "position_du_corps": [
+        "position_corps": [
           "Jouez à des jeux de danse et récréatifs sur une console de jeux qui nécessitent des mouvements très amples.",
           "Inscrivez l'enfant à des cours d'arts martiaux ou de danse.",
           "Attribuez à l'enfant le rôle d'enlever/de replacer des documents sur le tableau d'affichage à l'école."
@@ -125,7 +125,7 @@
           "Choisissez de partir aux périodes plus calmes (en dehors des heures de pointe) pour faire les courses.",
           "Fournissez des instructions écrites ou des images pour compléter l'information verbale."
         ],
-        "toucher": [
+        "tactile": [
           "Expliquez le besoin d'espace personnel aux autres personnes.",
           "Sélectionnez des textures non irritantes et des styles qui ne seront pas lors des achats de vêtements.",
           "Positionnez les ventilateurs/ aérations de façon à ce qu'ils ne soufflent pas directement sur l'enfant.",
@@ -142,13 +142,13 @@
           "Utilisez des sièges ou des chaises afin que le bébé ou le jeune enfant n'ait pas besoin d'être porté tout le temps.",
           "Utilisez une poussette qui offre la possibilité d'asseoir l'enfant droit."
         ],
-        "oralite/gout/odorat": [
+        "sensoriel_oral": [
           "Servez la nourriture en disposant les sauces et les vinaigrettes à part.",
           "Utilisez des mouchoirs, savons, etc. non parfumés.",
           "Permettez à l'enfant de choisir le restaurant lorsque vous sortez manger.",
           "Retirez les désodorisants de la pièce."
         ],
-        "position_du_corps": [
+        "position_corps": [
           "Identifiez les places assises et les positions préférées de l'enfant pour les rendre disponibles facilement.",
           "Établissez des routines stables pour se préparer.",
           "Apprenez à l'enfant à s'asseoir pour enlever ou retirer son pantalon et/ou ses chaussures."
@@ -181,7 +181,7 @@
           "Fermez les fenêtres pour réduire les bruits de l'environnement.",
           "Réduisez ou éliminez les stimulations auditives qui pourraient distraire l'enfant."
         ],
-        "toucher": [
+        "tactile": [
           "Expliquez à l'enfant pourquoi vous ajoutez des couches de vêtements par mauvais temps.",
           "Parlez d'espace physique personnel et de ce qui est acceptable à ce sujet dans chaque environnement social.",
           "Utilisez de l'eau tiède pour les bains.",
@@ -193,12 +193,12 @@
           "Disposez des sièges de manière agréable/ confortable de façon à réduire le besoin de déplacement pendant les repas.",
           "Créez des routines régulières de mouvements autour des tâches de la vie quotidienne."
         ],
-        "oralite/gout/odorat": [
+        "sensoriel_oral": [
           "Créez un journal alimentaire pour déterminer quels sont les aliments problématiques/ difficiles pour l'enfant.",
           "Observez si les eaux de toilette de certaines personnes ou si certains savons sont associés à des changements de comportements de type comportement-défi.",
           "Préparez l'enfant préalablement au goût de la nourriture, associez les goûts avec des images."
         ],
-        "position_du_corps": [
+        "position_corps": [
           "Créez un plan de routines à l'intérieur de la maison et de l'école avec des informations détaillées sur la place de l'enfant et sur ses responsabilités.",
           "Inventez des jeux qui contiennent des schémas de mouvements attendus."
         ],
@@ -229,7 +229,7 @@
           "Fournissez des instructions écrites ou des images pour accompagner les informations verbales.",
           "Apprenez à l'enfant à demander à une autre personne de lui fournir des indices quand il semble qu'il perde le fil ou se déconcentre."
         ],
-        "toucher": [
+        "tactile": [
           "Utilisez le toucher par pressions profondes plutôt qu'un toucher léger.",
           "Faites porter à l'enfant des vêtements qui sont lourds ou bien ajustés.",
           "Emmitouflez ou enveloppez votre enfant dans une couverture.",
@@ -244,12 +244,12 @@
           "Utilisez une poussette qui permette d'être assis droit.",
           "Créez une structure de siège qui soit confortable pour l'enfant lors des repas."
         ],
-        "oralite/gout/odorat": [
+        "sensoriel_oral": [
           "Identifiez les produits parfumés que l'enfant aime et favorisez leur utilisation.",
           "Identifiez les arômes et les ingrédients que l'enfant préfère et trouvez un moyen de les incorporer dans vos repas quotidiens.",
           "Introduisez de nouveaux aliments et nouvelles odeurs graduellement."
         ],
-        "position_du_corps": [
+        "position_corps": [
           "Assignez à l'enfant une place assise qui soit familière dans la salle de classe.",
           "Encouragez l'enfant à pousser le caddie de courses au magasin ou les coffres-bibliothèques à roulettes à l'école.",
           "Mettez à disposition des livres que l'enfant pourra placer sur ses genoux lors des repas et pendant le travail assis à l'école."
@@ -282,7 +282,7 @@
           "Utilisez des jouets qui produisent des sons lorsque vous y jouez.",
           "Inventez un jeu sonore ou un jeu d'actions avec l'eau, lors du bain."
         ],
-        "toucher": [
+        "tactile": [
           "Sélectionnez des vêtements aux textures variées.",
           "Choisissez des vêtements qui permettent de bouger facilement.",
           "Fournissez une variété d'outils scripteurs de divers poids et/ou textures.",
@@ -296,13 +296,13 @@
           "Demandez à l'enfant de s'asseoir sur un coussin lors des repas.",
           "Encouragez les jeux de parcours d'obstacles."
         ],
-        "oralite/gout/odorat": [
+        "sensoriel_oral": [
           "Ajoutez des arômes aux aliments pour que l'enfant puisse différencier les goûts.",
           "Dans des rayons de bougies/parfumerie ou chez des fleuristes, entraînez-vous à différencier les nuances des parfums.",
           "Changez souvent de parfum de savon; demandez à l'enfant d'identifier la nouvelle odeur.",
           "Commentez les choses que vous sentez dans l'environnement."
         ],
-        "position_du_corps": [
+        "position_corps": [
           "Jouez à des jeux qui nécessitent des changements fréquents de position du corps (exemples: au ballon-chasseur, à la balle au prisonnier ou au loup).",
           "Donnez à l'enfant différentes surfaces sur lesquelles s'asseoir (exemples: tabourets, chaises plus hautes ou plus basses, coussins)."
         ],
@@ -338,7 +338,7 @@
           "Demandez à l'enfant de vous répéter ou de vous expliquer l'information qui lui a été donnée, afin de vous assurer qu'il a bien intégré ce qui a été dit.",
           "Demandez à l'enfant d'utiliser une alarme pour les rappels."
         ],
-        "toucher": [
+        "tactile": [
           "Fournissez des textures de tissus variées (exemples: gants de toilette, serviettes, vêtements).",
           "Apprenez à l'enfant à utiliser des indices visuels ou verbaux pour identifier quand des personnes ou des objets le touchent.",
           "Réglez les chauffe-eaux à une température moins chaude ou tiède pour prévenir les brûlures.",
@@ -354,11 +354,11 @@
           "Faites porter des semelles de chaussures antidérapantes à l'enfant.",
           "Veillez à ce que les allées ne soient pas encombrées d'objets sur lesquels on pourrait trébucher."
         ],
-        "oralite/gout/odorat": [
+        "sensoriel_oral": [
           "Rendez les repas plus intéressants en incorporant des aliments peu familiers, en cuisinant des associations inhabituelles ou en introduisant des aliments avec un goût fort ou aromatisé.",
           "Sensibiliser l'enfant à être toujours particulièrement attentif lorsqu'il boit des boissons chaudes."
         ],
-        "position_du_corps": [
+        "position_corps": [
           "Variez la place de l'enfant dans la salle de classe.",
           "Utilisez des couvertures lourdes pour dormir.",
           "Fournissez à l'enfant des occasions de porter/de déplacer des objets lourds (exemple: porter des sacs d'épicerie).",
@@ -384,7 +384,7 @@
           "Donnez les consignes selon un ordre facile à anticiper.",
           "Mettez un bruit de fond apaisant pour les activités plus exigeantes (exemples: bruit blanc tel que celui d'un ventilateur, sons de la nature)."
         ],
-        "toucher": [
+        "tactile": [
           "Choisissez des gants de toilette et des serviettes composés de matières aux textures douces.",
           "Identifiez les préférences parmi les chaussettes, les sous-vêtements et les textures de vêtements et choisissez-les pour remplir la garde-robe de l'enfant en conséquence.",
           "Veillez à ce que les vêtements de l'enfant soient amples et sans serrage (exemple: sans élastiques trop serrés).",
@@ -397,11 +397,11 @@
           "Encouragez l'enfant à s'asseoir dans un fauteuil à bascule.",
           "Rassembler les vêtements en un seul endroit pour s'habiller."
         ],
-        "oralite/gout/odorat": [
+        "sensoriel_oral": [
           "Choisissez des aliments à la saveur douce ou peu relevée.",
           "Utilisez des produits non parfumés ou choisissez des parfums peu intenses qui sont réconfortants pour l'enfant."
         ],
-        "position_du_corps": [
+        "position_corps": [
           "Utilisez en classe des sièges qui maintiennent les pieds de l'enfant de façon stable au sol.",
           "Choisissez des tâches domestiques qui ont lieu régulièrement et qui comportent une part de travail soutenu (exemples: vider les poubelles de la maison, sortir les poubelles dans la rue pour qu'elles soient ramassées)."
         ],
