@@ -1,13 +1,25 @@
 {
   "workspace": "C:/temp/profil-sensoriel-qt/data",
   "libreoffice": "C:/Program Files/LibreOffice/program/soffice.exe",
-  "debug": true,
+  "debug": false,
   "generate_html": true,
-  "generate_odt": true,
+  "generate_odt": false,
   "strategy_threshold": 1.7,
   "forms": {
     "enfant": "QKzLAp",
     "jeune_enfant": "kdk7YJ",
     "scolaire": "Me7JAg"
+  },
+  "ui": {
+    "theme": "light",
+    "charts": {
+      "bar_height": 0.4,
+      "row_height": 0.4,
+      "show_marker": true,
+      "show_values": true,
+      "show_zero_line": true,
+      "show_x_axis": false,
+      "dpi": 150
+    }
   }
 }

@@ -524,7 +524,7 @@ class ReportViewer(QMainWindow):
             open_odt(output_path)
 
     # Fonction obsolette du bouton "Générer / ouvrir ODT"
-    def open_odt(self):
+    def old_open_odt(self):
         """
         Génère le bilan ODT du rapport sélectionné.
         """

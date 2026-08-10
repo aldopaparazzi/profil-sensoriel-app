@@ -78,8 +78,8 @@ class StrategiesDialog(QDialog):
         """
         button_row = QHBoxLayout()
 
-        btn_generate = QPushButton("Générer seulement")
         btn_generate_open = QPushButton("Générer et ouvrir")
+        btn_generate = QPushButton("Générer seulement")
         btn_open_only = QPushButton("Ouvrir seulement")
         btn_cancel = QPushButton("Annuler")
 
