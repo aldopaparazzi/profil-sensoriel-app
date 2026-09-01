@@ -132,6 +132,48 @@ def generate_item_chart(
         chart_config=chart_config,
     )
 
+def generate_item_charts(
+    section: str,
+    scores_for_type: dict,
+    chart_config: dict | None = None,
+) -> list[tuple[str, float, bytes, float]]:
+    """
+    Génère un graphique SVG par item.
+
+    Retourne une liste contenant, pour chaque item :
+        (
+            libellé,
+            score,
+            svg_bytes,
+            height_cm,
+        )
+    """
+    rows = _build_chart_rows(section, scores_for_type)
+
+    items = []
+
+    for row in rows:
+        key = row["key"]
+        values = scores_for_type[key]
+
+        svg_bytes, height_cm = generate_item_chart(
+            section=section,
+            key=key,
+            values=values,
+            chart_config=chart_config,
+        )
+
+        items.append(
+            (
+                row["label"],
+                row["z"],
+                svg_bytes,
+                height_cm,
+            )
+        )
+
+    return items
+
 
 def _build_chart_rows(
     section: str,
@@ -156,6 +198,263 @@ def _build_chart_rows(
         })
 
     return rows
+
+def _get_chart_dimensions(rows, config):
+    """
+    Calcule les dimensions du SVG à partir du nombre de lignes
+    et de la configuration graphique.
+    """
+    bar_width = SVG_WIDTH - LEFT_MARGIN - RIGHT_MARGIN
+    n = max(len(rows), 1)
+
+    svg_height = (
+        TOP_MARGIN
+        + n * config["row_height"]
+        + BOTTOM_MARGIN
+    )
+
+    return bar_width, svg_height
+
+def _get_row_geometry(index, row, config, bar_width):
+    """
+    Calcule les positions et dimensions nécessaires au rendu
+    d'une ligne du graphique SVG.
+    """
+    z_clamped = row["z_clamped"]
+
+    # Position verticale de la ligne.
+    y_center = (
+        TOP_MARGIN
+        + index * config["row_height"]
+        + config["row_height"] / 2
+    )
+
+    # Position du zéro.
+    x_zero = LEFT_MARGIN + bar_width * 0.5
+
+    # Largeur de la barre.
+    pct_fill = min(
+        (abs(z_clamped) / MAX_Z) * 50.0,
+        50.0,
+    )
+
+    # Conversion du pourcentage en pixels.
+    fill_width = bar_width * pct_fill / 100.0
+
+    # Position de départ de la barre.
+    if z_clamped >= 0:
+        fill_x = x_zero
+    else:
+        fill_x = x_zero - fill_width
+
+    # Position du point final.
+    if z_clamped >= 0:
+        dot_x = x_zero + fill_width
+    else:
+        dot_x = x_zero - fill_width
+
+    return y_center, x_zero, fill_width, fill_x, dot_x
+
+
+def _render_chart_label(svg, index, label, y_center):
+    """
+    Ajoute le label d'une ligne au SVG.
+    """
+    svg.append(
+        f'''
+        <!-- Ligne {index + 1} : {label} -->
+
+        <text
+            class="label"
+            x="{LEFT_MARGIN - 20}"
+            y="{y_center + 6:.2f}"
+            text-anchor="end">
+            {label}
+        </text>
+        '''
+    )
+
+def _render_bar_track(svg, y_center, config, bar_width):
+    """
+    Ajoute la barre de fond grise d'une ligne au SVG.
+    """
+    track_y = y_center - config["bar_height"] / 2
+
+    svg.append(
+        f'''
+        <rect
+            class="track"
+            x="{LEFT_MARGIN}"
+            y="{track_y:.2f}"
+            width="{bar_width}"
+            height="{config["bar_height"]:.2f}"
+            rx="{config["bar_height"] / 2:.2f}"
+            ry="{config["bar_height"] / 2:.2f}"/>
+        '''
+    )
+
+def _render_bar_fill(svg, y_center, fill_width, fill_x, color, config):
+    """
+    Ajoute la barre colorée correspondant au score.
+    """
+    if fill_width <= 0:
+        return
+
+    fill_y = y_center - config["fill_height"] / 2
+
+    svg.append(
+        f'''
+        <rect
+            x="{fill_x:.2f}"
+            y="{fill_y:.2f}"
+            width="{fill_width:.2f}"
+            height="{config["fill_height"]:.2f}"
+            rx="{config["fill_height"] / 2:.2f}"
+            ry="{config["fill_height"] / 2:.2f}"
+
+            fill="{color}"/>
+        '''
+    )
+
+def _render_zero_line(svg, y_center, x_zero, config):
+    """
+    Ajoute la ligne verticale centrale du graphique.
+    """
+    if not config["show_zero_line"]:
+        return
+
+    zero_y = y_center - config["zero_line_height"] / 2
+
+    svg.append(
+        f'''
+        <rect
+            class="zero"
+            x="{x_zero - 0.75:.2f}"
+            y="{zero_y:.2f}"
+            width="1.5"
+            height="{config["zero_line_height"]:.2f}"/>
+        '''
+    )
+
+def _render_marker(svg, y_center, dot_x, color, config):
+    """
+    Ajoute le marqueur circulaire à l'extrémité de la barre.
+    """
+    if not config["show_marker"]:
+        return
+
+    # Cercle blanc extérieur.
+    marker_radius = config["marker_size"] / 2
+
+    svg.append(
+        f'''
+        <circle
+            cx="{dot_x:.2f}"
+            cy="{y_center:.2f}"
+            r="{marker_radius:.2f}"
+            fill="white"/>
+        '''
+    )
+
+    # Cercle coloré.
+    inner_radius = max(marker_radius - 2, 1)
+
+    svg.append(
+        f'''
+        <circle
+            cx="{dot_x:.2f}"
+            cy="{y_center:.2f}"
+            r="{inner_radius:.2f}"
+            fill="{color}"
+            stroke="white"
+            stroke-width="2"/>
+
+        '''
+    )
+
+    # Petit contour extérieur très léger.
+    # Cela reproduit :
+    # box-shadow: 0 0 0 1px rgba(0,0,0,.15)
+    # En SVG, on le fait avec un cercle supplémentaire.
+    svg.append(
+        f'''
+        <circle
+            cx="{dot_x:.2f}"
+            cy="{y_center:.2f}"
+            r="{marker_radius:.2f}"
+            fill="none"
+            stroke="#000000"
+            stroke-opacity="0.15"
+            stroke-width="1"/>
+        '''
+    )
+
+def _render_value(svg, y_center, dot_x, z, z_clamped, color, config):
+    """
+    Ajoute la valeur DS à côté du marqueur.
+    """
+    if not config["show_values"]:
+        return
+
+    # Formatage identique à fmtDS() :
+    #
+    # +0.72
+    # -1.15
+    # +2.00
+    #
+    value_text = f"{z:+.2f}"
+
+    # Décalage de la valeur par rapport au point.
+    value_offset = 18
+
+    if z_clamped >= 0:
+        value_x = dot_x + value_offset
+        anchor = "start"
+    else:
+        value_x = dot_x - value_offset
+        anchor = "end"
+
+    svg.append(
+        f'''
+        <text
+            class="value"
+            x="{value_x:.2f}"
+            y="{y_center + 5:.2f}"
+            text-anchor="{anchor}"
+            fill="{color}">
+            {value_text}
+        </text>
+        '''
+    )
+
+def _build_chart_svg_style(config):
+    """
+    Construit le bloc <style> du graphique SVG.
+    """
+    return f'''
+    <style>
+        .label {{
+            font-family: "IBM Plex Sans", "DejaVu Sans", sans-serif;
+            font-size: {config["label_font_size"]}px;
+            fill: {TEXT_COLOR};
+        }}
+
+        .value {{
+            font-family: "IBM Plex Mono", "DejaVu Sans Mono", monospace;
+            font-size: {config["value_font_size"]}px;
+            font-weight: 500;
+        }}
+
+        .track {{
+            fill: {BORDER_COLOR};
+        }}
+
+        .zero {{
+            fill: {TEXT_COLOR};
+            opacity: 0.25;
+        }}
+    </style>
+    '''
 
 
 def generate_chart(
@@ -212,15 +511,7 @@ def generate_chart(
     # Dimensions SVG
     # ---------------------------------------------------------
 
-    # Zone disponible pour les barres.
-    BAR_WIDTH = SVG_WIDTH - LEFT_MARGIN - RIGHT_MARGIN
-
-    # Hauteur totale.
-    n = max(len(rows), 1)
-
-    svg_height = (
-        TOP_MARGIN + n * config["row_height"] + BOTTOM_MARGIN
-    )  # Calcul de la hauteur totale du SVG en fonction du nombre de lignes et des marges.
+    BAR_WIDTH, svg_height = _get_chart_dimensions(rows, config)
 
     # ---------------------------------------------------------
     # Construction du SVG
@@ -238,249 +529,81 @@ def generate_chart(
      width="{SVG_WIDTH}"
      height="{svg_height}"
      viewBox="0 0 {SVG_WIDTH} {svg_height}"
-     preserveAspectRatio="xMidYMid meet">
-
-    <!--
-        Style global du graphique.
-
-        Les couleurs et polices reprennent celles de template.html.
-    -->
-    <style>
-        .label {{
-            font-family: "IBM Plex Sans", "DejaVu Sans", sans-serif;
-            font-size: {config["label_font_size"]}px;
-            fill: {TEXT_COLOR};
-        }}
-
-        .value {{
-            font-family: "IBM Plex Mono", "DejaVu Sans Mono", monospace;
-            font-size: {config["value_font_size"]}px;
-            font-weight: 500;
-        }}
-
-        .track {{
-            fill: {BORDER_COLOR};
-        }}
-
-        .zero {{
-            fill: {TEXT_COLOR};
-            opacity: 0.25;
-        }}
-    </style>
+     preserveAspectRatio="xMidYMid meet"
+     >
     '''
     )
 
-    # ---------------------------------------------------------
-    # Dessin des lignes
-    # ---------------------------------------------------------
+    svg.append(_build_chart_svg_style(config))
 
+    # Dessin des lignes
     for index, row in enumerate(rows):
         label = row["label"]
         z = row["z"]
         z_clamped = row["z_clamped"]
         color = row["color"]
 
-        # Position verticale de la ligne.
-        y_center = TOP_MARGIN + index * config["row_height"] + config["row_height"] / 2
-
-        # Position du zéro
-        x_zero = LEFT_MARGIN + BAR_WIDTH * 0.5
-
-        # Largeur de la barre
-        pct_fill = min(
-            (abs(z_clamped) / MAX_Z) * 50.0,
-            50.0,
+        y_center, x_zero, fill_width, fill_x, dot_x = _get_row_geometry(
+            index,
+            row,
+            config,
+            BAR_WIDTH,
         )
 
-        # Conversion du pourcentage en pixels.
-        fill_width = BAR_WIDTH * pct_fill / 100.0
-
-        # Position de départ de la barre.
-        if z_clamped >= 0:
-            fill_x = x_zero
-        else:
-            fill_x = x_zero - fill_width
-
-        # Position du point final.
-        if z_clamped >= 0:
-            dot_x = x_zero + fill_width
-        else:
-            dot_x = x_zero - fill_width
-
-        # -----------------------------------------------------
         # LABEL
-        # -----------------------------------------------------
-
-        svg.append(
-            f'''
-            <!-- Ligne {index + 1} : {label} -->
-
-            <text
-                class="label"
-                x="{LEFT_MARGIN - 20}"
-                y="{y_center + 6:.2f}"
-                text-anchor="end">
-                {label}
-            </text>
-            '''
+        _render_chart_label(
+            svg,
+            index,
+            label,
+            y_center,
         )
 
-        # -----------------------------------------------------
         # BAR TRACK
-        # -----------------------------------------------------
-        #
-        # Équivalent HTML :
-        #
-        # .bar-track {{
-        #     height: 8px;
-        #     background: var(--border);
-        #     border-radius: 4px;
-        # }}
-        #
-
-        track_y = y_center - config["bar_height"] / 2
-
-        svg.append(
-            f'''
-            <rect
-                class="track"
-                x="{LEFT_MARGIN}"
-                y="{track_y:.2f}"
-                width="{BAR_WIDTH}"
-                height="{config["bar_height"]:.2f}" 
-                rx="{config["bar_height"] / 2:.2f}"
-                ry="{config["bar_height"] / 2:.2f}"/>
-        '''
+        _render_bar_track(
+            svg,
+            y_center,
+            config,
+            BAR_WIDTH,
         )
 
-        # -----------------------------------------------------
         # BAR FILL
-        # -----------------------------------------------------
+        _render_bar_fill(
+            svg,
+            y_center,
+            fill_width,
+            fill_x,
+            color,
+            config
+        )
 
-        if fill_width > 0:
-            fill_y = y_center - config["fill_height"] / 2
-
-            svg.append(
-                f'''
-                <rect
-                    x="{fill_x:.2f}"
-                    y="{fill_y:.2f}"
-                    width="{fill_width:.2f}"
-                    height="{config["fill_height"]:.2f}"
-                    rx="{config["fill_height"] / 2:.2f}"
-                    ry="{config["fill_height"] / 2:.2f}"
-
-                    fill="{color}"/>
-                '''
-            )
-
-        # -----------------------------------------------------
         # ZERO LINE
-        # -----------------------------------------------------
+        _render_zero_line(
+            svg,
+            y_center,
+            x_zero,
+            config
+        )
 
-        if config["show_zero_line"]:
-            zero_y = y_center - config["zero_line_height"] / 2
-
-            svg.append(
-                f'''
-                <rect
-                    class="zero"
-                    x="{x_zero - 0.75:.2f}"
-                    y="{zero_y:.2f}"
-                    width="1.5"
-                    height="{config["zero_line_height"]:.2f}"/>
-            '''
-            )
-
-        # -----------------------------------------------------
         # POINT
-        # -----------------------------------------------------
+        _render_marker(
+            svg,
+            y_center,
+            dot_x,
+            color,
+            config,
+        )
 
-        if config["show_marker"]:
-            # Cercle blanc extérieur.
-            marker_radius = config["marker_size"] / 2
-            svg.append(
-                f'''
-                <circle
-                    cx="{dot_x:.2f}"
-                    cy="{y_center:.2f}"
-                    r="{marker_radius:.2f}"
-                    fill="white"/>
-                '''
-            )
 
-            # Cercle coloré.
-            inner_radius = max(marker_radius - 2, 1)
-
-            svg.append(
-                f'''
-                <circle
-                    cx="{dot_x:.2f}"
-                    cy="{y_center:.2f}"
-                    r="{inner_radius:.2f}"
-                    fill="{color}"
-                    stroke="white"
-                    stroke-width="2"/>
-
-                '''
-            )
-
-            # Petit contour extérieur très léger.
-            # Cela reproduit :
-            # box-shadow: 0 0 0 1px rgba(0,0,0,.15)
-            # En SVG, on le fait avec un cercle supplémentaire.
-            svg.append(
-                f'''
-                <circle
-                    cx="{dot_x:.2f}"
-                    cy="{y_center:.2f}"
-                    r="{marker_radius:.2f}"
-                    fill="none"
-                    stroke="#000000"
-                    stroke-opacity="0.15"
-                    stroke-width="1"/>
-                '''
-            )
-
-        # -----------------------------------------------------
         # VALEUR DS
-        # -----------------------------------------------------
-        #
-        # Dans template.html, la valeur est affichée à côté
-        # du point.
-        #
-
-        if config["show_values"]:
-            # Formatage identique à fmtDS() :
-            #
-            # +0.72
-            # -1.15
-            # +2.00
-            #
-            value_text = f"{z:+.2f}"
-
-            # Décalage de la valeur par rapport au point.
-            value_offset = 18
-
-            if z_clamped >= 0:
-                value_x = dot_x + value_offset
-                anchor = "start"
-            else:
-                value_x = dot_x - value_offset
-                anchor = "end"
-
-            svg.append(
-                f'''
-                <text
-                    class="value"
-                    x="{value_x:.2f}"
-                    y="{y_center + 5:.2f}"
-                    text-anchor="{anchor}"
-                    fill="{color}">
-                    {value_text}
-                </text>
-            '''
-            )
+        _render_value(
+            svg,
+            y_center,
+            dot_x,
+            z,
+            z_clamped,
+            color,
+            config,
+        )
 
     # ---------------------------------------------------------
     # Fermeture du SVG
@@ -505,6 +628,54 @@ def generate_chart(
     height_cm = max(height_cm, 1.5)
 
     return svg_bytes, height_cm
+
+def generate_item_charts(
+    section: str,
+    scores_for_type: dict,
+    chart_config: dict | None = None,
+) -> list[tuple[str, float, bytes, float]]:
+    """
+    Génère un graphique SVG par item.
+
+    Retourne une liste contenant, pour chaque item :
+        (
+            libellé,
+            score,
+            svg_bytes,
+            height_cm,
+        )
+    """
+    rows = _build_chart_rows(section, scores_for_type)
+
+    items = []
+
+    for row in rows:
+        key = row["key"]
+
+        values = scores_for_type[key]
+
+        chart = generate_item_chart(
+            section=section,
+            key=key,
+            values=values,
+            chart_config=chart_config,
+        )
+
+        label = row["label"]
+        score = row["z"]
+
+        svg_bytes, height_cm = chart
+
+        items.append(
+            (
+                label,
+                score,
+                svg_bytes,
+                height_cm,
+            )
+        )
+
+    return items
 
 
 def generate_all_charts(
