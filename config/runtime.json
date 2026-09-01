@@ -13,13 +13,18 @@
   "ui": {
     "theme": "light",
     "charts": {
-      "bar_height": 0.4,
-      "row_height": 0.4,
+      "bar_height": 12,
+      "row_height": 32,
       "show_marker": true,
       "show_values": true,
       "show_zero_line": true,
       "show_x_axis": false,
-      "dpi": 150
+      "dpi": 150,
+      "label_font_size": 20,
+      "value_font_size": 20,
+      "fill_height": 12,
+      "zero_line_height": 24,
+      "marker_size": 16
     }
   }
 }

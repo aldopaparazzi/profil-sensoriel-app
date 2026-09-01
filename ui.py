@@ -67,7 +67,8 @@ from ui.ui_settings import SettingsDialog
 from ui.ui_splash import show_splash
 from ui.ui_worker import FetchWorker
 from utils.logger import logger, configure_logging
-from reporting.bilan_odt import build_bilan_odt, select_strategy_candidates
+from reporting.bilan_odt import build_bilan_odt
+from reporting.bilan_strategies import select_strategy_candidates
 from ui.ui_strategies_dialog import StrategiesDialog
 
 

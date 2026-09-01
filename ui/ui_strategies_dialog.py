@@ -1,6 +1,6 @@
 # ui/ui_strategies_dialog.py
 """
-Popup de sélection des stratégies de compensation.
+Popup de sélection des Aménagements à mettre en place.
 Affiche les items proposés (au-dessus du seuil) sous forme de cases à cocher,
 groupées par quadrant puis par domaine.
 """
@@ -30,7 +30,7 @@ class StrategiesDialog(QDialog):
     def __init__(self, candidates: dict, parent=None):
         super().__init__(parent)
         self.action = None
-        self.setWindowTitle("Sélection des stratégies de compensation")
+        self.setWindowTitle("Sélection des Aménagements à mettre en place")
         self.setMinimumSize(600, 500)
 
         self._checkboxes: list[tuple[str, str, str, QCheckBox]] = []

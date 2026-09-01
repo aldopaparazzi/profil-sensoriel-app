@@ -153,10 +153,31 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
     for form_name, raw in context["raw"].items():
         context["validated"][form_name] = filter_empty_submissions(raw, context)
 
+    for form_name, validated in context["validated"].items():
+        submissions = validated.get("submissions", [])
+        logger.info(
+            "🔎 VALIDATED %s : %d soumissions",
+            form_name,
+            len(submissions),
+        )
+
     # 3. SPLIT
+    """
     logger.info("3. ✂️ Split", extra={"status": True})
     for form_name, clean in context["validated"].items():
         context["split"][form_name] = split_dataset(clean, form_name)
+    """
+
+    logger.info("3. ✂️ Split", extra={"status": True})
+    for form_name, clean in context["validated"].items():
+        result = split_dataset(clean, form_name)
+        context["split"][form_name] = result
+
+        logger.info(
+            "🔎 SPLIT %s : %d éléments",
+            form_name,
+            len(result) if result else 0,
+        )
 
     # 4. MAP + SCORE + REPORT
     logger.info("4. 🧠 Mapping + Scoring + Report", extra={"status": True})
@@ -165,6 +186,29 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
     normes = load_json_cached(paths.normes_path)
 
     exported_count = 0
+
+    logger.info(
+        "🔎 Contenu de context['split'] : %s",
+        {k: len(v) if v else 0 for k, v in context["split"].items()},
+    )
+
+    logger.info("========== DEBUG AVANT EXPORT ==========")
+
+    for form_name, submissions in context["split"].items():
+        logger.info(
+            "FORMULAIRE : %s | TYPE=%s | NB=%s",
+            form_name,
+            type(submissions).__name__,
+            len(submissions) if hasattr(submissions, "__len__") else "?",
+        )
+        """
+        if submissions:
+            logger.info(
+                "PREMIER ELEMENT : %r",
+                submissions[0] if isinstance(submissions, list) else submissions,
+            )
+        """
+    logger.info("========================================")
 
     for form_name, submissions in context["split"].items():
         form_ref = reference.get(form_name)
