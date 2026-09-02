@@ -17,12 +17,13 @@ from pathlib import Path
 
 from odf.draw import Frame, Image
 from odf.opendocument import load
+from odf.table import Table, TableCell, TableColumn, TableRow
 from odf.text import H, List, ListItem, P
 
 from reporting.bilan_charts import (
     QUADRANT_LABELS,
     SECTIONS,
-    generate_all_charts,
+    generate_all_item_charts,
 )
 from storage.paths import paths
 from utils.logger import get_logger
@@ -68,31 +69,64 @@ def _add_patient_identity(doc, patient: dict) -> None:
         doc.text.addElement(P(text=f"Niveau : {patient['niveau']}"))
 
 
-def _add_chart_section(
+def _add_item_chart_row(
+    doc,
+    table,
+    label: str,
+    score: float,
+    svg_bytes: bytes,
+    height_cm: float,
+) -> None:
+    """Ajoute une ligne Libellé / Score / Graphique au tableau."""
+    row = TableRow()
+
+    cell = TableCell()
+    cell.addElement(P(text=label))
+    row.addElement(cell)
+
+    cell = TableCell()
+    cell.addElement(P(text=f"{score:+.2f}"))
+    row.addElement(cell)
+
+    cell = TableCell()
+
+    frame = Frame(
+        width="4cm",
+        height=f"{height_cm}cm",
+    )
+
+    href = doc.addPictureFromString(
+        svg_bytes,
+        "image/svg+xml",
+    )
+
+    image = Image(href=href)
+    frame.addElement(image)
+
+    paragraph = P()
+    paragraph.addElement(frame)
+    cell.addElement(paragraph)
+
+    row.addElement(cell)
+
+    table.addElement(row)
+
+
+def _add_item_chart_section(
     doc,
     title: str,
-    chart: tuple[bytes, float],
+    items: list[tuple[str, float, bytes, float]],
 ) -> None:
-    svg_bytes, height_cm = chart
+    """Ajoute une section contenant un tableau Libellé / Score / Graphique."""
     doc.text.addElement(
         H(
             outlinelevel=1,
             text=title,
         )
     )
-    href = doc.addPictureFromString(
-        svg_bytes,
-        "image/svg+xml",
-    )
-    frame = Frame(
-        width="16cm",
-        height=f"{height_cm}cm",
-        anchortype="paragraph",
-    )
-    frame.addElement(Image(href=href))
-    paragraph = P()
-    paragraph.addElement(frame)
-    doc.text.addElement(paragraph)
+
+    table = _build_item_chart_table(doc, items)
+    doc.text.addElement(table)
 
 
 def _add_strategies(doc, selected_strategies: dict) -> None:
@@ -151,14 +185,17 @@ def build_bilan_odt(
     doc = load(str(paths.odt_template))
 
     _add_patient_identity(doc, patient)
-
-    charts = generate_all_charts(scores)
+    item_charts = generate_all_item_charts(scores)
 
     for section_key, title in SECTIONS:
-        chart = charts.get(section_key)
+        items = item_charts.get(section_key)
 
-        if chart:
-            _add_chart_section(doc, title, chart)
+        if items:
+            _add_item_chart_section(
+                doc,
+                title,
+                items,
+            )
 
     _add_strategies(doc, selected_strategies)
 
@@ -173,3 +210,69 @@ def build_bilan_odt(
     )
 
     return output_path
+
+def _build_item_chart_table(
+    doc,
+    items: list[tuple[str, float, bytes, float]],
+) -> Table:
+    """Construit un tableau contenant une ligne par item."""
+    table = Table(name="ItemCharts")
+
+    for _ in range(3):
+        table.addElement(TableColumn())
+
+    for label, score, svg_bytes, height_cm in items:
+        _add_item_chart_row(
+            doc,
+            table,
+            label,
+            score,
+            svg_bytes,
+            height_cm,
+        )
+
+    return table
+
+
+if __name__ == "__main__":
+    from odf.opendocument import OpenDocumentText
+
+    doc = OpenDocumentText()
+
+    test_scores = {
+        "quadrants": {
+            "recherche": {"z": 0.51},
+            "evitement": {"z": -1.39},
+            "sensibilite": {"z": 0.85},
+        },
+        "domains": {
+            "auditif": {"z": -0.19},
+            "visuel": {"z": 0.54},
+            "tactile": {"z": 0.68},
+        },
+        "composantes_scolaires": {
+            "1": {"z": 0.72},
+        },
+    }
+    charts = generate_all_item_charts(test_scores)
+
+    for section_key, title in SECTIONS:
+        items = charts.get(section_key)
+
+        if not items:
+            continue
+
+        _add_item_chart_section(
+            doc,
+            title,
+            items,
+        )
+
+        print(
+            f"{section_key}: {len(items)} lignes"
+        )
+
+    test_path = Path("test_table.odt")
+    doc.save(str(test_path))
+
+    print(f"Tableau test créé : {test_path}")

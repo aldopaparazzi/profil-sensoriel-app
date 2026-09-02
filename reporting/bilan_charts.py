@@ -76,7 +76,6 @@ BOTTOM_MARGIN = 12
 DISPLAY_WIDTH_CM = 16.0
 MAX_Z = 3.0
 
-
 def _get_chart_config(chart_config: dict | None) -> dict:
     if chart_config is None:
         runtime = load_runtime()
@@ -95,7 +94,6 @@ def _get_chart_config(chart_config: dict | None) -> dict:
         "marker_size": chart_config.get("marker_size", 14),
     }
 
-
 def _bar_color(z: float | None) -> str:
     """Couleur selon |z|, mêmes seuils que CONFIG.bar.colors du template.html."""
     if z is None:
@@ -106,10 +104,8 @@ def _bar_color(z: float | None) -> str:
             return color
     return BAR_COLOR_THRESHOLDS[-1][1]
 
-
 def _get_label(section: str, key: str) -> str:
     return LABEL_MAPS.get(section, {}).get(key, key)
-
 
 def _ordered_keys(section: str, data: dict) -> list[str]:
     """Respecte l'ordre fixe des quadrants ; sinon ordre naturel."""
@@ -117,7 +113,6 @@ def _ordered_keys(section: str, data: dict) -> list[str]:
         return [k for k in QUADRANT_ORDER if k in data]
 
     return list(data.keys())
-
 
 def generate_item_chart(
     section: str,
@@ -137,25 +132,14 @@ def generate_item_charts(
     scores_for_type: dict,
     chart_config: dict | None = None,
 ) -> list[tuple[str, float, bytes, float]]:
-    """
-    Génère un graphique SVG par item.
 
-    Retourne une liste contenant, pour chaque item :
-        (
-            libellé,
-            score,
-            svg_bytes,
-            height_cm,
-        )
-    """
+    """     Génère un graphique SVG par item. """
+
     rows = _build_chart_rows(section, scores_for_type)
-
     items = []
-
     for row in rows:
         key = row["key"]
         values = scores_for_type[key]
-
         svg_bytes, height_cm = generate_item_chart(
             section=section,
             key=key,
@@ -173,7 +157,6 @@ def generate_item_charts(
         )
 
     return items
-
 
 def _build_chart_rows(
     section: str,
@@ -254,7 +237,6 @@ def _get_row_geometry(index, row, config, bar_width):
         dot_x = x_zero - fill_width
 
     return y_center, x_zero, fill_width, fill_x, dot_x
-
 
 def _render_chart_label(svg, index, label, y_center):
     """
@@ -456,7 +438,6 @@ def _build_chart_svg_style(config):
     </style>
     '''
 
-
 def generate_chart(
     section: str,
     scores_for_type: dict,
@@ -629,72 +610,30 @@ def generate_chart(
 
     return svg_bytes, height_cm
 
-def generate_item_charts(
-    section: str,
-    scores_for_type: dict,
-    chart_config: dict | None = None,
-) -> list[tuple[str, float, bytes, float]]:
-    """
-    Génère un graphique SVG par item.
-
-    Retourne une liste contenant, pour chaque item :
-        (
-            libellé,
-            score,
-            svg_bytes,
-            height_cm,
-        )
-    """
-    rows = _build_chart_rows(section, scores_for_type)
-
-    items = []
-
-    for row in rows:
-        key = row["key"]
-
-        values = scores_for_type[key]
-
-        chart = generate_item_chart(
-            section=section,
-            key=key,
-            values=values,
-            chart_config=chart_config,
-        )
-
-        label = row["label"]
-        score = row["z"]
-
-        svg_bytes, height_cm = chart
-
-        items.append(
-            (
-                label,
-                score,
-                svg_bytes,
-                height_cm,
-            )
-        )
-
-    return items
-
-
-def generate_all_charts(
+def generate_all_item_charts(
     scores: dict,
-) -> dict[str, tuple[bytes, float]]:
+    chart_config: dict | None = None,
+) -> dict[str, list[tuple[str, float, bytes, float]]]:
     """
-    Génère tous les graphiques SVG nécessaires au bilan.
+    Génère un graphique SVG par item pour chaque section.
 
     Retourne :
 
         {
-            "quadrants": (svg_bytes, height_cm),
-            "domains": (svg_bytes, height_cm),
-            "composantes_scolaires": (svg_bytes, height_cm),
+            "quadrants": [
+                (libellé, score, svg_bytes, height_cm),
+                ...
+            ],
+            "domains": [
+                ...
+            ],
+            "composantes_scolaires": [
+                ...
+            ],
         }
 
-    Les sections absentes ou vides ne produisent pas de graphique.
+    Les sections absentes ou vides ne produisent pas d'items.
     """
-
     charts = {}
 
     for section_key, _title in SECTIONS:
@@ -703,9 +642,38 @@ def generate_all_charts(
         if not data:
             continue
 
-        charts[section_key] = generate_chart(
-            section_key,
-            data,
+        charts[section_key] = generate_item_charts(
+            section=section_key,
+            scores_for_type=data,
+            chart_config=chart_config,
         )
 
     return charts
+
+
+if __name__ == "__main__":
+    test_scores = {
+        "quadrants": {
+            "recherche": {"z": 0.51},
+            "evitement": {"z": -1.39},
+            "sensibilite": {"z": 0.85},
+        },
+        "domains": {
+            "auditif": {"z": -0.19},
+            "visuel": {"z": 0.54},
+            "tactile": {"z": 0.68},
+        },
+        "composantes_scolaires": {
+            "1": {"z": 0.72},
+        },
+    }
+
+    charts = generate_all_item_charts(test_scores)
+
+    for section, items in charts.items():
+        print(f"\n{section} : {len(items)} items")
+
+        for label, score, svg_bytes, height_cm in items:
+            print(
+                f"  {label}: {score:+.2f}"
+            )
