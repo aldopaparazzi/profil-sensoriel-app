@@ -17,6 +17,13 @@ from pathlib import Path
 
 from odf.draw import Frame, Image
 from odf.opendocument import load
+from odf.style import (
+    ParagraphProperties,
+    Style,
+    TableCellProperties,
+    TableColumnProperties,
+    TableRowProperties,
+)
 from odf.table import Table, TableCell, TableColumn, TableRow
 from odf.text import H, List, ListItem, P
 
@@ -78,21 +85,28 @@ def _add_item_chart_row(
     height_cm: float,
 ) -> None:
     """Ajoute une ligne Libellé / Score / Graphique au tableau."""
-    row = TableRow()
+    row = TableRow(stylename="ItemChartsRow")
 
-    cell = TableCell()
+    cell = TableCell(stylename="ItemChartsCell")
     cell.addElement(P(text=label))
     row.addElement(cell)
 
-    cell = TableCell()
-    cell.addElement(P(text=f"{score:+.2f}"))
+    cell = TableCell(stylename="ItemChartsCell")
+    cell.addElement(
+        P(
+            stylename="ItemChartsScoreParagraph",
+            text=f"{score:+.2f}",
+        )
+    )
     row.addElement(cell)
 
-    cell = TableCell()
+
+    cell = TableCell(stylename="ItemChartsCell")
 
     frame = Frame(
-        width="4cm",
+        width="8.5cm",
         height=f"{height_cm}cm",
+        anchortype="char",
     )
 
     href = doc.addPictureFromString(
@@ -103,7 +117,10 @@ def _add_item_chart_row(
     image = Image(href=href)
     frame.addElement(image)
 
-    paragraph = P()
+    paragraph = P(
+        stylename="ItemChartsGraphParagraph",
+    )
+
     paragraph.addElement(frame)
     cell.addElement(paragraph)
 
@@ -211,15 +228,82 @@ def build_bilan_odt(
 
     return output_path
 
+
 def _build_item_chart_table(
     doc,
     items: list[tuple[str, float, bytes, float]],
 ) -> Table:
     """Construit un tableau contenant une ligne par item."""
     table = Table(name="ItemCharts")
+    cell_style = Style(
+        name="ItemChartsCell",
+        family="table-cell",
+    )
+    graph_paragraph_style = Style(
+        name="ItemChartsGraphParagraph",
+        family="paragraph",
+    )
+    graph_paragraph_style.addElement(
+        ParagraphProperties(
+            textalign="center",
+        )
+    )
+    doc.automaticstyles.addElement(graph_paragraph_style)
 
-    for _ in range(3):
-        table.addElement(TableColumn())
+    score_paragraph_style = Style(
+        name="ItemChartsScoreParagraph",
+        family="paragraph",
+    )
+    score_paragraph_style.addElement(
+        ParagraphProperties(
+            textalign="center",
+        )
+    )
+    doc.automaticstyles.addElement(score_paragraph_style)
+
+
+    cell_style.addElement(
+        TableCellProperties(
+            verticalalign="middle",
+        )
+    )
+    doc.automaticstyles.addElement(cell_style)
+
+    row_style = Style(
+        name="ItemChartsRow",
+        family="table-row",
+    )
+    row_style.addElement(
+        TableRowProperties(
+            rowheight="1.5cm",
+        )
+    )
+    doc.automaticstyles.addElement(row_style)
+
+    label_style = Style(
+        name="ItemChartsLabelCol",
+        family="table-column",
+    )
+    label_style.addElement(TableColumnProperties(columnwidth="4cm"))
+    doc.automaticstyles.addElement(label_style)
+
+    score_style = Style(
+        name="ItemChartsScoreCol",
+        family="table-column",
+    )
+    score_style.addElement(TableColumnProperties(columnwidth="1.5cm"))
+    doc.automaticstyles.addElement(score_style)
+
+    graph_style = Style(
+        name="ItemChartsGraphCol",
+        family="table-column",
+    )
+    graph_style.addElement(TableColumnProperties(columnwidth="10cm"))
+    doc.automaticstyles.addElement(graph_style)
+
+    table.addElement(TableColumn(stylename="ItemChartsLabelCol"))
+    table.addElement(TableColumn(stylename="ItemChartsScoreCol"))
+    table.addElement(TableColumn(stylename="ItemChartsGraphCol"))
 
     for label, score, svg_bytes, height_cm in items:
         _add_item_chart_row(
@@ -268,11 +352,14 @@ if __name__ == "__main__":
             items,
         )
 
-        print(
-            f"{section_key}: {len(items)} lignes"
-        )
+        print(f"{section_key}: {len(items)} lignes")
 
     test_path = Path("test_table.odt")
     doc.save(str(test_path))
+    import zipfile
+
+    with zipfile.ZipFile(test_path) as z:
+        content = z.read("content.xml").decode("utf-8")
+        print(content)
 
     print(f"Tableau test créé : {test_path}")
