@@ -2,16 +2,21 @@
 
 from reporting.chart_style import (
     BAR_COLOR_THRESHOLDS,
+    BAR_HEIGHT,
     BORDER_COLOR,
     BOTTOM_MARGIN,
     COMPOSANTE_LABELS,
-    DISPLAY_WIDTH_CM,
     DOMAIN_LABELS,
+    FILL_HEIGHT,
     FONT_FAMILY,
     LABEL_MAPS,
     LEFT_MARGIN,
+    MARKER_SIZE,
     MAX_Z,
+    MIN_CHART_HEIGHT_CM,
     MUTED_COLOR,
+    ODT_CHART_HEIGHT_CM,
+    ODT_CHART_WIDTH_CM,
     QUADRANT_LABELS,
     QUADRANT_ORDER,
     RIGHT_MARGIN,
@@ -19,29 +24,12 @@ from reporting.chart_style import (
     SVG_WIDTH,
     TEXT_COLOR,
     TOP_MARGIN,
+    VALUE_FONT_SIZE,
+    VALUE_OFFSET,
+    ZERO_LINE_HEIGHT,
 )
 from storage.init import load_runtime
 
-#from storage.paths import paths
-
-
-def _get_chart_config(chart_config: dict | None) -> dict:
-    if chart_config is None:
-        runtime = load_runtime()
-        chart_config = runtime.get("ui", {}).get("charts", {})
-
-    return {
-        "show_values": chart_config.get("show_values", True),
-        "show_marker": chart_config.get("show_marker", True),
-        "show_zero_line": chart_config.get("show_zero_line", True),
-        "label_font_size": chart_config.get("label_font_size", 21),
-        "value_font_size": chart_config.get("value_font_size", 18),
-        "row_height": chart_config.get("row_height", 42),
-        "bar_height": chart_config.get("bar_height", 12),
-        "fill_height": chart_config.get("fill_height", 10),
-        "zero_line_height": chart_config.get("zero_line_height", 21),
-        "marker_size": chart_config.get("marker_size", 14),
-    }
 
 def _bar_color(z: float | None) -> str:
     """Couleur selon |z|, mêmes seuils que CONFIG.bar.colors du template.html."""
@@ -53,8 +41,6 @@ def _bar_color(z: float | None) -> str:
             return color
     return BAR_COLOR_THRESHOLDS[-1][1]
 
-def _get_label(section: str, key: str) -> str:
-    return LABEL_MAPS.get(section, {}).get(key, key)
 
 def _ordered_keys(section: str, data: dict) -> list[str]:
     """Respecte l'ordre fixe des quadrants ; sinon ordre naturel."""
@@ -131,35 +117,41 @@ def _build_chart_rows(
 
     return rows
 
-def _get_chart_dimensions(rows, config):
+def _get_chart_config(chart_config: dict | None) -> dict:
+    if chart_config is None:
+        runtime = load_runtime()
+        chart_config = runtime.get("ui", {}).get("charts", {})
+
+    return {
+        "show_values": chart_config.get("show_values", True),
+        "show_marker": chart_config.get("show_marker", True),
+        "show_zero_line": chart_config.get("show_zero_line", True),
+    }
+
+def _get_chart_dimensions():
     """
-    Calcule les dimensions du SVG à partir du nombre de lignes
-    et de la configuration graphique.
+    Calcule les dimensions intrinsèques d'un SVG mono-item.
     """
     bar_width = SVG_WIDTH - LEFT_MARGIN - RIGHT_MARGIN
-    n = max(len(rows), 1)
-
     svg_height = (
         TOP_MARGIN
-        + n * config["row_height"]
+        + BAR_HEIGHT
         + BOTTOM_MARGIN
     )
-
     return bar_width, svg_height
 
-def _get_row_geometry(index, row, config, bar_width):
+def _get_label(section: str, key: str) -> str:
+    return LABEL_MAPS.get(section, {}).get(key, key)
+
+def _get_row_geometry(row, bar_width):
     """
     Calcule les positions et dimensions nécessaires au rendu
     d'une ligne du graphique SVG.
     """
     z_clamped = row["z_clamped"]
 
-    # Position verticale de la ligne.
-    y_center = (
-        TOP_MARGIN
-        + index * config["row_height"]
-        + config["row_height"] / 2
-    )
+    # Position verticale de l'unique barre.
+    y_center = TOP_MARGIN + BAR_HEIGHT / 2
 
     # Position du zéro.
     x_zero = LEFT_MARGIN + bar_width * 0.5
@@ -187,29 +179,11 @@ def _get_row_geometry(index, row, config, bar_width):
 
     return y_center, x_zero, fill_width, fill_x, dot_x
 
-def _render_chart_label(svg, index, label, y_center):
+def _render_bar_track(svg, y_center, bar_width):
     """
-    Ajoute le label d'une ligne au SVG.
+    Ajoute la barre de fond grise au SVG.
     """
-    svg.append(
-        f'''
-        <!-- Ligne {index + 1} : {label} -->
-
-        <text
-            class="label"
-            x="{LEFT_MARGIN - 20}"
-            y="{y_center + 6:.2f}"
-            text-anchor="end">
-            {label}
-        </text>
-        '''
-    )
-
-def _render_bar_track(svg, y_center, config, bar_width):
-    """
-    Ajoute la barre de fond grise d'une ligne au SVG.
-    """
-    track_y = y_center - config["bar_height"] / 2
+    track_y = y_center - BAR_HEIGHT / 2
 
     svg.append(
         f'''
@@ -218,20 +192,20 @@ def _render_bar_track(svg, y_center, config, bar_width):
             x="{LEFT_MARGIN}"
             y="{track_y:.2f}"
             width="{bar_width}"
-            height="{config["bar_height"]:.2f}"
-            rx="{config["bar_height"] / 2:.2f}"
-            ry="{config["bar_height"] / 2:.2f}"/>
+            height="{BAR_HEIGHT:.2f}"
+            rx="{BAR_HEIGHT / 2:.2f}"
+            ry="{BAR_HEIGHT / 2:.2f}"/>
         '''
     )
 
-def _render_bar_fill(svg, y_center, fill_width, fill_x, color, config):
+def _render_bar_fill(svg, y_center, fill_width, fill_x, color):
     """
     Ajoute la barre colorée correspondant au score.
     """
     if fill_width <= 0:
         return
 
-    fill_y = y_center - config["fill_height"] / 2
+    fill_y = y_center - FILL_HEIGHT / 2
 
     svg.append(
         f'''
@@ -239,10 +213,9 @@ def _render_bar_fill(svg, y_center, fill_width, fill_x, color, config):
             x="{fill_x:.2f}"
             y="{fill_y:.2f}"
             width="{fill_width:.2f}"
-            height="{config["fill_height"]:.2f}"
-            rx="{config["fill_height"] / 2:.2f}"
-            ry="{config["fill_height"] / 2:.2f}"
-
+            height="{FILL_HEIGHT:.2f}"
+            rx="{FILL_HEIGHT / 2:.2f}"
+            ry="{FILL_HEIGHT / 2:.2f}"
             fill="{color}"/>
         '''
     )
@@ -254,7 +227,7 @@ def _render_zero_line(svg, y_center, x_zero, config):
     if not config["show_zero_line"]:
         return
 
-    zero_y = y_center - config["zero_line_height"] / 2
+    zero_y = y_center - ZERO_LINE_HEIGHT / 2
 
     svg.append(
         f'''
@@ -263,7 +236,7 @@ def _render_zero_line(svg, y_center, x_zero, config):
             x="{x_zero - 0.75:.2f}"
             y="{zero_y:.2f}"
             width="1.5"
-            height="{config["zero_line_height"]:.2f}"/>
+            height="{ZERO_LINE_HEIGHT:.2f}"/>
         '''
     )
 
@@ -275,7 +248,7 @@ def _render_marker(svg, y_center, dot_x, color, config):
         return
 
     # Cercle blanc extérieur.
-    marker_radius = config["marker_size"] / 2
+    marker_radius = MARKER_SIZE / 2
 
     svg.append(
         f'''
@@ -328,15 +301,10 @@ def _render_value(svg, y_center, dot_x, z, z_clamped, color, config):
         return
 
     # Formatage identique à fmtDS() :
-    #
-    # +0.72
-    # -1.15
-    # +2.00
-    #
     value_text = f"{z:+.2f}"
 
     # Décalage de la valeur par rapport au point.
-    value_offset = 18
+    value_offset = VALUE_OFFSET
 
     if z_clamped >= 0:
         value_x = dot_x + value_offset
@@ -364,15 +332,9 @@ def _build_chart_svg_style(config):
     """
     return f'''
     <style>
-        .label {{
-            font-family: "IBM Plex Sans", "DejaVu Sans", sans-serif;
-            font-size: {config["label_font_size"]}px;
-            fill: {TEXT_COLOR};
-        }}
-
         .value {{
             font-family: "IBM Plex Mono", "DejaVu Sans Mono", monospace;
-            font-size: {config["value_font_size"]}px;
+            font-size: {VALUE_FONT_SIZE}px;
             font-weight: 500;
         }}
 
@@ -395,57 +357,14 @@ def generate_chart(
     """
     Génère un graphique SVG reproduisant le style des barres
     présentes dans template.html.
-
-    Le graphique est composé directement en SVG :
-        - une ligne/barre de fond grise (.bar-track)
-        - une barre colorée (.bar-fill)
-        - un trait vertical central (.bar-zero)
-        - un point circulaire (.bar-dot)
-        - éventuellement la valeur DS à droite/gauche
-
-
-    Paramètres
-    ----------
-    section:
-        Type de section :
-            - "quadrants"
-            - "domains"
-            - "composantes_scolaires"
-
-    scores_for_type:
-        Dictionnaire contenant les scores.
-
-        Exemple :
-            {
-                "recherche": {"z": 0.72},
-                "evitement": {"z": -1.15},
-                ...
-            }
-
-    chart_config:
-        Configuration optionnelle provenant du runtime.
-
-    Retour
-    ------
-    tuple[bytes, float]
-        - SVG sous forme de bytes
-        - hauteur recommandée en cm pour LibreOffice
     """
-    config = _get_chart_config(
-        chart_config
-    )  # Récupère la configuration graphique (taille police, hauteur ligne, etc.)
-
+    config = _get_chart_config(chart_config)
     rows = _build_chart_rows(section, scores_for_type)
-
-    # ---------------------------------------------------------
-    # Dimensions SVG
-    # ---------------------------------------------------------
-
-    BAR_WIDTH, svg_height = _get_chart_dimensions(rows, config)
-
-    # ---------------------------------------------------------
-    # Construction du SVG
-    # ---------------------------------------------------------
+    if len(rows) != 1:
+        raise ValueError(
+            "generate_chart() attend exactement un item."
+        )
+    BAR_WIDTH, svg_height = _get_chart_dimensions()
 
     svg = []
 
@@ -466,96 +385,71 @@ def generate_chart(
 
     svg.append(_build_chart_svg_style(config))
 
-    # Dessin des lignes
-    for index, row in enumerate(rows):
-        label = row["label"]
-        z = row["z"]
-        z_clamped = row["z_clamped"]
-        color = row["color"]
+    # Dessin de l'item
+    row = rows[0]
 
-        y_center, x_zero, fill_width, fill_x, dot_x = _get_row_geometry(
-            index,
-            row,
-            config,
-            BAR_WIDTH,
+    label = row["label"]
+    z = row["z"]
+    z_clamped = row["z_clamped"]
+    color = row["color"]
+
+    y_center, x_zero, fill_width, fill_x, dot_x = _get_row_geometry(
+        row,
+        BAR_WIDTH,
+    )
+
+    # BAR TRACK
+    _render_bar_track(
+        svg,
+        y_center,
+        BAR_WIDTH,
+    )
+
+    # BAR FILL
+    _render_bar_fill(
+        svg,
+        y_center,
+        fill_width,
+        fill_x,
+        color,
         )
 
-        # LABEL
-        _render_chart_label(
-            svg,
-            index,
-            label,
-            y_center,
-        )
+    # ZERO LINE
+    _render_zero_line(
+        svg,
+        y_center,
+        x_zero,
+        config
+    )
 
-        # BAR TRACK
-        _render_bar_track(
-            svg,
-            y_center,
-            config,
-            BAR_WIDTH,
-        )
+    # POINT
+    _render_marker(
+        svg,
+        y_center,
+        dot_x,
+        color,
+        config,
+    )
 
-        # BAR FILL
-        _render_bar_fill(
-            svg,
-            y_center,
-            fill_width,
-            fill_x,
-            color,
-            config
-        )
-
-        # ZERO LINE
-        _render_zero_line(
-            svg,
-            y_center,
-            x_zero,
-            config
-        )
-
-        # POINT
-        _render_marker(
-            svg,
-            y_center,
-            dot_x,
-            color,
-            config,
-        )
-
-
-        # VALEUR DS
-        _render_value(
-            svg,
-            y_center,
-            dot_x,
-            z,
-            z_clamped,
-            color,
-            config,
-        )
-
-    # ---------------------------------------------------------
-    # Fermeture du SVG
-    # ---------------------------------------------------------
+    # VALEUR
+    _render_value(
+        svg,
+        y_center,
+        dot_x,
+        z,
+        z_clamped,
+        color,
+        config,
+    )
 
     svg.append("</svg>")
 
-    # Conversion en bytes UTF-8.
     svg_bytes = "".join(svg).encode("utf-8")
 
-    # ---------------------------------------------------------
-    # Hauteur pour LibreOffice
-    # ---------------------------------------------------------
-    #
-    # Le calcul reprend l'idée de l'ancien generate_chart().
-    #
-    # On ajoute une petite marge pour le haut/bas.
-    #
-
-    height_cm = DISPLAY_WIDTH_CM * (svg_height / SVG_WIDTH)
+    # Hauteur intrinsèque du SVG → hauteur d'image ODT
+    height_cm = ODT_CHART_WIDTH_CM * (svg_height / SVG_WIDTH)
     height_cm = round(height_cm, 2)
-    height_cm = max(height_cm, 1.5)
+    height_cm = max(height_cm, MIN_CHART_HEIGHT_CM)
 
     return svg_bytes, height_cm
 

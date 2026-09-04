@@ -63,12 +63,37 @@ LABEL_MAPS = {
     "composantes_scolaires": COMPOSANTE_LABELS,
 }
 
+
+# Dimensions générales du SVG
 SVG_WIDTH = 1000
 
-LEFT_MARGIN = 260
+LEFT_MARGIN = 40
 RIGHT_MARGIN = 90
 TOP_MARGIN = 4
 BOTTOM_MARGIN = 4
 
-DISPLAY_WIDTH_CM = 16.0
+# Dimensions du graphique dans l'ODT
+ODT_CHART_WIDTH_CM = 10.0
+ODT_CHART_HEIGHT_CM = 0.7
+MIN_CHART_HEIGHT_CM = 0.7
+
+# Échelle des scores
 MAX_Z = 3.0
+
+# Géométrie interne du graphique
+BAR_HEIGHT = 12
+FILL_HEIGHT = 10
+ZERO_LINE_HEIGHT = 21
+MARKER_SIZE = 14
+
+# Typographie interne du graphique
+VALUE_FONT_SIZE = 18
+VALUE_OFFSET = 18
+
+# legacy
+DEFAULT_CHART_SETTINGS = {
+    "show_values": True,
+    "show_marker": True,
+    "show_zero_line": True,
+}
+ODT_CHART_ROW_PADDING_CM = 0.15

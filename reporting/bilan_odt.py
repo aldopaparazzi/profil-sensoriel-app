@@ -33,7 +33,12 @@ from reporting.bilan_charts import (
     SECTIONS,
     generate_all_item_charts,
 )
-from reporting.chart_style import BAR_COLOR_THRESHOLDS
+from reporting.chart_style import (
+    BAR_COLOR_THRESHOLDS,
+    ODT_CHART_HEIGHT_CM,
+    ODT_CHART_ROW_PADDING_CM,
+    ODT_CHART_WIDTH_CM,
+)
 from storage.paths import paths
 from utils.logger import get_logger
 
@@ -323,7 +328,7 @@ def _build_item_chart_table(
     )
     row_style.addElement(
         TableRowProperties(
-            rowheight="1cm",
+            rowheight=f"{ODT_CHART_HEIGHT_CM + ODT_CHART_ROW_PADDING_CM}cm",
         )
     )
     doc.automaticstyles.addElement(row_style)

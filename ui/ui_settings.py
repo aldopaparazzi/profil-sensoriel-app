@@ -70,50 +70,10 @@ from PySide6.QtWidgets import (
 from config.settings import get_tally_token, save_tally_token
 from ingestion.fetch_tally import check_token_valid
 from reporting.bilan_charts import generate_chart
+from reporting.chart_style import DEFAULT_CHART_SETTINGS
 from storage.init import load_runtime, save_runtime
 from storage.paths import paths
 from utils.logger import logger
-
-# ============================================================
-# CONFIGURATION GRAPHIQUE PAR DÉFAUT
-# ============================================================
-#
-# Ces valeurs correspondent maintenant directement au moteur SVG.
-# Toutes les dimensions graphiques sont exprimées en pixels SVG.
-# Cela permet de conserver une relation simple :
-#     UI → chart_config → generate_chart() → SVG → ODT
-# Il n'y a plus de paramètre DPI puisque le SVG est vectoriel.
-#
-
-DEFAULT_CHART_SETTINGS = {
-    "show_marker": True,
-    "show_values": True,
-    "show_zero_line": True,
-    "show_x_axis": False,
-    # Texte
-    "label_font_size": 21,
-    "value_font_size": 18,
-    # Géométrie
-    "row_height": 42,
-    "bar_height": 12,
-    "fill_height": 10,
-    "zero_line_height": 21,
-    "marker_size": 14,
-    # Legacy : conservé pour compatibilité avec les anciens runtime.json
-}
-
-
-# ============================================================
-# COMPATIBILITÉ LEGACY
-# ============================================================
-#
-# Ces paramètres ne sont plus présentés dans l'interface.
-#
-# Ils peuvent cependant exister dans runtime.json.
-#
-# On les conserve afin d'éviter de supprimer silencieusement
-# des informations provenant d'une ancienne version.
-#
 
 LEGACY_CHART_KEYS = ("show_x_axis",)
 
