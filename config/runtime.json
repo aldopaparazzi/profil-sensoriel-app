@@ -16,7 +16,7 @@
       "bar_height": 12,
       "row_height": 32,
       "show_marker": true,
-      "show_values": true,
+      "show_values": false,
       "show_zero_line": true,
       "show_x_axis": false,
       "dpi": 150,

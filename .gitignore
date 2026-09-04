@@ -35,3 +35,4 @@ venv/
 source*
 resultat.*
 convert_reference.py
+test_table.odt

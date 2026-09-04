@@ -23,6 +23,7 @@ from odf.style import (
     TableCellProperties,
     TableColumnProperties,
     TableRowProperties,
+    TextProperties,
 )
 from odf.table import Table, TableCell, TableColumn, TableRow
 from odf.text import H, List, ListItem, P
@@ -32,6 +33,7 @@ from reporting.bilan_charts import (
     SECTIONS,
     generate_all_item_charts,
 )
+from reporting.chart_style import BAR_COLOR_THRESHOLDS
 from storage.paths import paths
 from utils.logger import get_logger
 
@@ -83,30 +85,44 @@ def _add_item_chart_row(
     score: float,
     svg_bytes: bytes,
     height_cm: float,
+    score_styles: dict[str, str],
 ) -> None:
+
     """Ajoute une ligne Libellé / Score / Graphique au tableau."""
+    # Propriétés du paragraphe contenant le libellé
     row = TableRow(stylename="ItemChartsRow")
-
-    cell = TableCell(stylename="ItemChartsCell")
-    cell.addElement(P(text=label))
-    row.addElement(cell)
-
     cell = TableCell(stylename="ItemChartsCell")
     cell.addElement(
         P(
-            stylename="ItemChartsScoreParagraph",
-            text=f"{score:+.2f}",
+            stylename="ItemChartsLabelParagraph",
+            text=label,
         )
     )
     row.addElement(cell)
 
-
+    # Propriétés du paragraphe contenant le score
     cell = TableCell(stylename="ItemChartsCell")
+    distance = abs(score)
+    # Détermine la couleur du score en fonction de la distance par rapport à zéro
+    score_color = next(
+        color
+        for threshold, color in BAR_COLOR_THRESHOLDS
+        if distance <= threshold
+    )
+    score_paragraph = P(
+        stylename=score_styles[score_color],
+        text=f"{score:+.2f}",
+    )
+    cell.addElement(score_paragraph)
 
+
+    # Propriétés du paragraphe contenant le graphique
+    row.addElement(cell)
+    cell = TableCell(stylename="ItemChartsCell") # 
     frame = Frame(
-        width="8.5cm",
-        height=f"{height_cm}cm",
-        anchortype="char",
+        width="10cm",
+        height="0.7cm",
+        anchortype="paragraph",
     )
 
     href = doc.addPictureFromString(
@@ -123,9 +139,7 @@ def _add_item_chart_row(
 
     paragraph.addElement(frame)
     cell.addElement(paragraph)
-
     row.addElement(cell)
-
     table.addElement(row)
 
 
@@ -235,10 +249,14 @@ def _build_item_chart_table(
 ) -> Table:
     """Construit un tableau contenant une ligne par item."""
     table = Table(name="ItemCharts")
+
+    # Style des cellules du tableau
     cell_style = Style(
         name="ItemChartsCell",
         family="table-cell",
     )
+
+    # Style du paragraphe contenant le graphique
     graph_paragraph_style = Style(
         name="ItemChartsGraphParagraph",
         family="paragraph",
@@ -246,59 +264,98 @@ def _build_item_chart_table(
     graph_paragraph_style.addElement(
         ParagraphProperties(
             textalign="center",
+            margin="0cm",
         )
     )
     doc.automaticstyles.addElement(graph_paragraph_style)
 
-    score_paragraph_style = Style(
-        name="ItemChartsScoreParagraph",
+    # Style du paragraphe contenant le libellé
+    label_paragraph_style = Style(
+        name="ItemChartsLabelParagraph",
         family="paragraph",
     )
-    score_paragraph_style.addElement(
-        ParagraphProperties(
-            textalign="center",
+    label_paragraph_style.addElement(
+        TextProperties(
+            fontsize="10pt",
         )
     )
-    doc.automaticstyles.addElement(score_paragraph_style)
+    doc.automaticstyles.addElement(label_paragraph_style)
 
+    # Styles pour les paragraphes contenant les scores
+    score_styles = {}
 
+    for index, (_threshold, color) in enumerate(BAR_COLOR_THRESHOLDS):
+        style_name = f"ItemChartsScoreParagraph{index}"
+
+        score_style = Style(
+            name=style_name,
+            family="paragraph",
+        )
+        score_style.addElement(
+            ParagraphProperties(
+                textalign="center",
+            )
+        )
+        score_style.addElement(
+            TextProperties(
+                fontsize="10pt",
+                color=color,
+            )
+        )
+
+        doc.automaticstyles.addElement(score_style)
+        score_styles[color] = style_name
+
+    # Propriétés des cellules
     cell_style.addElement(
         TableCellProperties(
             verticalalign="middle",
+            border="0.5pt solid #000000",
+            padding="0.15cm",
         )
     )
     doc.automaticstyles.addElement(cell_style)
 
+    # Style des lignes
     row_style = Style(
         name="ItemChartsRow",
         family="table-row",
     )
     row_style.addElement(
         TableRowProperties(
-            rowheight="1.5cm",
+            rowheight="1cm",
         )
     )
     doc.automaticstyles.addElement(row_style)
 
+    # Style de la colonne Libellé
     label_style = Style(
         name="ItemChartsLabelCol",
         family="table-column",
     )
-    label_style.addElement(TableColumnProperties(columnwidth="4cm"))
+    label_style.addElement(
+        TableColumnProperties(columnwidth="4cm")
+    )
     doc.automaticstyles.addElement(label_style)
 
+    # Style de la colonne Score
     score_style = Style(
         name="ItemChartsScoreCol",
         family="table-column",
     )
-    score_style.addElement(TableColumnProperties(columnwidth="1.5cm"))
+    score_style.addElement(
+        TableColumnProperties(columnwidth="1.5cm")
+    )
     doc.automaticstyles.addElement(score_style)
 
+    # Style de la colonne Graphique
     graph_style = Style(
         name="ItemChartsGraphCol",
         family="table-column",
     )
-    graph_style.addElement(TableColumnProperties(columnwidth="10cm"))
+    graph_style.addElement(
+        TableColumnProperties(columnwidth="10cm")
+    )
     doc.automaticstyles.addElement(graph_style)
 
     table.addElement(TableColumn(stylename="ItemChartsLabelCol"))
@@ -313,7 +370,9 @@ def _build_item_chart_table(
             score,
             svg_bytes,
             height_cm,
+            score_styles,
         )
+
 
     return table
 
