@@ -73,9 +73,9 @@ TOP_MARGIN = 4
 BOTTOM_MARGIN = 4
 
 # Dimensions du graphique dans l'ODT
-ODT_CHART_WIDTH_CM = 10.0
+ODT_CHART_WIDTH_CM = 8.0
 ODT_CHART_HEIGHT_CM = 0.7
-MIN_CHART_HEIGHT_CM = 0.7
+MIN_CHART_HEIGHT_CM = 0.0
 
 # Échelle des scores
 MAX_Z = 3.0
@@ -90,10 +90,21 @@ MARKER_SIZE = 14
 VALUE_FONT_SIZE = 18
 VALUE_OFFSET = 18
 
-# legacy
+# legacy — compatibilité temporaire avec ui_settings.py
 DEFAULT_CHART_SETTINGS = {
+    # Réglages encore utilisés par le moteur SVG
     "show_values": True,
     "show_marker": True,
     "show_zero_line": True,
+
+    # Réglages legacy — seront supprimés avec les contrôles UI correspondants
+    "label_font_size": 18,
+    "value_font_size": VALUE_FONT_SIZE,
+    "row_height": 40,
+    "bar_height": BAR_HEIGHT,
+    "fill_height": FILL_HEIGHT,
+    "zero_line_height": ZERO_LINE_HEIGHT,
+    "marker_size": MARKER_SIZE,
 }
+
 ODT_CHART_ROW_PADDING_CM = 0.15

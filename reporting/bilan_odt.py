@@ -125,10 +125,11 @@ def _add_item_chart_row(
     row.addElement(cell)
     cell = TableCell(stylename="ItemChartsCell") # 
     frame = Frame(
-        width="10cm",
-        height="0.7cm",
+        width=f"{ODT_CHART_WIDTH_CM}cm",
+        height=f"{height_cm}cm",
         anchortype="paragraph",
     )
+
 
     href = doc.addPictureFromString(
         svg_bytes,

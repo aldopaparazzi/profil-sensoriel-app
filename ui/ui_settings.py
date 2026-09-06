@@ -883,9 +883,6 @@ class SettingsDialog(QDialog):
 
         preview_scores = {
             "auditif": {"z": 1.2},
-            "visuel": {"z": -0.8},
-            "tactile": {"z": 2.1},
-            "vestibulaire": {"z": -2.4},
         }
 
         # ----------------------------------------------------
