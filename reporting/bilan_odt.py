@@ -35,10 +35,10 @@ from reporting.bilan_charts import (
 )
 from reporting.chart_style import (
     BAR_COLOR_THRESHOLDS,
-    ODT_CHART_HEIGHT_CM,
-    ODT_CHART_ROW_PADDING_CM,
+    CHART_CELL_HEIGHT_CM,
     ODT_CHART_WIDTH_CM,
 )
+from storage.init import load_runtime
 from storage.paths import paths
 from utils.logger import get_logger
 
@@ -127,7 +127,7 @@ def _add_item_chart_row(
     frame = Frame(
         width=f"{ODT_CHART_WIDTH_CM}cm",
         height=f"{height_cm}cm",
-        anchortype="paragraph",
+        anchortype="as-char",
     )
 
 
@@ -327,9 +327,15 @@ def _build_item_chart_table(
         name="ItemChartsRow",
         family="table-row",
     )
+    
+    runtime = load_runtime()
+    chart_cell_height = runtime.get("ui", {}).get("charts", {}).get(
+        "chart_cell_height_cm", CHART_CELL_HEIGHT_CM
+    )
+
     row_style.addElement(
         TableRowProperties(
-            rowheight=f"{ODT_CHART_HEIGHT_CM + ODT_CHART_ROW_PADDING_CM}cm",
+            rowheight=f"{chart_cell_height}cm",
         )
     )
     doc.automaticstyles.addElement(row_style)

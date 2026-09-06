@@ -612,6 +612,23 @@ class SettingsDialog(QDialog):
         )
 
         # ----------------------------------------------------
+        # Hauteur de la cellule contenant chaque graphique.
+        # ----------------------------------------------------
+
+
+        self.chart_cell_height = QDoubleSpinBox()
+        self.chart_cell_height.setRange(0.8, 3.0)
+        self.chart_cell_height.setSingleStep(0.1)
+        self.chart_cell_height.setDecimals(1)
+        self.chart_cell_height.setSuffix(" cm")
+        self.chart_cell_height.setToolTip(
+            "Hauteur de la cellule contenant chaque graphique.\n"
+            "Sous 0,8 cm, le texte des autres colonnes devient trop serré."
+        )
+        self.chart_cell_height.setValue(
+            charts.get("chart_cell_height_cm", DEFAULT_CHART_SETTINGS["chart_cell_height_cm"])
+        )
+        # ----------------------------------------------------
         # Piste grise
         # ----------------------------------------------------
 
@@ -711,6 +728,10 @@ class SettingsDialog(QDialog):
             "Espacement des lignes :",
             self.row_height,
         )
+        bars_form.addRow(
+            "Hauteur de cellule graphique :",
+            self.chart_cell_height
+        )
 
         bars_form.addRow(
             "Épaisseur de la piste :",
@@ -793,6 +814,7 @@ class SettingsDialog(QDialog):
             self.fill_height,
             self.zero_line_height,
             self.marker_size,
+            self.chart_cell_height,
         ]
 
         for widget in spin_widgets:
@@ -818,19 +840,37 @@ class SettingsDialog(QDialog):
             DEFAULT_CHART_SETTINGS["show_zero_line"]
         )
 
-        self.label_font_size.setValue(DEFAULT_CHART_SETTINGS["label_font_size"])
+        self.label_font_size.setValue(
+            DEFAULT_CHART_SETTINGS["label_font_size"]
+            )
 
-        self.value_font_size.setValue(DEFAULT_CHART_SETTINGS["value_font_size"])
+        self.value_font_size.setValue(
+            DEFAULT_CHART_SETTINGS["value_font_size"]
+            )
 
-        self.row_height.setValue(DEFAULT_CHART_SETTINGS["row_height"])
+        self.row_height.setValue(
+            DEFAULT_CHART_SETTINGS["row_height"]
+            )
 
-        self.bar_height.setValue(DEFAULT_CHART_SETTINGS["bar_height"])
+        self.bar_height.setValue(
+            DEFAULT_CHART_SETTINGS["bar_height"]
+            )
 
-        self.fill_height.setValue(DEFAULT_CHART_SETTINGS["fill_height"])
+        self.fill_height.setValue(
+            DEFAULT_CHART_SETTINGS["fill_height"]
+            )
 
-        self.zero_line_height.setValue(DEFAULT_CHART_SETTINGS["zero_line_height"])
+        self.zero_line_height.setValue(
+            DEFAULT_CHART_SETTINGS["zero_line_height"]
+         )
 
-        self.marker_size.setValue(DEFAULT_CHART_SETTINGS["marker_size"])
+        self.marker_size.setValue(
+            DEFAULT_CHART_SETTINGS["marker_size"]
+            )
+
+        self.chart_cell_height.setValue(
+            DEFAULT_CHART_SETTINGS["chart_cell_height_cm"]
+        )
 
     # ============================================================
     # PARAMÈTRES GRAPHIQUES
@@ -1047,6 +1087,8 @@ class SettingsDialog(QDialog):
         charts["zero_line_height"] = self.zero_line_height.value()
 
         charts["marker_size"] = self.marker_size.value()
+
+        charts["chart_cell_height_cm"] = self.chart_cell_height.value()
 
         # ====================================================
         # SAUVEGARDE

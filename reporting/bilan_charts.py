@@ -131,27 +131,31 @@ def _get_chart_config(chart_config: dict | None) -> dict:
 def _get_chart_dimensions():
     """
     Calcule les dimensions intrinsèques d'un SVG mono-item.
+
+    La hauteur du SVG suit le plus grand élément graphique
+    vertical (barre, ligne centrale, marqueur), plutôt que
+    des marges fixes.
     """
     bar_width = SVG_WIDTH - LEFT_MARGIN - RIGHT_MARGIN
-    svg_height = (
-        TOP_MARGIN
-        + BAR_HEIGHT
-        + BOTTOM_MARGIN
+    svg_height = max(
+        BAR_HEIGHT,
+        ZERO_LINE_HEIGHT,
+        MARKER_SIZE,
     )
     return bar_width, svg_height
 
 def _get_label(section: str, key: str) -> str:
     return LABEL_MAPS.get(section, {}).get(key, key)
 
-def _get_row_geometry(row, bar_width):
+def _get_row_geometry(row, bar_width, svg_height):
     """
     Calcule les positions et dimensions nécessaires au rendu
     d'une ligne du graphique SVG.
     """
     z_clamped = row["z_clamped"]
 
-    # Position verticale de l'unique barre.
-    y_center = TOP_MARGIN + BAR_HEIGHT / 2
+    # Position verticale : centre exact du SVG.
+    y_center = svg_height / 2
 
     # Position du zéro.
     x_zero = LEFT_MARGIN + bar_width * 0.5
@@ -388,7 +392,7 @@ def generate_chart(
     # Dessin de l'item
     row = rows[0]
 
-    label = row["label"]
+    # label = row["label"]
     z = row["z"]
     z_clamped = row["z_clamped"]
     color = row["color"]
@@ -396,6 +400,7 @@ def generate_chart(
     y_center, x_zero, fill_width, fill_x, dot_x = _get_row_geometry(
         row,
         BAR_WIDTH,
+        svg_height,
     )
 
     # BAR TRACK

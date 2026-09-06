@@ -13,6 +13,7 @@
   "ui": {
     "theme": "light",
     "charts": {
+      "chart_cell_height_cm": 2.0,
       "bar_height": 12,
       "row_height": 32,
       "show_marker": true,

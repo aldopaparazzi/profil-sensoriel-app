@@ -77,6 +77,10 @@ ODT_CHART_WIDTH_CM = 8.0
 ODT_CHART_HEIGHT_CM = 0.7
 MIN_CHART_HEIGHT_CM = 0.0
 
+# Espacement de la cellule ODT (remplace ODT_CHART_HEIGHT_CM + ODT_CHART_ROW_PADDING_CM
+# pour le calcul de la hauteur de ligne — réglage utilisateur à venir)
+CHART_CELL_HEIGHT_CM = 1.0
+
 # Échelle des scores
 MAX_Z = 3.0
 
@@ -105,6 +109,7 @@ DEFAULT_CHART_SETTINGS = {
     "fill_height": FILL_HEIGHT,
     "zero_line_height": ZERO_LINE_HEIGHT,
     "marker_size": MARKER_SIZE,
+    "chart_cell_height_cm": 1.0,
 }
 
 ODT_CHART_ROW_PADDING_CM = 0.15
