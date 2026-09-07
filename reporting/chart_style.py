@@ -69,12 +69,9 @@ SVG_WIDTH = 1000
 
 LEFT_MARGIN = 40
 RIGHT_MARGIN = 90
-TOP_MARGIN = 4
-BOTTOM_MARGIN = 4
 
 # Dimensions du graphique dans l'ODT
 ODT_CHART_WIDTH_CM = 8.0
-ODT_CHART_HEIGHT_CM = 0.7
 MIN_CHART_HEIGHT_CM = 0.0
 
 # Espacement de la cellule ODT (remplace ODT_CHART_HEIGHT_CM + ODT_CHART_ROW_PADDING_CM
@@ -104,12 +101,9 @@ DEFAULT_CHART_SETTINGS = {
     # Réglages legacy — seront supprimés avec les contrôles UI correspondants
     "label_font_size": 18,
     "value_font_size": VALUE_FONT_SIZE,
-    "row_height": 40,
     "bar_height": BAR_HEIGHT,
     "fill_height": FILL_HEIGHT,
     "zero_line_height": ZERO_LINE_HEIGHT,
     "marker_size": MARKER_SIZE,
     "chart_cell_height_cm": 1.0,
 }
-
-ODT_CHART_ROW_PADDING_CM = 0.15

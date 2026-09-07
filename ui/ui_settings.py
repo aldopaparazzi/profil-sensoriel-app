@@ -585,33 +585,6 @@ class SettingsDialog(QDialog):
         bars_form = QFormLayout(bars_group)
 
         # ----------------------------------------------------
-        # Espacement vertical
-        # ----------------------------------------------------
-
-        self.row_height = QSpinBox()
-
-        self.row_height.setRange(
-            25,
-            80,
-        )
-
-        self.row_height.setSingleStep(1)
-
-        self.row_height.setSuffix(" px")
-
-        self.row_height.setToolTip(
-            "Hauteur totale de chaque ligne du graphique.\n"
-            "Une valeur faible rend le graphique plus compact."
-        )
-
-        self.row_height.setValue(
-            charts.get(
-                "row_height",
-                DEFAULT_CHART_SETTINGS["row_height"],
-            )
-        )
-
-        # ----------------------------------------------------
         # Hauteur de la cellule contenant chaque graphique.
         # ----------------------------------------------------
 
@@ -725,10 +698,6 @@ class SettingsDialog(QDialog):
         )
 
         bars_form.addRow(
-            "Espacement des lignes :",
-            self.row_height,
-        )
-        bars_form.addRow(
             "Hauteur de cellule graphique :",
             self.chart_cell_height
         )
@@ -809,7 +778,6 @@ class SettingsDialog(QDialog):
         spin_widgets = [
             self.label_font_size,
             self.value_font_size,
-            self.row_height,
             self.bar_height,
             self.fill_height,
             self.zero_line_height,
@@ -846,10 +814,6 @@ class SettingsDialog(QDialog):
 
         self.value_font_size.setValue(
             DEFAULT_CHART_SETTINGS["value_font_size"]
-            )
-
-        self.row_height.setValue(
-            DEFAULT_CHART_SETTINGS["row_height"]
             )
 
         self.bar_height.setValue(
@@ -935,7 +899,6 @@ class SettingsDialog(QDialog):
             "show_zero_line": (self.chk_chart_show_zero_line.isChecked()),
             "label_font_size": (self.label_font_size.value()),
             "value_font_size": (self.value_font_size.value()),
-            "row_height": (self.row_height.value()),
             "bar_height": (self.bar_height.value()),
             "fill_height": (self.fill_height.value()),
             "zero_line_height": (self.zero_line_height.value()),
@@ -1077,8 +1040,6 @@ class SettingsDialog(QDialog):
         # ----------------------------------------------------
         # Géométrie
         # ----------------------------------------------------
-
-        charts["row_height"] = self.row_height.value()
 
         charts["bar_height"] = self.bar_height.value()
 
