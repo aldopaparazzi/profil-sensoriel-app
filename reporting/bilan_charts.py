@@ -4,10 +4,14 @@ from reporting.chart_style import (
     BAR_COLOR_THRESHOLDS,
     BAR_HEIGHT,
     BORDER_COLOR,
+    CHART_CELL_HEIGHT_CM,
     COMPOSANTE_LABELS,
     DOMAIN_LABELS,
     FILL_HEIGHT,
     FONT_FAMILY,
+    GRAPH_COL_MIN_CM,
+    GRAPH_MARGIN_PCT,
+    LABEL_COL_MIN_CM,
     LABEL_MAPS,
     LEFT_MARGIN,
     MARKER_SIZE,
@@ -18,8 +22,11 @@ from reporting.chart_style import (
     QUADRANT_LABELS,
     QUADRANT_ORDER,
     RIGHT_MARGIN,
+    SCORE_COL_MIN_CM,
     SECTIONS,
     SVG_WIDTH,
+    TABLE_BORDER_WIDTH_PT,
+    TABLE_TOTAL_WIDTH_DEFAULT_CM,
     TEXT_COLOR,
     VALUE_FONT_SIZE,
     VALUE_OFFSET,
@@ -51,19 +58,22 @@ def generate_item_chart(
     key: str,
     values: dict,
     chart_config: dict | None = None,
-) -> tuple[bytes, float]:
+    width_cm: float | None = None,  
+) -> tuple[bytes, float, float]:
 
     return generate_chart(
         section=section,
         scores_for_type={key: values},
         chart_config=chart_config,
+        width_cm=width_cm,
     )
 
 def generate_item_charts(
     section: str,
     scores_for_type: dict,
     chart_config: dict | None = None,
-) -> list[tuple[str, float, bytes, float]]:
+    width_cm: float | None = None,
+) -> list[tuple[str, float, bytes, float, float]]:
 
     """     Génère un graphique SVG par item. """
 
@@ -72,11 +82,12 @@ def generate_item_charts(
     for row in rows:
         key = row["key"]
         values = scores_for_type[key]
-        svg_bytes, height_cm = generate_item_chart(
+        svg_bytes, height_cm, width_cm_out = generate_item_chart(
             section=section,
             key=key,
             values=values,
             chart_config=chart_config,
+            width_cm=width_cm,
         )
 
         items.append(
@@ -85,6 +96,7 @@ def generate_item_charts(
                 row["z"],
                 svg_bytes,
                 height_cm,
+                width_cm_out,
             )
         )
 
@@ -354,7 +366,8 @@ def generate_chart(
     section: str,
     scores_for_type: dict,
     chart_config: dict | None = None,
-) -> tuple[bytes, float]:
+    width_cm: float | None = None,   # ← nouveau
+) -> tuple[bytes, float, float]:      # ← ajoute width_cm en sortie
     """
     Génère un graphique SVG reproduisant le style des barres
     présentes dans template.html.
@@ -449,50 +462,47 @@ def generate_chart(
     svg_bytes = "".join(svg).encode("utf-8")
 
     # Hauteur intrinsèque du SVG → hauteur d'image ODT
-    height_cm = ODT_CHART_WIDTH_CM * (svg_height / SVG_WIDTH)
+    effective_width_cm = width_cm if width_cm is not None else ODT_CHART_WIDTH_CM
+    height_cm = effective_width_cm * (svg_height / SVG_WIDTH)
     height_cm = round(height_cm, 2)
     height_cm = max(height_cm, MIN_CHART_HEIGHT_CM)
 
-    return svg_bytes, height_cm
+    return svg_bytes, height_cm, effective_width_cm
 
 def generate_all_item_charts(
     scores: dict,
     chart_config: dict | None = None,
-) -> dict[str, list[tuple[str, float, bytes, float]]]:
+    width_cm: float | None = None,
+) -> dict[str, list[tuple[str, float, bytes, float, float]]]:
     """
     Génère un graphique SVG par item pour chaque section.
-
-    Retourne :
-
-        {
-            "quadrants": [
-                (libellé, score, svg_bytes, height_cm),
-                ...
-            ],
-            "domains": [
-                ...
-            ],
-            "composantes_scolaires": [
-                ...
-            ],
-        }
-
     Les sections absentes ou vides ne produisent pas d'items.
+    Les composantes scolaires marquées comme non autorisées
+    pour une population sont ignorées à l'affichage.
     """
     charts = {}
-
     for section_key, _title in SECTIONS:
         data = scores.get(section_key)
-
         if not data:
             continue
-
+        """Artefact créé lors du fetching :
+         certaines composantes scolaires sont présentes dans
+         les données mais explicitement interdites pour la population.
+        """
+        if section_key == "composantes_scolaires":
+            data = {
+                key: values
+                for key, values in data.items()
+                if values.get("error") != "not_allowed_for_population"
+            }
+            if not data:
+                continue
         charts[section_key] = generate_item_charts(
             section=section_key,
             scores_for_type=data,
             chart_config=chart_config,
+            width_cm=width_cm,    
         )
-
     return charts
 
 
@@ -518,7 +528,7 @@ if __name__ == "__main__":
     for section, items in charts.items():
         print(f"\n{section} : {len(items)} items")
 
-        for label, score, svg_bytes, height_cm in items:
+        for label, score, svg_bytes, height_cm, width_cm in items:
             print(
                 f"  {label}: {score:+.2f}"
             )

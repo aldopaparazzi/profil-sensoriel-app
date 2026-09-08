@@ -14,6 +14,7 @@ Il est prévu pour être utilisé sur un ordinateur local, sans serveur web.
 import json  # Importe le module JSON pour lire et écrire des fichiers JSON  # noqa: I001
 import logging  # Importe le module logging pour gérer les messages de journalisation
 import sys  # Importe le module système Python pour gérer les arguments et la fermeture de l'application
+from ui.ui_home import HomePage
 
 # Permet de manipuler facilement les chemins de fichiers et dossiers
 from pathlib import (
@@ -24,6 +25,7 @@ from pathlib import (
 from PySide6.QtCore import (
     Qt,  # Qt est le module central de Qt,
     QUrl,  # QUrl permet de manipuler des URLs,
+    QTimer, # QTimer permet de créer des temporisateurs pour exécuter du code après un délai ou à intervalles réguliers
 )
 from PySide6.QtGui import (
     QIcon,  # Permet de définir une icône pour la fenêtre principale
@@ -51,6 +53,7 @@ from PySide6.QtWidgets import (
     QInputDialog,  # Fenêtre de dialogue pour saisir des informations
     QProgressBar,  # Fenêtre de dialogue pour afficher une barre de progression
     QDialog,  # Fenêtre de dialogue modale Qt
+    QStackedWidget, # Permet d'empiler plusieurs widgets et d'en afficher un à la fois
 )
 
 # from config.settings import load_config, sauvegarder_token
@@ -90,14 +93,24 @@ def load_report_metadata(html_file):
     except (json.JSONDecodeError, OSError):
         return None
 
-
 def reload_reports():
     """
     Recharge la liste des rapports HTML.
+    Re-sélectionne le rapport actif si possible.
     """
+    current_path = window.current_report
+
     window.report_list.clear()
     window.load_reports()
 
+    if current_path is None:
+        return
+
+    for index in range(window.report_list.count()):
+        item = window.report_list.item(index)
+        if item.data(Qt.UserRole) == current_path:
+            window.report_list.setCurrentItem(item)
+            break
 
 def create_tooltip(data):
     """
@@ -132,116 +145,222 @@ def create_tooltip(data):
             lines.append(f"• {name} : {z:+.2f} DS")
     return "\n".join(lines)
 
-
 # Création d'une classe représentant notre fenêtre principale
 # Elle hérite de QMainWindow pour avoir une fenêtre Qt complète
 class ReportViewer(QMainWindow):
     """Fenêtre principale de consultation des profils sensoriels.
-
-    Elle permet :
-    - de rechercher un patient ;
-    - de sélectionner un rapport ;
-    - d'afficher le HTML associé dans un navigateur intégré.
     """
 
     # Constructeur appelé automatiquement lors de la création de la fenêtre
     def __init__(self):
 
-        # Appelle le constructeur de la classe parent QMainWindow
-        super().__init__()  # Appelle le constructeur de la classe parent QMainWindow pour initialiser la fenêtre principale
+        # ============================================================
+        # Initialisation de la fenêtre
+        # ============================================================
+
+        super().__init__()
+
         runtime = load_runtime()
-        configure_logging(runtime.get("debug", False))  # 1. configure le niveau d'abord
+
+        # Configure le niveau de journalisation avant de créer
+        # les composants qui utilisent les logs.
+        configure_logging(runtime.get("debug", False))
+
+        # Branche le système de logs sur la barre d'état.
         self.status_logger = StatusBarLogger(
-            self, logging.getLogger()
-        )  # 2. puis on branche
-        self._setup_progress_bar()  # configure la barre de progression dans la status bar
-        self.ensure_workspace()  # Vérifie qu'un dossier de travail est défini
+            self,
+            logging.getLogger(),
+        )
+
+        # Configure la barre de progression dans la barre d'état.
+        self._setup_progress_bar()
+
+        # Vérifie qu'un espace de travail utilisateur existe.
+        self.ensure_workspace()
+
         self.current_report = None
-        self.setWindowTitle("Profil Sensoriel")  # Titre de la fenêtre principale
-        if paths.favicon_dir.exists():
-            self.setWindowIcon(QIcon(str(paths.favicon_dir)))
+
+        self.setWindowTitle("Profil Sensoriel")
+
+        if paths.favicon_path.exists():
+            self.setWindowIcon(QIcon(str(paths.favicon_path)))
+
         self.resize(1400, 900)
         self.setMinimumSize(800, 600)
         self.setStyleSheet("font-size: 16px;")
 
-        # ==========================
-        # Affichage HTML
-        # ==========================
-        # Création du navigateur web intégré Qt, Il utilise Chromium en interne
+        # ============================================================
+        # Zone de contenu : accueil / rapport HTML
+        # ============================================================
+
+        # Navigateur HTML intégré.
         self.viewer = QWebEngineView()
 
-        # ==========================
-        # Layout principal
-        # ==========================
+        # Évite que Qt repeigne inutilement l'arrière-plan
+        # lors de l'apparition de la surface Chromium.
+        self.viewer.setAttribute(Qt.WA_OpaquePaintEvent, True)
+        self.viewer.setAttribute(Qt.WA_NoSystemBackground, True)
 
-        container = QWidget()  # Crée un widget conteneur pour organiser les autres widgets dans la fenêtre principale
-        # Crée un gestionnaire de mise en page verticale pour organiser les widgets dans le conteneur
+        # Signal émis lorsque l'impression PDF est terminée.
+        self.viewer.pdfPrintingFinished.connect(
+            self._on_pdf_printing_finished
+        )
+
+        # Initialise le moteur WebEngine avant que l'utilisateur
+        # ouvre son premier rapport.
+        self.viewer.setHtml(
+            "<html><body></body></html>"
+        )
+
+
+        # Page d'accueil.
+        self.home_page = HomePage(self)
+
+        # Connexion des boutons de la page d'accueil.
+        self.home_page.fetch_requested.connect(self.fetch_reports)
+        self.home_page.settings_requested.connect(self.open_settings)
+        self.home_page.open_report_requested.connect(
+            self.open_report_folder
+        )
+
+        # Le QStackedWidget permet d'afficher une seule vue à la fois :
+        #
+        #   index 0 = page d'accueil
+        #   index 1 = rapport HTML
+        #
+        # Les deux widgets restent présents dans l'interface.
+        self.content_stack = QStackedWidget()
+        self.content_stack.addWidget(self.home_page)
+        self.content_stack.addWidget(self.viewer)
+
+        # Au démarrage, afficher la page d'accueil.
+        self.content_stack.setCurrentIndex(0)
+        self.viewer.hide()
+
+
+        # ============================================================
+        # Conteneur principal
+        # ============================================================
+
+        container = QWidget()
+
         layout = QVBoxLayout(container)
 
-        # ==========================
-        # Bandeau boutons
-        # ==========================
+        # ============================================================
+        # Barre d'outils
+        # ============================================================
 
         layout.addLayout(self.create_toolbar())
 
-        # ==========================
+        # ============================================================
         # Liste des rapports
-        # ==========================
+        # ============================================================
 
-        # Création d'une liste graphique vide
-        # self permet de conserver l'objet pour l'utiliser dans toute la classe
         self.report_list = QListWidget()
-        # Remplit la liste avec les fichiers HTML disponibles
+
+        # Charge les rapports disponibles dans le workspace.
         self.load_reports()
-        # Connecte l'évènement "clic sur un élément"  au fonctionnement open_report
-        self.report_list.itemClicked.connect(self.open_report)
 
-        # ==========================
-        # Zone principale
-        # ==========================
+        # Lorsqu'un rapport est sélectionné,
+        # il est affiché dans le navigateur HTML.
+        self.report_list.itemClicked.connect(
+            self.open_report
+        )
 
-        splitter = QSplitter()  # Séparateur permettant à l'utilisateur d'ajuster la largeur de la liste et du visualiseur HTML.
+        # ============================================================
+        # Zone principale : liste + contenu
+        # ============================================================
 
-        # ==========================
-        # Colonne gauche
-        # ==========================
+        splitter = QSplitter()
+
+        # ------------------------------------------------------------
+        # Colonne gauche : recherche + liste des rapports
+        # ------------------------------------------------------------
 
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
-        # Barre de recherche en haut
+
         left_layout.addLayout(self.create_filterbar())
-        # Liste des rapports dessous
         left_layout.addWidget(self.report_list)
 
-        # Ajoute le panneau gauche au sépar
         splitter.addWidget(left_panel)
 
-        # ==========================
-        # Colonne droite
-        # ==========================
-        splitter.addWidget(self.viewer)  # Ajoute le visualiseur HTML au séparateur
+        # ------------------------------------------------------------
+        # Colonne droite : accueil ou rapport HTML
+        # ------------------------------------------------------------
+
+        splitter.addWidget(self.content_stack)
+
+        # Largeurs initiales :
+        #   300 px pour la liste
+        #   1100 px pour le contenu
         splitter.setSizes([
             300,
             1100,
-        ])  # Définit les tailles initiales des deux panneaux
-        # Ajoute le séparateur (contenant la liste et le visualiseur HTML) au layout principal
-        layout.addWidget(splitter)
-        # Définit le widget conteneur comme widget central de la fenêtre principale, ce qui permet d'afficher tous les widgets organisés dans le layout principal
-        self.setCentralWidget(container)
-        # ==========================
-        # Layout
-        # ==========================
+        ])
 
+        layout.addWidget(splitter)
+
+        # Définit le conteneur comme zone centrale de la fenêtre.
+        self.setCentralWidget(container)
+
+        # ============================================================
+        # Connexions des commandes
+        # ============================================================
+
+        # Recherche des rapports.
         self.search.textChanged.connect(
             self.filter_reports
-        )  # Connecte l'évènement "texte modifié" du champ de recherche à la fonction filter_reports() pour filtrer la liste des rapports en fonction du texte saisi
+        )
+
+        # Effacement de la recherche.
         self.clear_button.clicked.connect(
             self.search.clear
-        )  # Connecte l'évènement "clic sur le bouton d'effacement" à la fonction clear() du champ de recherche pour effacer le texte saisi
-        self.btn_refresh.clicked.connect(self.refresh_reports)
-        self.btn_fetch.clicked.connect(self.fetch_reports)
-        self.btn_odt.clicked.connect(self.generate_odt)
-        self.btn_settings.clicked.connect(self.open_settings)
+        )
+
+        # Actualisation de la liste.
+        self.btn_refresh.clicked.connect(
+            self.refresh_reports
+        )
+
+        # Récupération des formulaires.
+        self.btn_fetch.clicked.connect(
+            self.fetch_reports
+        )
+
+        # Génération / ouverture du bilan ODT.
+        self.btn_odt.clicked.connect(
+            self.generate_odt
+        )
+
+        # Ouverture de la configuration.
+        self.btn_settings.clicked.connect(
+            self.open_settings
+        )
+
+        # Impression du rapport en PDF.
+        self.btn_print.clicked.connect(
+            self.print_report
+        )
+
+        # Initialise WebEngine après l'affichage de l'interface.
+        # L'accueil peut ainsi apparaître rapidement.
+        QTimer.singleShot(
+            500,  # 500 ms après le démarrage
+            self._warmup_webengine,
+        )
+
+    def _warmup_webengine(self):
+        """
+        Initialise le moteur WebEngine après le démarrage
+        de l'interface, afin de ne pas ralentir l'affichage
+        de la page d'accueil.
+        """
+
+        if self.viewer.url().isEmpty():
+            self.viewer.setHtml(
+                "<html><body></body></html>"
+            )
 
     # Fonction appelée lors de la fermeture de la fenêtre
     def closeEvent(self, event):
@@ -322,17 +441,24 @@ class ReportViewer(QMainWindow):
     # Fonction appelée lorsqu'un utilisateur clique sur un rapport
     def open_report(self, item):
         """
-        Affiche le rapport sélectionné.
-        Stocke également le rapport courant pour
-        les actions métier (ODT, export, etc.).
+        Affiche le rapport HTML sélectionné.
         """
+
         self.current_report = item.data(Qt.UserRole)
         html_path = self.current_report
-        if html_path and html_path.exists():
-            url = QUrl.fromLocalFile(str(html_path))
-            self.viewer.load(url)
-            self.btn_odt.setEnabled(True)
-            # self.btn_export.setEnabled(True)
+
+        if not html_path or not html_path.exists():
+            return
+
+        self.viewer.load(
+            QUrl.fromLocalFile(str(html_path))
+        )
+
+        self.content_stack.setCurrentIndex(1)
+
+        self.btn_odt.setEnabled(True)
+        self.btn_print.setEnabled(True)
+
 
     # Fonction appelée lorsqu'un utilisateur tape dans le champ de recherche
     def filter_reports(self, text):
@@ -365,6 +491,54 @@ class ReportViewer(QMainWindow):
         """
         reload_reports()
         logger.info("Liste des rapports actualisée", extra={"status": True})
+
+    # Fonction du bouton "Imprimer PDF"
+    def print_report(self):
+        """
+        Génère un PDF à partir du rapport HTML actuellement affiché.
+        """
+        if not self.current_report or not self.current_report.exists():
+            logger.warning("Aucun rapport à imprimer")
+            return
+        self.pdf_path = paths.pdf_dir / f"{self.current_report.stem}.pdf"
+        paths.pdf_dir.mkdir(parents=True, exist_ok=True)
+        self.viewer.printToPdf(str(self.pdf_path))
+
+    # Fonction appelée lorsque la génération du PDF est terminée
+    def _on_pdf_printing_finished(self, file_path, success):
+        """
+        Appelé par Qt lorsque la génération du PDF est terminée.
+        """
+        if not success:
+            logger.error("Échec génération PDF dans : %s", Path(file_path).parent)
+
+            QMessageBox.warning(
+                self,
+                "Impression",
+                "Impossible de générer le PDF.",
+            )
+            return
+
+        pdf_dir = Path(file_path).parent
+
+        logger.info(
+            "PDF généré dans : %s",
+            pdf_dir,
+            extra={"status": True},
+        )
+
+        try:
+            import os
+
+            os.startfile(file_path)
+        except OSError:
+            logger.exception("Impossible d'ouvrir le PDF")
+            QMessageBox.warning(
+                self,
+                "Impression",
+                "Le PDF a été généré mais impossible de l'ouvrir.",
+            )
+
 
     def fetch_reports(self):
         """
@@ -403,15 +577,21 @@ class ReportViewer(QMainWindow):
 
     # fonction de saisir un token
     def ask_tally_token(self):
-        """Demande à l'utilisateur de saisir un token"""
+        """Demande à l'utilisateur de saisir un token Tally."""
         token, ok = QInputDialog.getText(
             self,
             "Token Tally",
             "Nouveau token :",
+            QLineEdit.EchoMode.Password,
         )
-        if ok:
-            return token.strip()
-        return None
+
+        if not ok:
+            return None
+
+        token = token.strip()
+
+        return token or None
+
 
     # Fonction pour créer le bandeau de boutons
     def create_toolbar(self):
@@ -422,11 +602,16 @@ class ReportViewer(QMainWindow):
         toolbar = QHBoxLayout()
         self.btn_fetch = QPushButton("📥 Récupérer formulaires")
         self.btn_refresh = QPushButton("🔄 Actualiser liste")
-        self.btn_odt = QPushButton("📄 Générer / ouvrir ODT")
+        self.btn_odt = QPushButton("📄 Générer / ouvrir le Bilan")
         self.btn_settings = QPushButton("⚙ Configuration")
+        self.btn_print = QPushButton("🖨 PDF")
+
         toolbar.addWidget(self.btn_fetch)
         toolbar.addWidget(self.btn_refresh)
+        toolbar.addWidget(self.btn_print)
         toolbar.addWidget(self.btn_odt)
+
+        self.btn_print.setEnabled(self.current_report is not None)
         self.btn_odt.setEnabled(self.current_report is not None)
         # self.btn_export.setEnabled(self.current_report is not None)
 
@@ -525,36 +710,31 @@ class ReportViewer(QMainWindow):
             open_odt(output_path)
 
     # Fonction obsolette du bouton "Générer / ouvrir ODT"
-    def old_open_odt(self):
-        """
-        Génère le bilan ODT du rapport sélectionné.
-        """
-        item = self.report_list.currentItem()
-        if not item:
-            logger.warning("Aucun rapport sélectionné")
-            return
-        html_path = item.data(Qt.UserRole)
-        filename = html_path.stem
-        try:
-            result = generate_bilan(filename)
-            # Détail complet (dict) -> debug uniquement
-            logger.debug("Résultat génération ODT : %s", result)
-            # Version courte -> status bar / console normale
-            if result.get("status") == "ok":
-                logger.info(
-                    "✓ Bilan ODT généré : %s",
-                    paths.bilan_dir,  # afficher le chemin complet sans le fichier
-                    extra={"status": True},
-                )
-            elif result.get("status") == "warning":
-                logger.warning(
-                    "⚠ Bilan généré avec avertissement : %s", result.get("file")
-                )
-            else:
-                logger.error("✗ Échec génération ODT : %s", result.get("error"))
 
-        except Exception:  # noqa: BLE001
-            logger.exception("Erreur génération ODT")
+    def open_report_folder(self):
+        """Ouvre le dossier Rapports de l'espace de travail."""
+        data_dir = paths.report_dir
+
+        if not data_dir.exists():
+            QMessageBox.warning(
+                self,
+                "Dossier Rapports",
+                "Le dossier Rapports n'existe pas.",
+            )
+            return
+
+        try:
+            import os
+
+            os.startfile(data_dir)
+        except OSError:
+            logger.exception("Impossible d'ouvrir le dossier Rapports")
+            QMessageBox.warning(
+                self,
+                "Dossier Rapports",
+                "Impossible d'ouvrir le dossier Rapports.",
+            )
+
 
     # Fonction du bouton "Configuration"
     def open_settings(self):
@@ -568,7 +748,6 @@ class ReportViewer(QMainWindow):
             reload_reports()  # optionnel : si le workspace a changé
 
         logger.info("Ouverture des paramètres", extra={"status": True})
-
 
 # Point d'entrée classique d'un programme Python
 if __name__ == "__main__":

@@ -21,11 +21,15 @@
       "show_zero_line": true,
       "show_x_axis": false,
       "dpi": 150,
-      "label_font_size": 20,
-      "value_font_size": 20,
-      "fill_height": 12,
-      "zero_line_height": 24,
-      "marker_size": 16
+      "label_font_size": 18,
+      "value_font_size": 18,
+      "fill_height": 10,
+      "zero_line_height": 21,
+      "marker_size": 14,
+      "border_width_pt": 0.0,
+      "table_total_width_cm": 17.0,
+      "label_col_width_cm": 3.5,
+      "score_col_width_cm": 2.0
     }
   }
 }

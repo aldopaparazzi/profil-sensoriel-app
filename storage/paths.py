@@ -166,6 +166,11 @@ class Paths:
     @property
     def bilan_dir(self) -> Path:
         return self.report_dir / "bilan"
+    @property
+
+    def pdf_dir(self) -> Path:
+        return self.report_dir / "pdf"
+
 
     # --------------------------------------------------------
     # Ressources embarquées
@@ -182,6 +187,10 @@ class Paths:
     @property
     def favicon_dir(self) -> Path:
         return self.resource_dir / "favicon_io"
+
+    @property
+    def favicon_path(self) -> Path:
+        return self.resource_dir / "favicon_io" / "favicon.ico"
 
     @property
     def reporting_dir(self) -> Path:
@@ -288,6 +297,7 @@ class Paths:
             self.html_dir,
             self.json_dir,
             self.bilan_dir,
+            self.pdf_dir,
         ):
             directory.mkdir(
                 parents=True,
@@ -299,19 +309,18 @@ class Paths:
     # --------------------------------------------------------
 
     def debug(self):
-        """
-        Affiche les chemins dans le log.
-        """
+        """Affiche les chemins dans le log."""
         logger.debug("DEBUG MODE ENABLED")
-        logger.debug("APP_DIR              :", self.app_dir)
-        logger.debug("RESOURCE_DIR         :", self.resource_dir)
-        logger.debug("WORKSPACE            :", self.workspace)
-        logger.debug("REPORT_DIR           :", self.report_dir)
-        logger.debug("HTML_DIR             :", self.html_dir)
-        logger.debug("JSON_DIR             :", self.json_dir)
-        logger.debug("BILAN_DIR            :", self.bilan_dir)
-        logger.debug("ENV_FILE             :", self.env_file)
-        logger.debug("RUNTIME_JSON         :", self.runtime_json)
+        logger.debug("APP_DIR              : %s", self.app_dir)
+        logger.debug("RESOURCE_DIR         : %s", self.resource_dir)
+        logger.debug("WORKSPACE            : %s", self.workspace)
+        logger.debug("REPORT_DIR           : %s", self.report_dir)
+        logger.debug("HTML_DIR             : %s", self.html_dir)
+        logger.debug("JSON_DIR             : %s", self.json_dir)
+        logger.debug("BILAN_DIR            : %s", self.bilan_dir)
+        logger.debug("ENV_FILE             : %s", self.env_file)
+        logger.debug("RUNTIME_JSON         : %s", self.runtime_json)
+
 
 
 # ============================================================

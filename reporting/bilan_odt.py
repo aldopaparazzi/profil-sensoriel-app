@@ -22,6 +22,7 @@ from odf.style import (
     Style,
     TableCellProperties,
     TableColumnProperties,
+    TableProperties,
     TableRowProperties,
     TextProperties,
 )
@@ -36,7 +37,13 @@ from reporting.bilan_charts import (
 from reporting.chart_style import (
     BAR_COLOR_THRESHOLDS,
     CHART_CELL_HEIGHT_CM,
+    GRAPH_COL_MIN_CM,
+    GRAPH_MARGIN_PCT,
+    LABEL_COL_MIN_CM,
     ODT_CHART_WIDTH_CM,
+    SCORE_COL_MIN_CM,
+    TABLE_BORDER_WIDTH_PT,
+    TABLE_TOTAL_WIDTH_DEFAULT_CM,
 )
 from storage.init import load_runtime
 from storage.paths import paths
@@ -90,6 +97,7 @@ def _add_item_chart_row(
     score: float,
     svg_bytes: bytes,
     height_cm: float,
+    width_cm: float,
     score_styles: dict[str, str],
 ) -> None:
 
@@ -125,7 +133,7 @@ def _add_item_chart_row(
     row.addElement(cell)
     cell = TableCell(stylename="ItemChartsCell") # 
     frame = Frame(
-        width=f"{ODT_CHART_WIDTH_CM}cm",
+        width=f"{width_cm}cm",
         height=f"{height_cm}cm",
         anchortype="as-char",
     )
@@ -220,9 +228,12 @@ def build_bilan_odt(
 ) -> Path:
     """Génère le bilan ODT prérempli."""
     doc = load(str(paths.odt_template))
+    runtime = load_runtime()
+    label_w, score_w, graph_w = _resolve_column_widths(runtime)
+    graph_image_width = graph_w * (1 - GRAPH_MARGIN_PCT)
 
     _add_patient_identity(doc, patient)
-    item_charts = generate_all_item_charts(scores)
+    item_charts = generate_all_item_charts(scores, width_cm=graph_image_width)
 
     for section_key, title in SECTIONS:
         items = item_charts.get(section_key)
@@ -248,14 +259,39 @@ def build_bilan_odt(
 
     return output_path
 
+def _resolve_column_widths(runtime: dict) -> tuple[float, float, float]:
+    """Calcule (label_cm, score_cm, graph_cm) à partir du runtime, avec clamps."""
+    charts_cfg = runtime.get("ui", {}).get("charts", {})
+
+    total = charts_cfg.get("table_total_width_cm", TABLE_TOTAL_WIDTH_DEFAULT_CM)
+    label = max(charts_cfg.get("label_col_width_cm", 4.0), LABEL_COL_MIN_CM)
+    score = max(charts_cfg.get("score_col_width_cm", 1.5), SCORE_COL_MIN_CM)
+
+    graph = total - label - score
+    graph = max(graph, GRAPH_COL_MIN_CM)  # sécurité : jamais sous le minimum
+
+    return label, score, graph
+
 
 def _build_item_chart_table(
     doc,
-    items: list[tuple[str, float, bytes, float]],
+    items: list[tuple[str, float, bytes, float, float]],
 ) -> Table:
     """Construit un tableau contenant une ligne par item."""
-    table = Table(name="ItemCharts")
+    runtime = load_runtime()
+    label_w, score_w, graph_w = _resolve_column_widths(runtime)
+    total_width = label_w + score_w + graph_w
 
+    table_style = Style(name="ItemChartsTable", family="table")
+    table_style.addElement(
+        TableProperties(
+            width=f"{total_width}cm",
+            align="left",
+        )
+    )
+    doc.automaticstyles.addElement(table_style)
+
+    table = Table(name="ItemCharts", stylename="ItemChartsTable")
     # Style des cellules du tableau
     cell_style = Style(
         name="ItemChartsCell",
@@ -313,10 +349,15 @@ def _build_item_chart_table(
         score_styles[color] = style_name
 
     # Propriétés des cellules
+    border_width = runtime.get("ui", {}).get("charts", {}).get(
+        "border_width_pt", TABLE_BORDER_WIDTH_PT
+    )
+    border_value = "none" if border_width == 0 else f"{border_width}pt solid #000000"
+
     cell_style.addElement(
         TableCellProperties(
             verticalalign="middle",
-            border="0.5pt solid #000000",
+            border=border_value,
             padding="0.15cm",
         )
     )
@@ -328,7 +369,6 @@ def _build_item_chart_table(
         family="table-row",
     )
     
-    runtime = load_runtime()
     chart_cell_height = runtime.get("ui", {}).get("charts", {}).get(
         "chart_cell_height_cm", CHART_CELL_HEIGHT_CM
     )
@@ -346,7 +386,7 @@ def _build_item_chart_table(
         family="table-column",
     )
     label_style.addElement(
-        TableColumnProperties(columnwidth="4cm")
+        TableColumnProperties(columnwidth=f"{label_w}cm")
     )
     doc.automaticstyles.addElement(label_style)
 
@@ -356,7 +396,7 @@ def _build_item_chart_table(
         family="table-column",
     )
     score_style.addElement(
-        TableColumnProperties(columnwidth="1.5cm")
+        TableColumnProperties(columnwidth=f"{score_w}cm")
     )
     doc.automaticstyles.addElement(score_style)
 
@@ -366,7 +406,7 @@ def _build_item_chart_table(
         family="table-column",
     )
     graph_style.addElement(
-        TableColumnProperties(columnwidth="10cm")
+        TableColumnProperties(columnwidth=f"{graph_w}cm")
     )
     doc.automaticstyles.addElement(graph_style)
 
@@ -374,7 +414,7 @@ def _build_item_chart_table(
     table.addElement(TableColumn(stylename="ItemChartsScoreCol"))
     table.addElement(TableColumn(stylename="ItemChartsGraphCol"))
 
-    for label, score, svg_bytes, height_cm in items:
+    for label, score, svg_bytes, height_cm, width_cm in items:
         _add_item_chart_row(
             doc,
             table,
@@ -382,6 +422,7 @@ def _build_item_chart_table(
             score,
             svg_bytes,
             height_cm,
+            width_cm,
             score_styles,
         )
 

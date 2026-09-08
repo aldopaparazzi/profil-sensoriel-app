@@ -216,6 +216,36 @@
       display: inline-block;
     }
 
+    /* ===== RAW FILTERS ===== */
+    .raw-filters {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: "IBM Plex Mono", monospace;
+    }
+
+    .raw-filters label {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+
+    .raw-filters select {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.72rem;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
     /* ===== ITEMS TABLE ===== */
     .raw-table {
       width: 100%;
@@ -351,27 +381,6 @@
       background: #333;
     }
 
-    /* ===== TOAST ===== */
-    .toast {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      background: var(--text);
-      color: var(--surface);
-      font-family: "IBM Plex Mono", monospace;
-      font-size: 0.76rem;
-      padding: 0.65rem 1.3rem;
-      border-radius: 4px;
-      opacity: 0;
-      transition: opacity 0.25s;
-      pointer-events: none;
-      z-index: 100;
-    }
-
-    .toast.show {
-      opacity: 1;
-    }
-
     /* ===== EMPTY STATE ===== */
     .empty-state {
       font-size: 0.8rem;
@@ -388,10 +397,6 @@
       }
 
       .actions {
-        display: none;
-      }
-
-      .toast {
         display: none;
       }
 
@@ -443,15 +448,6 @@
     <div class="meta" id="report-meta"></div>
   </header>
 
-  <!-- ===== ACTIONS ===== -->
-  <div class="actions">
-    <button onclick="copyResume()">Copier le résumé</button>
-    <button onclick="window.print()">Imprimer / PDF</button>
-    <button class="primary" onclick="toggleRaw()" id="toggle-raw-btn">
-      Afficher les items
-    </button>
-  </div>
-
   <!-- ===== QUADRANTS ===== -->
   <section>
     <div class="section-header">
@@ -495,9 +491,38 @@
   </section>
 
   <!-- ===== RAW ITEMS ===== -->
-  <section id="raw-section" style="display: none">
+  <section id="raw-section">
     <h2>Détail des réponses par item</h2>
+
+    <div class="raw-filters">
+      <label for="raw-quadrant-filter">Valeur</label>
+
+      <select id="raw-value-operator" aria-label="Opérateur de valeur">
+        <option value=">=" selected>&ge;</option>
+        <option value="=">=</option>
+      </select>
+
+      <select id="raw-value-filter" aria-label="Valeur">
+        <option value="0" selected>0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+
+      <label for="raw-quadrant-filter">Quadrant</label>
+      <select id="raw-quadrant-filter">
+        <option value="">Tous</option>
+        <option value="recherche">Recherche</option>
+        <option value="evitement">Évitement</option>
+        <option value="sensibilite">Sensibilité</option>
+        <option value="enregistrement">Enregistrement</option>
+      </select>
+    </div>
+
     <table class="raw-table">
+
       <thead>
         <tr>
           <th>#</th>
@@ -510,9 +535,6 @@
       <tbody id="raw-body"></tbody>
     </table>
   </section>
-
-  <!-- ===== TOAST ===== -->
-  <div class="toast" id="toast">Copié ✓</div>
 
   <script>
     /* ===================================================================
@@ -794,166 +816,116 @@
     /* ===================================================================
      RENDER : RAW ITEMS
      =================================================================== */
+    function matchesValueFilter(value) {
+      const operator = document.getElementById("raw-value-operator")?.value || ">";
+      const filterValue = Number(
+        document.getElementById("raw-value-filter")?.value ?? 0
+      );
+      const itemValue = Number(value);
+
+      if (operator === "=") {
+        return itemValue === filterValue;
+      }
+
+      return itemValue >= filterValue;
+    }
+
     function renderRawItems(responses, formType) {
-      const tbody = document.getElementById("raw-body");
-      if (!tbody) return;
+          const tbody = document.getElementById("raw-body");
+          if (!tbody) return;
 
-      const refForm =
-        (REFERENCE && REFERENCE[formType] && REFERENCE[formType].questions) ||
-        {};
-      const ids = Object.keys(responses || {}).sort(
-        (a, b) => Number(a) - Number(b),
-      );
+          const refForm =
+            (REFERENCE && REFERENCE[formType] && REFERENCE[formType].questions) ||
+            {};
+          const ids = Object.keys(responses || {}).sort(
+            (a, b) => Number(a) - Number(b),
+          );
 
-      if (ids.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Aucune réponse disponible</td></tr>`;
-        return;
-      }
+          if (ids.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Aucune réponse disponible</td></tr>`;
+            return;
+          }
 
-      const { code } = CONFIG.quadrants;
+          const { code } = CONFIG.quadrants;
 
-      tbody.innerHTML = ids
-        .map((id) => {
-          const val = responses[id];
-          const meta = refForm[id];
+          tbody.innerHTML = ids
+            .map((id) => {
+              const val = responses[id];
+              const meta = refForm[id];
 
-          const domaineLabel = meta
-            ? meta.domaine_label || meta.domaine_sensoriel
-            : "—";
-          const quadrantKey = meta ? meta.quadrant : null;
-          const badge =
-            quadrantKey && code[quadrantKey]
-              ? `<span class="q-badge q-${code[quadrantKey]}">${code[quadrantKey]}</span>`
-              : "";
-          const label = meta
-            ? meta.label
-            : "(question introuvable dans la référence)";
-          const naFlag =
-            meta && meta.pour_calcul === false
-              ? ' <span class="na-flag">(hors calcul)</span>'
-              : "";
+              if (!matchesValueFilter(val)) return "";
 
-          // Couleur de la valeur
-          const color = getItemColor(val);
-          const fontWeight = val === 3 ? "bold" : "normal";
+              const quadrantFilter =
+                document.getElementById("raw-quadrant-filter")?.value || "";
 
-          return `
-          <tr>
-            <td>${id}</td>
-            <td>${domaineLabel}</td>
-            <td>${badge}</td>
-            <td>${label}${naFlag}</td>
-            <td style="color:${color};font-weight:${fontWeight}">${val}</td>
-          </tr>
-        `;
-        })
-        .join("");
-    }
+              if (quadrantFilter && meta?.quadrant !== quadrantFilter) {
+                return "";
+              }
 
-    /* ===================================================================
-     INTERACTIONS
-     =================================================================== */
-    function toggleRaw() {
-      const section = document.getElementById("raw-section");
-      const btn = document.getElementById("toggle-raw-btn");
-      if (!section || !btn) return;
+              const domaineLabel = meta
+                ? meta.domaine_label || meta.domaine_sensoriel
+                : "—";
 
-      const hidden = section.style.display === "none";
-      section.style.display = hidden ? "block" : "none";
-      btn.textContent = hidden ? "Masquer les items" : "Afficher les items";
-    }
-    async function copyResume() {
+              const quadrantKey = meta ? meta.quadrant : null;
+              const badge =
+                quadrantKey && code[quadrantKey]
+                  ? `<span class="q-badge q-${code[quadrantKey]}">${code[quadrantKey]}</span>`
+                  : "";
+              const label = meta
+                ? meta.label
+                : "(question introuvable dans la référence)";
+              const naFlag =
+                meta && meta.pour_calcul === false
+                  ? ' <span class="na-flag">(hors calcul)</span>'
+                  : "";
 
-      const patient = REPORT_DATA.patient || {};
+              // Couleur de la valeur
+              const color = getItemColor(val);
+              const fontWeight = val === 3 ? "bold" : "normal";
 
-      const html = buildResumeHTML(patient);
-      const text = buildResumeText(patient);
+              return `
+              <tr
+                data-value="${val}"
+                data-quadrant="${quadrantKey || ""}"
+              >
+                <td>${id}</td>
+                <td>${domaineLabel}</td>
+                <td>${badge}</td>
+                <td>${label}${naFlag}</td>
+                <td style="color:${color};font-weight:${fontWeight}">${val}</td>
+              </tr>
+            `;
+            })
+            .join("");
+        }
 
-      try {
+    function filterRawItems() {
+      const valueFilter = document.getElementById("raw-value-filter");
+      const quadrantFilter = document.getElementById("raw-quadrant-filter");
 
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            "text/html": new Blob([html], {
-              type: "text/html",
-            }),
-            "text/plain": new Blob([text], {
-              type: "text/plain",
-            }),
-          }),
-        ]);
+      const selectedValue = valueFilter ? valueFilter.value : "";
+      const selectedQuadrant = quadrantFilter
+        ? quadrantFilter.value
+        : "";
 
-        showToast();
+      const rows = document.querySelectorAll("#raw-body tr[data-value]");
 
-      } catch (err) {
+      rows.forEach((row) => {
+        const valueMatch =
+          !selectedValue ||
+          row.dataset.value === selectedValue;
 
-        navigator.clipboard.writeText(text)
-          .then(showToast);
-      }
-    }
-    function old_copyResume() {
+        const quadrantMatch =
+          !selectedQuadrant ||
+          row.dataset.quadrant === selectedQuadrant;
 
-      const patient = REPORT_DATA.patient || {};
-      const fullName = [patient.prenom, patient.nom]
-        .filter(Boolean)
-        .join(" ");
-
-      const lines = [
-        `PROFIL SENSORIEL – ${fullName || "Patient"}`,
-        `Évaluation du ${formatDate(patient.evaluation_date)} | Âge : ${getAgeLabel(patient)}`,
-        "",
-        "QUADRANTS (écarts-types)",
-      ];
-
-      const { order, code, label } = CONFIG.quadrants;
-      order.forEach((key) => {
-        const q = REPORT_DATA.quadrants?.[key];
-        if (!q) return;
-        const sig = Math.abs(q.z) >= 2 ? "  ← significatif" : "";
-        lines.push(
-          `  ${label[key].padEnd(14)} (${code[key]}) : ${fmtDS(q.z)}${sig}`,
-        );
+        row.style.display =
+          valueMatch && quadrantMatch
+            ? ""
+            : "none";
       });
-
-      lines.push("", "DOMAINES (écarts-types)");
-      Object.entries(REPORT_DATA.domains || {}).forEach(([key, d]) => {
-        const l = getLabel(key, CONFIG.domains.label, key);
-        const sig = Math.abs(d.z) >= 2 ? "  ← significatif" : "";
-        lines.push(`  ${l.padEnd(18)} : ${fmtDS(d.z)}${sig}`);
-      });
-
-      const comments = Object.entries(REPORT_DATA.comments || {}).filter(
-        ([, t]) => t && t.trim(),
-      );
-      if (comments.length) {
-        lines.push("", "COMMENTAIRES");
-        comments.forEach(([domain, text]) => {
-          const l = getLabel(domain, CONFIG.domains.label, domain);
-          lines.push(`  ${l} : ${text}`);
-        });
-      }
-
-      const text = lines.join("\n");
-      navigator.clipboard
-        .writeText(text)
-        .then(showToast)
-        .catch(() => {
-          // Fallback: prompt with selectable text
-          const textarea = document.createElement("textarea");
-          textarea.value = text;
-          document.body.appendChild(textarea);
-          textarea.select();
-          document.execCommand("copy");
-          textarea.remove();
-          showToast();
-        });
     }
 
-    function showToast() {
-      const toast = document.getElementById("toast");
-      if (!toast) return;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 2500);
-    }
 
     /* ===================================================================
      INIT
@@ -968,24 +940,43 @@
 
       // School components
       const composantes = data.composantes_scolaires;
+
       if (composantes && Object.keys(composantes).length > 0) {
-        document.getElementById("composantes-section").style.display =
-          "block";
-        renderBarTable(
-          "composantes-body",
-          composantes,
-          CONFIG.schoolComponents.label,
-          "Composante ",
+        const composantesVisibles = Object.fromEntries(
+          Object.entries(composantes).filter(
+            ([, values]) => values?.error !== "not_allowed_for_population"
+          )
         );
+
+        if (Object.keys(composantesVisibles).length > 0) {
+          document.getElementById("composantes-section").style.display =
+            "block";
+
+          renderBarTable(
+            "composantes-body",
+            composantesVisibles,
+            CONFIG.schoolComponents.label,
+            "Composante ",
+          );
+        }
       }
+
 
       renderComments(data.comments);
       renderRawItems(data.responses, patient.form_type);
-    }
+       
+      document
+        .getElementById("raw-value-operator")
+        ?.addEventListener("change", () => renderRawItems(REPORT_DATA.responses, REPORT_DATA.patient?.form_type));
 
-    // Expose functions to global scope
-    window.copyResume = copyResume;
-    window.toggleRaw = toggleRaw;
+      document
+        .getElementById("raw-value-filter")
+        ?.addEventListener("change", () => renderRawItems(REPORT_DATA.responses, REPORT_DATA.patient?.form_type));
+
+      document
+        .getElementById("raw-quadrant-filter")
+        ?.addEventListener("change", () => renderRawItems(REPORT_DATA.responses, REPORT_DATA.patient?.form_type));
+    }
 
     // Run
     init();

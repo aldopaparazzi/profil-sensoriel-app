@@ -28,6 +28,7 @@ def generate_html_report(data: dict[str, Any], output_path: str | Path) -> Path:
     """
     reference = load_reference()
     template = paths.html_template.read_text(encoding="utf-8")
+    logger.info("TEMPLATE HTML UTILISÉ : %s", paths.html_template)
 
     data_json = json.dumps(data, ensure_ascii=False)
     reference_json = json.dumps(reference, ensure_ascii=False)

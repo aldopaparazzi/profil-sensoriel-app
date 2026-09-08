@@ -70,7 +70,14 @@ from PySide6.QtWidgets import (
 from config.settings import get_tally_token, save_tally_token
 from ingestion.fetch_tally import check_token_valid
 from reporting.bilan_charts import generate_chart
-from reporting.chart_style import DEFAULT_CHART_SETTINGS
+from reporting.chart_style import (
+    DEFAULT_CHART_SETTINGS,
+    GRAPH_MARGIN_PCT,
+    LABEL_COL_MIN_CM,
+    SCORE_COL_MIN_CM,
+    TABLE_TOTAL_WIDTH_MAX_CM,
+    TABLE_TOTAL_WIDTH_MIN_CM,
+)
 from storage.init import load_runtime, save_runtime
 from storage.paths import paths
 from utils.logger import logger
@@ -577,11 +584,84 @@ class SettingsDialog(QDialog):
         layout.addWidget(text_group)
 
         # ====================================================
+        # GROUPE : Tableau
+        # ====================================================
+
+        table_group = QGroupBox("Tableau")
+        table_form = QFormLayout(table_group)
+
+        # ----------------------------------------------------
+        # Bordures du tableau
+        # ----------------------------------------------------
+
+        self.border_width = QDoubleSpinBox()
+        self.border_width.setRange(0.0, 3.0)
+        self.border_width.setSingleStep(0.5)
+        self.border_width.setDecimals(1)
+        self.border_width.setSuffix(" pt")
+        self.border_width.setToolTip("Épaisseur de la bordure du tableau. 0 = pas de bordure.")
+        self.border_width.setValue(
+            charts.get("border_width_pt", DEFAULT_CHART_SETTINGS["border_width_pt"])
+        )
+
+        table_form.addRow(
+            "Épaisseur de la bordure :",
+            self.border_width,
+        )
+        self.table_total_width = QDoubleSpinBox()
+
+        self.table_total_width.setRange(TABLE_TOTAL_WIDTH_MIN_CM, TABLE_TOTAL_WIDTH_MAX_CM)
+        self.table_total_width.setSingleStep(0.5)
+        self.table_total_width.setSuffix(" cm")
+        self.table_total_width.setValue(
+            charts.get("table_total_width_cm", DEFAULT_CHART_SETTINGS["table_total_width_cm"])
+        )
+
+        self.label_col_width = QDoubleSpinBox()
+        self.label_col_width.setRange(LABEL_COL_MIN_CM, 10.0)
+        self.label_col_width.setSingleStep(0.1)
+        self.label_col_width.setSuffix(" cm")
+        self.label_col_width.setValue(
+            charts.get("label_col_width_cm", DEFAULT_CHART_SETTINGS["label_col_width_cm"])
+        )
+
+        self.score_col_width = QDoubleSpinBox()
+        self.score_col_width.setRange(SCORE_COL_MIN_CM, 5.0)
+        self.score_col_width.setSingleStep(0.1)
+        self.score_col_width.setSuffix(" cm")
+        self.score_col_width.setValue(
+            charts.get("score_col_width_cm", DEFAULT_CHART_SETTINGS["score_col_width_cm"])
+        )
+
+        self.graph_col_width_preview = QLabel()  # lecture seule, calculé
+
+        table_form.addRow(
+            "Largeur totale du tableau :",
+            self.table_total_width,
+        )
+
+        table_form.addRow(
+            "Largeur colonne Libellé :",
+            self.label_col_width,
+        )
+
+        table_form.addRow(
+            "Largeur colonne Score :",
+            self.score_col_width,
+        )
+
+        table_form.addRow(
+            "Largeur colonne Graphique (calculée) :",
+            self.graph_col_width_preview,
+        )
+
+        layout.addWidget(table_group)
+
+        # ====================================================
         # GROUPE : BARRES
         # ====================================================
 
         bars_group = QGroupBox("Barres")
-
         bars_form = QFormLayout(bars_group)
 
         # ----------------------------------------------------
@@ -785,10 +865,13 @@ class SettingsDialog(QDialog):
             self.chart_cell_height,
         ]
 
+        for widget in (self.table_total_width, self.label_col_width, self.score_col_width):
+            widget.valueChanged.connect(self._update_column_preview)
+
         for widget in spin_widgets:
             widget.valueChanged.connect(self._update_preview)
 
-        # Premier rendu.
+        self._update_column_preview()
         self._update_preview()
 
         return tab
@@ -836,6 +919,10 @@ class SettingsDialog(QDialog):
             DEFAULT_CHART_SETTINGS["chart_cell_height_cm"]
         )
 
+        self.border_width.setValue(
+            DEFAULT_CHART_SETTINGS["border_width_pt"]
+        )
+
     # ============================================================
     # PARAMÈTRES GRAPHIQUES
     # ============================================================
@@ -868,21 +955,8 @@ class SettingsDialog(QDialog):
         """
         Met à jour l'aperçu du graphique.
 
-        IMPORTANT
-        ---------
-        generate_chart() retourne maintenant du SVG.
+        Les paramètres graphiques sont lus directement dans l'UI.
 
-        On n'utilise donc plus :
-
-            QPixmap.loadFromData(png)
-
-        mais :
-
-            QSvgRenderer
-
-        pour rasteriser temporairement le SVG dans le QLabel.
-
-        Le graphique réel du rapport reste bien vectoriel.
         """
 
         preview_scores = {
@@ -909,7 +983,7 @@ class SettingsDialog(QDialog):
         # Génération SVG
         # ----------------------------------------------------
 
-        svg_bytes, _ = generate_chart(
+        svg_bytes, _, _ = generate_chart(
             section="preview",
             scores_for_type=preview_scores,
             chart_config=chart_cfg,
@@ -974,6 +1048,13 @@ class SettingsDialog(QDialog):
 
         self.preview_label.setPixmap(pixmap)
 
+    def _update_column_preview(self):
+        total = self.table_total_width.value()
+        label = self.label_col_width.value()
+        score = self.score_col_width.value()
+        graph = total - label - score
+        self.graph_col_width_preview.setText(f"{graph:.1f} cm")
+        
     # ============================================================
     # SAUVEGARDE
     # ============================================================
@@ -1002,15 +1083,10 @@ class SettingsDialog(QDialog):
         # ====================================================
 
         self.runtime["workspace"] = self.workspace_field.text().strip()
-
         self.runtime["libreoffice"] = self.libreoffice_field.text().strip()
-
         self.runtime["generate_html"] = self.chk_html.isChecked()
-
         self.runtime["generate_odt"] = self.chk_odt.isChecked()
-
         self.runtime["debug"] = self.chk_debug.isChecked()
-
         self.runtime["strategy_threshold"] = self.threshold_field.value()
 
         # ====================================================
@@ -1024,17 +1100,20 @@ class SettingsDialog(QDialog):
         # ----------------------------------------------------
 
         charts["show_values"] = self.chk_chart_show_values.isChecked()
-
         charts["show_marker"] = self.chk_chart_show_marker.isChecked()
-
         charts["show_zero_line"] = self.chk_chart_show_zero_line.isChecked()
+
+        charts["border_width_pt"] = self.border_width.value()
+
+        charts["table_total_width_cm"] = self.table_total_width.value()
+        charts["label_col_width_cm"] = self.label_col_width.value()
+        charts["score_col_width_cm"] = self.score_col_width.value()
 
         # ----------------------------------------------------
         # Texte
         # ----------------------------------------------------
 
         charts["label_font_size"] = self.label_font_size.value()
-
         charts["value_font_size"] = self.value_font_size.value()
 
         # ----------------------------------------------------
@@ -1042,13 +1121,9 @@ class SettingsDialog(QDialog):
         # ----------------------------------------------------
 
         charts["bar_height"] = self.bar_height.value()
-
         charts["fill_height"] = self.fill_height.value()
-
         charts["zero_line_height"] = self.zero_line_height.value()
-
         charts["marker_size"] = self.marker_size.value()
-
         charts["chart_cell_height_cm"] = self.chart_cell_height.value()
 
         # ====================================================
