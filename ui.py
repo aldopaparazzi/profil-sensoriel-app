@@ -56,7 +56,7 @@ from PySide6.QtWidgets import (
     QStackedWidget, # Permet d'empiler plusieurs widgets et d'en afficher un à la fois
 )
 
-# from config.settings import load_config, sauvegarder_token
+from config.settings import get_tally_token, save_tally_token
 # from ingestion.fetch_tally import check_token_valid
 # from main import import_forms
 
@@ -545,17 +545,46 @@ class ReportViewer(QMainWindow):
         Récupère les nouveaux formulaires Tally (en arrière-plan,
         pour que la status bar affiche chaque étape en direct).
         """
+        token = get_tally_token()
+
+        # --------------------------------------------------
+        # Premier démarrage : demander le token
+        # --------------------------------------------------
+
+        if not token:
+            token = self.ask_tally_token()
+            if not token:
+                logger.warning("Récupération annulée : token Tally manquant.")
+                return
+            save_tally_token(token)
+            logger.info("Token Tally enregistré localement.")
+
+        # --------------------------------------------------
+        # Lancement du worker
+        # --------------------------------------------------
         self.progress_dialog = ProgressDialog(self)
-        self.status_logger.set_progress_dialog(self.progress_dialog)  # branche les logs
-        self.progress_dialog.show()
+        self.progress_dialog.setWindowModality(Qt.NonModal)
+#
+        self.status_logger.set_progress_dialog(self.progress_dialog)
+        self.progress_dialog.open()
+
         self.btn_fetch.setEnabled(False)
         self.progress_bar.setVisible(True)
-        self.worker = FetchWorker()
+
+        self.worker = FetchWorker(
+            token_callback=self.ask_tally_token
+        )
+
+        self.worker.request_token.connect(
+            self._request_tally_token,
+            Qt.ConnectionType.QueuedConnection,
+        )
+
         self.worker.finished_ok.connect(self._on_fetch_done)
         self.worker.finished_error.connect(self._on_fetch_error)
-        # Branche les logs à la popup
-        # self.status_logger.log_signal.connect(self._on_log_for_progress)
+
         self.worker.start()
+
 
     def _on_fetch_done(self, count):
         logger.info("%s formulaire(s) récupéré(s)", count, extra={"status": True})
@@ -586,11 +615,26 @@ class ReportViewer(QMainWindow):
         )
 
         if not ok:
-            return None
+            return ""
 
         token = token.strip()
 
-        return token or None
+        return token
+
+    def _request_tally_token(self):
+        """Demande un nouveau token dans le thread UI."""
+        logger.info("🔔 Demande de nouveau token reçue par l'UI")
+
+        token = self.ask_tally_token()
+
+        logger.info(
+            "🔑 Réponse token reçue par l'UI : %s",
+            "fourni" if token else "annulée",
+        )
+
+        self.worker.provide_token(token)
+
+        logger.info("🔓 Worker réveillé avec le nouveau token")
 
 
     # Fonction pour créer le bandeau de boutons

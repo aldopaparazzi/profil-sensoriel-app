@@ -31,6 +31,7 @@ dans l'interface, aucun redémarrage n'est nécessaire.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -138,7 +139,19 @@ class Paths:
 
     @property
     def env_file(self) -> Path:
-        return self.workspace / ".env"
+        """
+        Fichier contenant le token Tally.
+        Stocké localement sur la machine, indépendamment du workspace.
+        """
+        local_app_data = Path(
+            os.environ.get(
+                "LOCALAPPDATA",
+                Path.home() / "AppData" / "Local",
+            )
+        )
+
+        return local_app_data / "Profil Sensoriel" / ".env"
+
 
     @property
     def raw_dir(self) -> Path:

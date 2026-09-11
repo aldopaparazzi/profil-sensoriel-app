@@ -335,7 +335,7 @@ class SettingsDialog(QDialog):
         general_layout.addWidget(options_group)
 
         # ====================================================
-        # SEUIL DES STRATÉGIES
+        # SEUIL DES AMMÉNAGEMENTS
         # ====================================================
 
         strategy_group = QGroupBox("Aménagements à mettre en place")
@@ -361,7 +361,7 @@ class SettingsDialog(QDialog):
         )
 
         strategy_form.addRow(
-            "Seuil stratégies (|z| ≥) :",
+            "Seuil à partir duquel afficher les elements (|z| ≥) :",
             self.threshold_field,
         )
 
@@ -432,7 +432,6 @@ class SettingsDialog(QDialog):
     def accept(self):
         self._stop_preview_worker()
         super().accept()
-
 
     def _path_row(
         self,
@@ -559,6 +558,23 @@ class SettingsDialog(QDialog):
         display_layout = QVBoxLayout(display_group)
 
         # ----------------------------------------------------
+        # Afficher les noms des groupes
+        # ----------------------------------------------------
+
+        self.chk_chart_show_strategy_group_names = QCheckBox(
+            "Afficher les noms des groupes"
+        )
+
+        self.chk_chart_show_strategy_group_names.setChecked(
+            charts.get(
+                "show_strategy_group_names",
+                DEFAULT_CHART_SETTINGS["show_strategy_group_names"],
+            )
+        )
+
+
+
+        # ----------------------------------------------------
         # Valeurs
         # ----------------------------------------------------
 
@@ -599,6 +615,11 @@ class SettingsDialog(QDialog):
         display_layout.addWidget(self.chk_chart_show_values)
         display_layout.addWidget(self.chk_chart_show_marker)
         display_layout.addWidget(self.chk_chart_show_zero_line)
+        display_layout.addWidget(self.chk_chart_show_values)
+        display_layout.addWidget(self.chk_chart_show_strategy_group_names)
+        display_layout.addWidget(self.chk_chart_show_marker)
+        display_layout.addWidget(self.chk_chart_show_zero_line)
+
         layout.addWidget(display_group)
 
 #        # ====================================================
@@ -943,26 +964,21 @@ class SettingsDialog(QDialog):
         """Réinitialise tous les paramètres graphiques."""
 
         self.chk_chart_show_values.setChecked(DEFAULT_CHART_SETTINGS["show_values"])
-
         self.chk_chart_show_marker.setChecked(DEFAULT_CHART_SETTINGS["show_marker"])
-
         self.chk_chart_show_zero_line.setChecked(
             DEFAULT_CHART_SETTINGS["show_zero_line"]
+        )
+        self.chk_chart_show_strategy_group_names.setChecked(
+            DEFAULT_CHART_SETTINGS["show_strategy_group_names"]
         )
 
 #        self.label_font_size.setValue(DEFAULT_CHART_SETTINGS["label_font_size"])
 #        self.value_font_size.setValue(DEFAULT_CHART_SETTINGS["value_font_size"])
-
         self.bar_height.setValue(DEFAULT_CHART_SETTINGS["bar_height"])
-
         self.fill_height.setValue(DEFAULT_CHART_SETTINGS["fill_height"])
-
         self.zero_line_height.setValue(DEFAULT_CHART_SETTINGS["zero_line_height"])
-
         self.marker_size.setValue(DEFAULT_CHART_SETTINGS["marker_size"])
-
         self.chart_cell_height.setValue(DEFAULT_CHART_SETTINGS["chart_cell_height_cm"])
-
         self.border_width.setValue(DEFAULT_CHART_SETTINGS["border_width_pt"])
 
     # ============================================================
@@ -1134,9 +1150,11 @@ class SettingsDialog(QDialog):
         charts["show_values"] = self.chk_chart_show_values.isChecked()
         charts["show_marker"] = self.chk_chart_show_marker.isChecked()
         charts["show_zero_line"] = self.chk_chart_show_zero_line.isChecked()
+        charts["show_strategy_group_names"] = (
+            self.chk_chart_show_strategy_group_names.isChecked()
+        )
 
         charts["border_width_pt"] = self.border_width.value()
-
         charts["table_total_width_cm"] = self.table_total_width.value()
         charts["label_col_width_cm"] = self.label_col_width.value()
         charts["score_col_width_cm"] = self.score_col_width.value()
@@ -1164,7 +1182,7 @@ class SettingsDialog(QDialog):
 
         save_runtime(self.runtime)
 
-        logger.info(
+        logger.debug(
             "runtime.json mis à jour : %s",
             self.runtime,
         )

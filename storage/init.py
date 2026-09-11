@@ -8,8 +8,19 @@ logger = logging.getLogger(__name__)
 
 
 def ensure_env():
+    """
+    S'assure que le dossier local de configuration
+    et le fichier .env existent.
+    """
+    paths.env_file.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
     if not paths.env_file.exists():
-        paths.env_file.write_text("", encoding="utf-8")
+        paths.env_file.write_text(
+            "",
+            encoding="utf-8",
+        )
 
 
 def load_runtime() -> dict:
@@ -23,6 +34,11 @@ def load_runtime() -> dict:
 
 
 def save_runtime(config: dict) -> None:
+    paths.runtime_json.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
     paths.runtime_json.write_text(
         json.dumps(
             config,

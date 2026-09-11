@@ -47,6 +47,7 @@ from reporting.chart_style import (
     TABLE_BORDER_WIDTH_PT,
     TABLE_TOTAL_WIDTH_DEFAULT_CM,
 )
+from reporting.utils import format_date
 from storage.init import load_runtime
 from storage.paths import paths
 from utils.logger import get_logger
@@ -81,8 +82,21 @@ def _add_patient_identity(doc, patient: dict) -> None:
             text=fullname or "Profil Sensoriel — Bilan",
         )
     )
-    doc.text.addElement(P(text=f"Évaluation du {patient.get('evaluation_date', '—')}"))
-    doc.text.addElement(P(text=f"Né(e) le {patient.get('birth_date', '—')}"))
+    evaluation_date = format_date(
+        patient.get("evaluation_date")
+    )
+
+    birth_date = format_date(
+        patient.get("birth_date")
+    )
+
+    doc.text.addElement(
+        P(text=f"Évaluation du {evaluation_date}")
+    )
+
+    doc.text.addElement(
+        P(text=f"Né(e) le {birth_date}")
+    )
     if patient.get("age_group"):
         age_label = f"tranche {patient['age_group']}"
     else:
@@ -172,50 +186,62 @@ def _add_item_chart_section(
     doc.text.addElement(table)
 
 
-def _add_strategies(doc, selected_strategies: dict) -> None:
+def _add_strategies(
+    doc,
+    selected_strategies: dict,
+    runtime: dict | None = None,
+) -> None:
     if not selected_strategies:
-        # doc.text.addElement(P(text="Aucun aménagements sélectionnée."))
         return
 
+    if runtime is None:
+        runtime = load_runtime()
+    charts_cfg = runtime.get("ui", {}).get("charts", {})
+    show_group_names = charts_cfg.get(
+        "show_strategy_group_names",
+        True,
+    )
     doc.text.addElement(
         H(
             outlinelevel=1,
             text="Aménagements à mettre en place",
         )
     )
-
     for quadrant, domains in selected_strategies.items():
-        _add_strategy_quadrant(doc, quadrant, domains)
+        _add_strategy_quadrant(
+            doc,
+            quadrant,
+            domains,
+            show_group_names=show_group_names,
+        )
 
 
 def _add_strategy_quadrant(
     doc,
     quadrant: str,
     domains: dict,
+    show_group_names: bool = True,
 ) -> None:
     label = QUADRANT_LABELS.get(
         quadrant,
         quadrant.capitalize(),
     )
-
-    doc.text.addElement(
-        H(
-            outlinelevel=2,
-            text=label,
+    if show_group_names:
+        doc.text.addElement(
+            H(
+                outlinelevel=2,
+                text=label,
+            )
         )
-    )
-
     for domaine, items in domains.items():
         doc.text.addElement(P(text=_get_domain_label(domaine)))
-
         strategy_list = List()
-
         for item in items:
             list_item = ListItem()
             list_item.addElement(P(text=item))
             strategy_list.addElement(list_item)
-
         doc.text.addElement(strategy_list)
+
 
 
 def build_preview_odt(
@@ -271,7 +297,12 @@ def build_bilan_odt(
                 runtime=runtime,
             )
 
-    _add_strategies(doc, selected_strategies)
+    _add_strategies(
+        doc,
+        selected_strategies,
+        runtime=runtime,
+    )
+
 
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -75,7 +75,7 @@ ODT_CHART_WIDTH_CM = 8.0
 MIN_CHART_HEIGHT_CM = 0.0
 
 CHART_CELL_HEIGHT_CM = 1.0  # Espacement de la cellule ODT (remplace ODT_CHART_HEIGHT_CM + ODT_CHART_ROW_PADDING_CM
-TABLE_BORDER_WIDTH_PT = 0.5  # Bordure du tableau ODT (0 = pas de bordure)
+TABLE_BORDER_WIDTH_PT = 0.0  # Bordure du tableau ODT (0 = pas de bordure)
 
 
 # Échelle des scores
@@ -120,4 +120,5 @@ DEFAULT_CHART_SETTINGS = {
     "table_total_width_cm": TABLE_TOTAL_WIDTH_DEFAULT_CM,
     "label_col_width_cm": 4.0,
     "score_col_width_cm": 1.5,
+    "show_strategy_group_names": True,
 }

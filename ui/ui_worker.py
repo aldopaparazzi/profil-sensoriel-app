@@ -12,9 +12,12 @@ entre threads : Qt les met en file d'attente et les délivre au thread
 principal sans rien à faire de plus.
 """
 
-from PySide6.QtCore import QThread, Signal
+from threading import Event
+
+from PySide6.QtCore import QMutex, QThread, QWaitCondition, Signal
 
 from main import import_forms
+from utils.logger import logger
 
 
 class FetchWorker(QThread):
@@ -22,14 +25,45 @@ class FetchWorker(QThread):
 
     finished_ok = Signal(int)
     finished_error = Signal(str)
+    request_token = Signal()
 
-    def __init__(self, force_refresh: bool = False, parent=None):
+    def __init__(
+        self,
+        force_refresh: bool = False,
+        token_callback=None,
+        parent=None,
+    ):
         super().__init__(parent)
         self.force_refresh = force_refresh
+        self.token_callback = token_callback
+
+        self.token = None
+        self.token_event = Event()
+
+    def provide_token(self, token):
+        self.token = token
+        self.token_event.set()
+
+    def ask_token(self):
+        self.token = None
+        self.token_event.clear()
+
+        self.request_token.emit()
+
+        self.token_event.wait()
+
+        return self.token
+
 
     def run(self):
+        
         try:
-            count = import_forms(self.force_refresh)
+            count = import_forms(
+                self.force_refresh,
+                request_token=self.ask_token,
+            )
+
+
             self.finished_ok.emit(count or 0)
         except Exception as e:  # noqa: BLE001
             self.finished_error.emit(str(e))

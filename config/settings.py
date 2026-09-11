@@ -84,25 +84,22 @@ def sauvegarder_token(nouveau_token: str) -> bool:
 
 def replace_tally_token(request_token=None):
     """
-    Remplace le token Tally.
+    Demande un nouveau token Tally via le mécanisme fourni.
 
-    request_token:
-        fonction appelée pour demander un nouveau token
-        (Qt, Streamlit, CLI...)
-
-    Retourne le nouveau token ou None.
+    Avec Qt, request_token est un callback qui bloque le worker
+    jusqu'à ce que l'UI fournisse le token.
     """
 
-    if request_token:
-        token = request_token()
-    else:
-        logger.warning("\n🔑 Token Tally invalide ou expiré.")
-        logger.info("   (Laissez vide pour abandonner)")
-        token = input("   Nouveau token : ").strip()
+    if not request_token:
+        logger.warning("🔑 Token Tally invalide ou expiré.")
+        return None
+
+    token = request_token()
 
     if not token:
         return None
 
     save_tally_token(token)
     logger.info("Token Tally sauvegardé dans : %s", paths.env_file)
+
     return token

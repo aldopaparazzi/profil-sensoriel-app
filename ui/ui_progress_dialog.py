@@ -75,7 +75,7 @@ class ProgressDialog(QDialog):
         self.text_logs.setVisible(False)
         layout.addWidget(self.text_logs)
 
-        self.setWindowModality(Qt.ApplicationModal)
+        # self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
 
     def set_message(self, message: str):

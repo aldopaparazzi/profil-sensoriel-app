@@ -29,7 +29,8 @@
       "border_width_pt": 0.0,
       "table_total_width_cm": 17.0,
       "label_col_width_cm": 3.75,
-      "score_col_width_cm": 2.0
+      "score_col_width_cm": 2.0,
+      "show_strategy_group_names": false
     }
   }
 }

@@ -1,6 +1,7 @@
 # reporting/utils.py
-from datetime import datetime
 import unicodedata
+from datetime import datetime
+
 
 def slugify(text: str) -> str:
     """Nettoie une chaîne pour l'utiliser dans un nom de fichier."""
@@ -35,6 +36,18 @@ def safe_date(date_str):
         return dt.strftime("%Y-%m-%d")
     except (TypeError, ValueError):
         return "unknown_date"
+
+def format_date(date_str, output_format="%d/%m/%Y", fallback="—"):
+    """Convertit une date ISO dans le format demandé."""
+    if not date_str:
+        return fallback
+
+    try:
+        dt = datetime.fromisoformat(str(date_str).replace("Z", ""))
+        return dt.strftime(output_format)
+    except (TypeError, ValueError):
+        return fallback
+
 
 def build_report_filename(patient: dict, extension: str = "json") -> str:
     """Construit le nom de fichier à partir des données patient."""

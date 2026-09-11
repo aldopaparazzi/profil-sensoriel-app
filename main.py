@@ -94,7 +94,7 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
                             "📦 Utilisation du cache (%d soumissions)", len(cached)
                         )
                     else:
-                        logger.warning("⚠️ Aucune donnée disponible pour %s", form_name)
+                        logger.info("⚠️ Aucune donnée disponible pour %s", form_name)
 
         except TallyAPIError as e:
             if e.status_code == 401:
@@ -104,7 +104,7 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
                 attempts = 0
 
                 while not success and attempts < max_attempts:
-                    token = replace_tally_token()
+                    token = replace_tally_token(request_token)
                     if token is None:
                         logger.error(
                             "❌ Aucun token fourni. Abandon pour ce formulaire."
@@ -162,11 +162,6 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
         )
 
     # 3. SPLIT
-    """
-    logger.info("3. ✂️ Split", extra={"status": True})
-    for form_name, clean in context["validated"].items():
-        context["split"][form_name] = split_dataset(clean, form_name)
-    """
 
     logger.info("3. ✂️ Split", extra={"status": True})
     for form_name, clean in context["validated"].items():
@@ -273,8 +268,8 @@ def import_forms(
     force_refresh: bool = False,
     request_token=None,
 ):
-    n = main(
-        force_refresh,
+    return main(
+        force_refresh=force_refresh,
         request_token=request_token,
     )
-    return n
+
