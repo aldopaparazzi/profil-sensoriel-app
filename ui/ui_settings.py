@@ -43,11 +43,11 @@ les anciennes configurations.
 
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QPainter, QPixmap
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -69,8 +69,8 @@ from PySide6.QtWidgets import (
 
 from config.settings import get_tally_token, save_tally_token
 from ingestion.fetch_tally import check_token_valid
-from reporting.bilan_charts import generate_chart
 from reporting.chart_style import (
+    BAR_COLOR_THRESHOLDS,
     DEFAULT_CHART_SETTINGS,
     GRAPH_MARGIN_PCT,
     LABEL_COL_MIN_CM,
@@ -78,11 +78,40 @@ from reporting.chart_style import (
     TABLE_TOTAL_WIDTH_MAX_CM,
     TABLE_TOTAL_WIDTH_MIN_CM,
 )
+from reporting.preview import generate_preview_png
 from storage.init import load_runtime, save_runtime
 from storage.paths import paths
 from utils.logger import logger
 
 LEGACY_CHART_KEYS = ("show_x_axis",)
+
+
+class PreviewWorker(QThread):
+    finished_ok = Signal(object)
+    finished_error = Signal(str)
+
+    def __init__(
+        self, scores, tmp_dir, chart_config=None, column_config=None, parent=None
+    ):
+        super().__init__(parent)
+        self.scores = scores
+        self.tmp_dir = tmp_dir
+        self.chart_config = chart_config
+        self.column_config = column_config
+
+    def run(self):
+        try:
+            from reporting.preview import generate_preview_png
+
+            png_path = generate_preview_png(
+                self.scores,
+                self.tmp_dir,
+                chart_config=self.chart_config,
+                column_config=self.column_config,
+            )
+            self.finished_ok.emit(png_path)
+        except Exception as e:  # noqa: BLE001
+            self.finished_error.emit(str(e))
 
 
 class SettingsDialog(QDialog):
@@ -92,7 +121,7 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
 
         self.setWindowTitle("Configuration")
-        self.setMinimumWidth(560)
+        self.setMinimumWidth(750)
 
         # ----------------------------------------------------
         # Chargement du runtime actuel
@@ -599,7 +628,9 @@ class SettingsDialog(QDialog):
         self.border_width.setSingleStep(0.5)
         self.border_width.setDecimals(1)
         self.border_width.setSuffix(" pt")
-        self.border_width.setToolTip("Épaisseur de la bordure du tableau. 0 = pas de bordure.")
+        self.border_width.setToolTip(
+            "Épaisseur de la bordure du tableau. 0 = pas de bordure."
+        )
         self.border_width.setValue(
             charts.get("border_width_pt", DEFAULT_CHART_SETTINGS["border_width_pt"])
         )
@@ -610,11 +641,15 @@ class SettingsDialog(QDialog):
         )
         self.table_total_width = QDoubleSpinBox()
 
-        self.table_total_width.setRange(TABLE_TOTAL_WIDTH_MIN_CM, TABLE_TOTAL_WIDTH_MAX_CM)
+        self.table_total_width.setRange(
+            TABLE_TOTAL_WIDTH_MIN_CM, TABLE_TOTAL_WIDTH_MAX_CM
+        )
         self.table_total_width.setSingleStep(0.5)
         self.table_total_width.setSuffix(" cm")
         self.table_total_width.setValue(
-            charts.get("table_total_width_cm", DEFAULT_CHART_SETTINGS["table_total_width_cm"])
+            charts.get(
+                "table_total_width_cm", DEFAULT_CHART_SETTINGS["table_total_width_cm"]
+            )
         )
 
         self.label_col_width = QDoubleSpinBox()
@@ -622,7 +657,9 @@ class SettingsDialog(QDialog):
         self.label_col_width.setSingleStep(0.1)
         self.label_col_width.setSuffix(" cm")
         self.label_col_width.setValue(
-            charts.get("label_col_width_cm", DEFAULT_CHART_SETTINGS["label_col_width_cm"])
+            charts.get(
+                "label_col_width_cm", DEFAULT_CHART_SETTINGS["label_col_width_cm"]
+            )
         )
 
         self.score_col_width = QDoubleSpinBox()
@@ -630,7 +667,9 @@ class SettingsDialog(QDialog):
         self.score_col_width.setSingleStep(0.1)
         self.score_col_width.setSuffix(" cm")
         self.score_col_width.setValue(
-            charts.get("score_col_width_cm", DEFAULT_CHART_SETTINGS["score_col_width_cm"])
+            charts.get(
+                "score_col_width_cm", DEFAULT_CHART_SETTINGS["score_col_width_cm"]
+            )
         )
 
         self.graph_col_width_preview = QLabel()  # lecture seule, calculé
@@ -668,7 +707,6 @@ class SettingsDialog(QDialog):
         # Hauteur de la cellule contenant chaque graphique.
         # ----------------------------------------------------
 
-
         self.chart_cell_height = QDoubleSpinBox()
         self.chart_cell_height.setRange(0.8, 3.0)
         self.chart_cell_height.setSingleStep(0.1)
@@ -679,7 +717,9 @@ class SettingsDialog(QDialog):
             "Sous 0,8 cm, le texte des autres colonnes devient trop serré."
         )
         self.chart_cell_height.setValue(
-            charts.get("chart_cell_height_cm", DEFAULT_CHART_SETTINGS["chart_cell_height_cm"])
+            charts.get(
+                "chart_cell_height_cm", DEFAULT_CHART_SETTINGS["chart_cell_height_cm"]
+            )
         )
         # ----------------------------------------------------
         # Piste grise
@@ -777,10 +817,7 @@ class SettingsDialog(QDialog):
             )
         )
 
-        bars_form.addRow(
-            "Hauteur de cellule graphique :",
-            self.chart_cell_height
-        )
+        bars_form.addRow("Hauteur de cellule graphique :", self.chart_cell_height)
 
         bars_form.addRow(
             "Épaisseur de la piste :",
@@ -812,23 +849,25 @@ class SettingsDialog(QDialog):
 
         preview_layout = QVBoxLayout(preview_group)
 
-        self.preview_label = QLabel()
-
-        self.preview_label.setAlignment(Qt.AlignCenter)
-
-        self.preview_label.setMinimumHeight(180)
-
-        self.preview_label.setStyleSheet(
+        self.preview_container = QWidget()
+        self.preview_container.setStyleSheet(
             """
-            QLabel {
+            QWidget {
                 background: white;
                 border: 1px solid #e7e5e4;
                 border-radius: 4px;
             }
             """
         )
+        self.preview_container.setMinimumHeight(180)
 
-        preview_layout.addWidget(self.preview_label)
+        self.preview_container_layout = QVBoxLayout(self.preview_container)
+
+        self.btn_generate_preview = QPushButton("🔄 Générer l'aperçu")
+        self.btn_generate_preview.clicked.connect(self._generate_real_preview)
+        preview_layout.addWidget(self.btn_generate_preview)
+
+        preview_layout.addWidget(self.preview_container)
 
         layout.addWidget(preview_group)
 
@@ -846,33 +885,15 @@ class SettingsDialog(QDialog):
         # CONNEXIONS POUR L'APERÇU
         # ====================================================
 
-        checkbox_widgets = [
-            self.chk_chart_show_values,
-            self.chk_chart_show_marker,
-            self.chk_chart_show_zero_line,
-        ]
-
-        for widget in checkbox_widgets:
-            widget.toggled.connect(self._update_preview)
-
-        spin_widgets = [
-            self.label_font_size,
-            self.value_font_size,
-            self.bar_height,
-            self.fill_height,
-            self.zero_line_height,
-            self.marker_size,
-            self.chart_cell_height,
-        ]
-
-        for widget in (self.table_total_width, self.label_col_width, self.score_col_width):
+        for widget in (
+            self.table_total_width,
+            self.label_col_width,
+            self.score_col_width,
+        ):
             widget.valueChanged.connect(self._update_column_preview)
 
-        for widget in spin_widgets:
-            widget.valueChanged.connect(self._update_preview)
-
         self._update_column_preview()
-        self._update_preview()
+        self._generate_real_preview()
 
         return tab
 
@@ -891,37 +912,21 @@ class SettingsDialog(QDialog):
             DEFAULT_CHART_SETTINGS["show_zero_line"]
         )
 
-        self.label_font_size.setValue(
-            DEFAULT_CHART_SETTINGS["label_font_size"]
-            )
+        self.label_font_size.setValue(DEFAULT_CHART_SETTINGS["label_font_size"])
 
-        self.value_font_size.setValue(
-            DEFAULT_CHART_SETTINGS["value_font_size"]
-            )
+        self.value_font_size.setValue(DEFAULT_CHART_SETTINGS["value_font_size"])
 
-        self.bar_height.setValue(
-            DEFAULT_CHART_SETTINGS["bar_height"]
-            )
+        self.bar_height.setValue(DEFAULT_CHART_SETTINGS["bar_height"])
 
-        self.fill_height.setValue(
-            DEFAULT_CHART_SETTINGS["fill_height"]
-            )
+        self.fill_height.setValue(DEFAULT_CHART_SETTINGS["fill_height"])
 
-        self.zero_line_height.setValue(
-            DEFAULT_CHART_SETTINGS["zero_line_height"]
-         )
+        self.zero_line_height.setValue(DEFAULT_CHART_SETTINGS["zero_line_height"])
 
-        self.marker_size.setValue(
-            DEFAULT_CHART_SETTINGS["marker_size"]
-            )
+        self.marker_size.setValue(DEFAULT_CHART_SETTINGS["marker_size"])
 
-        self.chart_cell_height.setValue(
-            DEFAULT_CHART_SETTINGS["chart_cell_height_cm"]
-        )
+        self.chart_cell_height.setValue(DEFAULT_CHART_SETTINGS["chart_cell_height_cm"])
 
-        self.border_width.setValue(
-            DEFAULT_CHART_SETTINGS["border_width_pt"]
-        )
+        self.border_width.setValue(DEFAULT_CHART_SETTINGS["border_width_pt"])
 
     # ============================================================
     # PARAMÈTRES GRAPHIQUES
@@ -951,102 +956,91 @@ class SettingsDialog(QDialog):
     # APERÇU SVG
     # ============================================================
 
-    def _update_preview(self):
-        """
-        Met à jour l'aperçu du graphique.
-
-        Les paramètres graphiques sont lus directement dans l'UI.
-
-        """
-
-        preview_scores = {
-            "auditif": {"z": 1.2},
+    def _generate_real_preview(self):
+        test_scores = {
+            "quadrants": {
+                "recherche": {"z": 0.3},
+                "evitement": {"z": -1.2},
+                "sensibilite": {"z": 2.3},
+                "enregistrement": {"z": -2.8},
+            },
         }
 
-        # ----------------------------------------------------
-        # Configuration identique à celle utilisée par l'ODT
-        # ----------------------------------------------------
-
-        chart_cfg = {
-            "show_values": (self.chk_chart_show_values.isChecked()),
-            "show_marker": (self.chk_chart_show_marker.isChecked()),
-            "show_zero_line": (self.chk_chart_show_zero_line.isChecked()),
-            "label_font_size": (self.label_font_size.value()),
-            "value_font_size": (self.value_font_size.value()),
-            "bar_height": (self.bar_height.value()),
-            "fill_height": (self.fill_height.value()),
-            "zero_line_height": (self.zero_line_height.value()),
-            "marker_size": (self.marker_size.value()),
+        chart_config = {
+            "show_values": self.chk_chart_show_values.isChecked(),
+            "show_marker": self.chk_chart_show_marker.isChecked(),
+            "show_zero_line": self.chk_chart_show_zero_line.isChecked(),
+            "label_font_size": self.label_font_size.value(),
+            "value_font_size": self.value_font_size.value(),
+            "bar_height": self.bar_height.value(),
+            "fill_height": self.fill_height.value(),
+            "zero_line_height": self.zero_line_height.value(),
+            "marker_size": self.marker_size.value(),
         }
 
-        # ----------------------------------------------------
-        # Génération SVG
-        # ----------------------------------------------------
+        column_config = {
+            "ui": {
+                "charts": {
+                    "table_total_width_cm": self.table_total_width.value(),
+                    "label_col_width_cm": self.label_col_width.value(),
+                    "score_col_width_cm": self.score_col_width.value(),
+                    "border_width_pt": self.border_width.value(),
+                    "chart_cell_height_cm": self.chart_cell_height.value(),
+                }
+            }
+        }
 
-        svg_bytes, _, _ = generate_chart(
-            section="preview",
-            scores_for_type=preview_scores,
-            chart_config=chart_cfg,
+        tmp_dir = Path(tempfile.gettempdir()) / "profil_sensoriel_preview"
+
+        self.btn_generate_preview.setEnabled(False)
+        self.btn_generate_preview.setText("⏳ Génération en cours…")
+
+        while self.preview_container_layout.count():
+            item = self.preview_container_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        self.preview_container_layout.addWidget(QLabel("Génération en cours…"))
+
+        self._preview_worker = PreviewWorker(
+            test_scores, tmp_dir, chart_config, column_config
         )
+        self._preview_worker.finished_ok.connect(self._on_preview_ready)
+        self._preview_worker.finished_error.connect(self._on_preview_error)
+        self._preview_worker.start()
 
-        # ----------------------------------------------------
-        # Rendu SVG → QPixmap
-        # ----------------------------------------------------
+    def _on_preview_ready(self, png_path):
+        self.btn_generate_preview.setEnabled(True)
+        self.btn_generate_preview.setText("🔄 Générer l'aperçu")
 
-        renderer = QSvgRenderer(svg_bytes)
+        while self.preview_container_layout.count():
+            item = self.preview_container_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
-        if not renderer.isValid():
-            logger.warning("Impossible de rendre l'aperçu SVG.")
-
-            self.preview_label.clear()
-
+        if png_path is None:
+            self.preview_container_layout.addWidget(QLabel("Échec génération aperçu"))
             return
 
-        # ----------------------------------------------------
-        # Taille d'aperçu
-        # ----------------------------------------------------
-        #
-        # On utilise une largeur confortable pour l'UI.
-        # La hauteur est calculée en conservant le ratio SVG.
-        #
+        pixmap = QPixmap(str(png_path))
+        crop_height = min(400, pixmap.height())
+        cropped = pixmap.copy(0, 0, pixmap.width(), crop_height)
 
-        preview_width = 700
+        label = QLabel()
+        label.setPixmap(cropped.scaledToWidth(650, Qt.SmoothTransformation))
+        self.preview_container_layout.addWidget(label)
 
-        default_size = renderer.defaultSize()
+    def _on_preview_error(self, message):
+        self.btn_generate_preview.setEnabled(True)
+        self.btn_generate_preview.setText("🔄 Générer l'aperçu")
+        logger.error("Erreur génération aperçu: %s", message)
 
-        if default_size.isValid() and default_size.width() > 0:
-            ratio = default_size.height() / default_size.width()
+        while self.preview_container_layout.count():
+            item = self.preview_container_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
-            preview_height = max(
-                1,
-                int(preview_width * ratio),
-            )
-
-        else:
-            preview_height = 220
-
-        pixmap = QPixmap(
-            preview_width,
-            preview_height,
-        )
-
-        pixmap.fill(Qt.transparent)
-
-        # ----------------------------------------------------
-        # Peinture du SVG dans le pixmap
-        # ----------------------------------------------------
-
-        painter = QPainter(pixmap)
-
-        renderer.render(painter)
-
-        painter.end()
-
-        # ----------------------------------------------------
-        # Affichage
-        # ----------------------------------------------------
-
-        self.preview_label.setPixmap(pixmap)
+        self.preview_container_layout.addWidget(QLabel(f"Erreur : {message}"))
 
     def _update_column_preview(self):
         total = self.table_total_width.value()
@@ -1054,7 +1048,7 @@ class SettingsDialog(QDialog):
         score = self.score_col_width.value()
         graph = total - label - score
         self.graph_col_width_preview.setText(f"{graph:.1f} cm")
-        
+
     # ============================================================
     # SAUVEGARDE
     # ============================================================

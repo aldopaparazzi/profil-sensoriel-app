@@ -1,5 +1,12 @@
 # reporting/bilan_charts.py
 
+
+# Ce module contient des fonctions pour générer des graphiques SVG
+# représentant les scores DS dans le style des barres présentes
+# dans le template.html. Il est utilisé pour produire des graphiques
+# dans les rapports ODT et pour générer des aperçus de tableaux.
+
+
 from reporting.chart_style import (
     BAR_COLOR_THRESHOLDS,
     BAR_HEIGHT,
@@ -53,12 +60,13 @@ def _ordered_keys(section: str, data: dict) -> list[str]:
 
     return list(data.keys())
 
+
 def generate_item_chart(
     section: str,
     key: str,
     values: dict,
     chart_config: dict | None = None,
-    width_cm: float | None = None,  
+    width_cm: float | None = None,
 ) -> tuple[bytes, float, float]:
 
     return generate_chart(
@@ -68,14 +76,14 @@ def generate_item_chart(
         width_cm=width_cm,
     )
 
+
 def generate_item_charts(
     section: str,
     scores_for_type: dict,
     chart_config: dict | None = None,
     width_cm: float | None = None,
 ) -> list[tuple[str, float, bytes, float, float]]:
-
-    """     Génère un graphique SVG par item. """
+    """Génère un graphique SVG par item."""
 
     rows = _build_chart_rows(section, scores_for_type)
     items = []
@@ -90,17 +98,16 @@ def generate_item_charts(
             width_cm=width_cm,
         )
 
-        items.append(
-            (
-                row["label"],
-                row["z"],
-                svg_bytes,
-                height_cm,
-                width_cm_out,
-            )
-        )
+        items.append((
+            row["label"],
+            row["z"],
+            svg_bytes,
+            height_cm,
+            width_cm_out,
+        ))
 
     return items
+
 
 def _build_chart_rows(
     section: str,
@@ -126,6 +133,7 @@ def _build_chart_rows(
 
     return rows
 
+
 def _get_chart_config(chart_config: dict | None) -> dict:
     if chart_config is None:
         runtime = load_runtime()
@@ -135,26 +143,26 @@ def _get_chart_config(chart_config: dict | None) -> dict:
         "show_values": chart_config.get("show_values", True),
         "show_marker": chart_config.get("show_marker", True),
         "show_zero_line": chart_config.get("show_zero_line", True),
+        "bar_height": chart_config.get("bar_height", BAR_HEIGHT),
+        "fill_height": chart_config.get("fill_height", FILL_HEIGHT),
+        "zero_line_height": chart_config.get("zero_line_height", ZERO_LINE_HEIGHT),
+        "marker_size": chart_config.get("marker_size", MARKER_SIZE),
     }
 
-def _get_chart_dimensions():
-    """
-    Calcule les dimensions intrinsèques d'un SVG mono-item.
 
-    La hauteur du SVG suit le plus grand élément graphique
-    vertical (barre, ligne centrale, marqueur), plutôt que
-    des marges fixes.
-    """
+def _get_chart_dimensions(config):
     bar_width = SVG_WIDTH - LEFT_MARGIN - RIGHT_MARGIN
     svg_height = max(
-        BAR_HEIGHT,
-        ZERO_LINE_HEIGHT,
-        MARKER_SIZE,
+        config["bar_height"],
+        config["zero_line_height"],
+        config["marker_size"],
     )
     return bar_width, svg_height
 
+
 def _get_label(section: str, key: str) -> str:
     return LABEL_MAPS.get(section, {}).get(key, key)
+
 
 def _get_row_geometry(row, bar_width, svg_height):
     """
@@ -192,33 +200,29 @@ def _get_row_geometry(row, bar_width, svg_height):
 
     return y_center, x_zero, fill_width, fill_x, dot_x
 
-def _render_bar_track(svg, y_center, bar_width):
-    """
-    Ajoute la barre de fond grise au SVG.
-    """
-    track_y = y_center - BAR_HEIGHT / 2
+
+def _render_bar_track(svg, y_center, bar_width, bar_height):
+    track_y = y_center - bar_height / 2
 
     svg.append(
         f'''
         <rect
-            class="track"
             x="{LEFT_MARGIN}"
             y="{track_y:.2f}"
             width="{bar_width}"
-            height="{BAR_HEIGHT:.2f}"
-            rx="{BAR_HEIGHT / 2:.2f}"
-            ry="{BAR_HEIGHT / 2:.2f}"/>
+            height="{bar_height:.2f}"
+            rx="{bar_height / 2:.2f}"
+            ry="{bar_height / 2:.2f}"
+            fill="{BORDER_COLOR}"/>
         '''
     )
 
-def _render_bar_fill(svg, y_center, fill_width, fill_x, color):
-    """
-    Ajoute la barre colorée correspondant au score.
-    """
+
+def _render_bar_fill(svg, y_center, fill_width, fill_x, color, fill_height):
     if fill_width <= 0:
         return
 
-    fill_y = y_center - FILL_HEIGHT / 2
+    fill_y = y_center - fill_height / 2
 
     svg.append(
         f'''
@@ -226,42 +230,40 @@ def _render_bar_fill(svg, y_center, fill_width, fill_x, color):
             x="{fill_x:.2f}"
             y="{fill_y:.2f}"
             width="{fill_width:.2f}"
-            height="{FILL_HEIGHT:.2f}"
-            rx="{FILL_HEIGHT / 2:.2f}"
-            ry="{FILL_HEIGHT / 2:.2f}"
+            height="{fill_height:.2f}"
+            rx="{fill_height / 2:.2f}"
+            ry="{fill_height / 2:.2f}"
             fill="{color}"/>
         '''
     )
 
+
 def _render_zero_line(svg, y_center, x_zero, config):
-    """
-    Ajoute la ligne verticale centrale du graphique.
-    """
     if not config["show_zero_line"]:
         return
 
-    zero_y = y_center - ZERO_LINE_HEIGHT / 2
+    zero_line_height = config["zero_line_height"]
+    zero_y = y_center - zero_line_height / 2
 
     svg.append(
         f'''
         <rect
-            class="zero"
             x="{x_zero - 0.75:.2f}"
             y="{zero_y:.2f}"
             width="1.5"
-            height="{ZERO_LINE_HEIGHT:.2f}"/>
+            height="{zero_line_height:.2f}"
+            fill="{TEXT_COLOR}"
+            opacity="0.25"/>
         '''
     )
 
+
 def _render_marker(svg, y_center, dot_x, color, config):
-    """
-    Ajoute le marqueur circulaire à l'extrémité de la barre.
-    """
     if not config["show_marker"]:
         return
 
-    # Cercle blanc extérieur.
-    marker_radius = MARKER_SIZE / 2
+    marker_size = config["marker_size"]
+    marker_radius = marker_size / 2
 
     svg.append(
         f'''
@@ -273,7 +275,6 @@ def _render_marker(svg, y_center, dot_x, color, config):
         '''
     )
 
-    # Cercle coloré.
     inner_radius = max(marker_radius - 2, 1)
 
     svg.append(
@@ -285,14 +286,9 @@ def _render_marker(svg, y_center, dot_x, color, config):
             fill="{color}"
             stroke="white"
             stroke-width="2"/>
-
         '''
     )
 
-    # Petit contour extérieur très léger.
-    # Cela reproduit :
-    # box-shadow: 0 0 0 1px rgba(0,0,0,.15)
-    # En SVG, on le fait avec un cercle supplémentaire.
     svg.append(
         f'''
         <circle
@@ -305,6 +301,7 @@ def _render_marker(svg, y_center, dot_x, color, config):
             stroke-width="1"/>
         '''
     )
+
 
 def _render_value(svg, y_center, dot_x, z, z_clamped, color, config):
     """
@@ -339,11 +336,12 @@ def _render_value(svg, y_center, dot_x, z, z_clamped, color, config):
         '''
     )
 
+
 def _build_chart_svg_style(config):
     """
     Construit le bloc <style> du graphique SVG.
     """
-    return f'''
+    return f"""
     <style>
         .value {{
             font-family: "IBM Plex Mono", "DejaVu Sans Mono", monospace;
@@ -360,14 +358,15 @@ def _build_chart_svg_style(config):
             opacity: 0.25;
         }}
     </style>
-    '''
+    """
+
 
 def generate_chart(
     section: str,
     scores_for_type: dict,
     chart_config: dict | None = None,
-    width_cm: float | None = None,   # ← nouveau
-) -> tuple[bytes, float, float]:      # ← ajoute width_cm en sortie
+    width_cm: float | None = None,  # ← nouveau
+) -> tuple[bytes, float, float]:  # ← ajoute width_cm en sortie
     """
     Génère un graphique SVG reproduisant le style des barres
     présentes dans template.html.
@@ -375,11 +374,8 @@ def generate_chart(
     config = _get_chart_config(chart_config)
     rows = _build_chart_rows(section, scores_for_type)
     if len(rows) != 1:
-        raise ValueError(
-            "generate_chart() attend exactement un item."
-        )
-    BAR_WIDTH, svg_height = _get_chart_dimensions()
-
+        raise ValueError("generate_chart() attend exactement un item.")
+    BAR_WIDTH, svg_height = _get_chart_dimensions(config)
     svg = []
 
     # En-tête XML.
@@ -418,24 +414,21 @@ def generate_chart(
         svg,
         y_center,
         BAR_WIDTH,
+        config["bar_height"],
     )
 
-    # BAR FILL
+    #
     _render_bar_fill(
         svg,
         y_center,
         fill_width,
         fill_x,
         color,
-        )
+        config["fill_height"],
+    )
 
     # ZERO LINE
-    _render_zero_line(
-        svg,
-        y_center,
-        x_zero,
-        config
-    )
+    _render_zero_line(svg, y_center, x_zero, config)
 
     # POINT
     _render_marker(
@@ -469,6 +462,7 @@ def generate_chart(
 
     return svg_bytes, height_cm, effective_width_cm
 
+
 def generate_all_item_charts(
     scores: dict,
     chart_config: dict | None = None,
@@ -501,7 +495,7 @@ def generate_all_item_charts(
             section=section_key,
             scores_for_type=data,
             chart_config=chart_config,
-            width_cm=width_cm,    
+            width_cm=width_cm,
         )
     return charts
 
@@ -529,6 +523,4 @@ if __name__ == "__main__":
         print(f"\n{section} : {len(items)} items")
 
         for label, score, svg_bytes, height_cm, width_cm in items:
-            print(
-                f"  {label}: {score:+.2f}"
-            )
+            print(f"  {label}: {score:+.2f}")

@@ -1,5 +1,5 @@
 """
-storage.paths
+storage/paths.py
 =============
 
 Gestion centralisée des chemins de l'application Profil Sensoriel.
@@ -166,11 +166,10 @@ class Paths:
     @property
     def bilan_dir(self) -> Path:
         return self.report_dir / "bilan"
-    @property
 
+    @property
     def pdf_dir(self) -> Path:
         return self.report_dir / "pdf"
-
 
     # --------------------------------------------------------
     # Ressources embarquées
@@ -320,7 +319,6 @@ class Paths:
         logger.debug("BILAN_DIR            : %s", self.bilan_dir)
         logger.debug("ENV_FILE             : %s", self.env_file)
         logger.debug("RUNTIME_JSON         : %s", self.runtime_json)
-
 
 
 # ============================================================

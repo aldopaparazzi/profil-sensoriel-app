@@ -13,7 +13,7 @@
   "ui": {
     "theme": "light",
     "charts": {
-      "chart_cell_height_cm": 1.0,
+      "chart_cell_height_cm": 0.8,
       "bar_height": 12,
       "row_height": 32,
       "show_marker": true,
@@ -28,7 +28,7 @@
       "marker_size": 14,
       "border_width_pt": 0.0,
       "table_total_width_cm": 17.0,
-      "label_col_width_cm": 3.5,
+      "label_col_width_cm": 3.75,
       "score_col_width_cm": 2.0
     }
   }

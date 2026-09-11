@@ -75,7 +75,7 @@ ODT_CHART_WIDTH_CM = 8.0
 MIN_CHART_HEIGHT_CM = 0.0
 
 CHART_CELL_HEIGHT_CM = 1.0  # Espacement de la cellule ODT (remplace ODT_CHART_HEIGHT_CM + ODT_CHART_ROW_PADDING_CM
-TABLE_BORDER_WIDTH_PT = 0.5 # Bordure du tableau ODT (0 = pas de bordure)
+TABLE_BORDER_WIDTH_PT = 0.5  # Bordure du tableau ODT (0 = pas de bordure)
 
 
 # Échelle des scores
@@ -92,12 +92,12 @@ VALUE_FONT_SIZE = 18
 VALUE_OFFSET = 18
 
 # Colonnes du tableau ODT (Sujet B2)
-TABLE_TOTAL_WIDTH_MIN_CM = 8.0   # 3.5 (label) + 1.0 (score) + 3.5 (graphique)
+TABLE_TOTAL_WIDTH_MIN_CM = 8.0  # 3.5 (label) + 1.0 (score) + 3.5 (graphique)
 TABLE_TOTAL_WIDTH_MAX_CM = 19.0
 TABLE_TOTAL_WIDTH_DEFAULT_CM = 17.0
 
 LABEL_COL_MIN_CM = 3.5
-SCORE_COL_MIN_CM = 1.0
+SCORE_COL_MIN_CM = 1.2
 GRAPH_COL_MIN_CM = 3.5
 
 GRAPH_MARGIN_PCT = 0.10  # marge gauche+droite dans la cellule graphique
@@ -108,7 +108,6 @@ DEFAULT_CHART_SETTINGS = {
     "show_values": True,
     "show_marker": True,
     "show_zero_line": True,
-
     # Réglages legacy — seront supprimés avec les contrôles UI correspondants
     "label_font_size": 18,
     "value_font_size": VALUE_FONT_SIZE,
@@ -120,6 +119,5 @@ DEFAULT_CHART_SETTINGS = {
     "border_width_pt": TABLE_BORDER_WIDTH_PT,
     "table_total_width_cm": TABLE_TOTAL_WIDTH_DEFAULT_CM,
     "label_col_width_cm": 4.0,
-    "score_col_width_cm": 1.5, 
+    "score_col_width_cm": 1.5,
 }
-
