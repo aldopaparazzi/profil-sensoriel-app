@@ -173,16 +173,16 @@ def _add_item_chart_section(
 
 
 def _add_strategies(doc, selected_strategies: dict) -> None:
+    if not selected_strategies:
+        # doc.text.addElement(P(text="Aucun aménagements sélectionnée."))
+        return
+
     doc.text.addElement(
         H(
             outlinelevel=1,
             text="Aménagements à mettre en place",
         )
     )
-
-    if not selected_strategies:
-        doc.text.addElement(P(text="Aucune stratégie sélectionnée."))
-        return
 
     for quadrant, domains in selected_strategies.items():
         _add_strategy_quadrant(doc, quadrant, domains)
@@ -277,12 +277,7 @@ def build_bilan_odt(
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     doc.save(str(output_path))
-
-    logger.info(
-        "✓ Bilan ODT prérempli généré : %s",
-        output_path,
-    )
-
+    #logger.info("✓ Bilan ODT prérempli généré : %s"output_path.parent)
     return output_path
 
 

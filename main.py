@@ -40,7 +40,7 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
     config = load_config()
     configure_logging(config.get("debug", False))
 
-    logger.info("=== PROFIL SENSORIEL V1 ===", extra={"status": True})
+    logger.info("=== PROFIL SENSORIEL V1.5 ===", extra={"status": True})
 
     context = {
         "raw": {},

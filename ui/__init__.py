@@ -1,0 +1,3 @@
+APP_NAME = "Profil sensoriel"
+APP_VERSION = "1.5"
+APP_BUILD = "2609111246"

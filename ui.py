@@ -2,8 +2,8 @@
 """
 Application Qt pour consulter les rapports HTML du Profil Sensoriel 2.
 
-Version 2.0.1
-date: 2026-07-27
+Version 1.5
+date: 2026-09-11
 
 Ce programme permet de consulter les rapports HTML générés par le Profil Sensoriel 2.
 Il est prévu pour être utilisé sur un ordinateur local, sans serveur web.
@@ -61,7 +61,7 @@ from PySide6.QtWidgets import (
 # from main import import_forms
 
 # from reporting.html import generate_html_report
-from reporting.odt import generate_bilan, open_odt
+from reporting.odt import generate_bilan, open_odt, is_locked
 from storage.paths import paths
 from storage.init import load_runtime, save_runtime, ensure_env
 from ui.ui_logging import StatusBarLogger
@@ -692,11 +692,47 @@ class ReportViewer(QMainWindow):
             open_odt(output_path)
             return
 
+        # --- Vérification du verrou avant génération ---
+        if is_locked(output_path):
+            QMessageBox.warning(
+                self,
+                "Fichier ouvert",
+                f"« {output_path.name} » est actuellement ouvert dans LibreOffice.\n\n"
+                "Fermez-le avant de générer une nouvelle version.\n"
+                "⚠️ Le document n'a PAS été mis à jour.",
+            )
+            return
+
+        # --- Confirmation d'écrasement ---
+        if output_path.exists():
+        #    reply = QMessageBox.question(
+        #        self,
+        #        "Écraser le fichier existant ?",
+        #        f"« {output_path.name} » existe déjà.\n\nLe remplacer ?",
+        #        QMessageBox.Yes | QMessageBox.No,
+        #        QMessageBox.No,
+        #    )
+        #    if reply != QMessageBox.Yes:
+        #        logger.info("Génération ODT annulée (écrasement refusé)")
+        #        return
+
+            box = QMessageBox(self)
+            box.setWindowTitle("Écraser le fichier existant ?")
+            box.setText(f"« {output_path.name} » existe déjà.\n\nLe remplacer ?")
+            box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            box.button(QMessageBox.Yes).setText("Oui")
+            box.button(QMessageBox.No).setText("Non")
+            box.setDefaultButton(QMessageBox.No)
+            reply = box.exec()
+            if reply != QMessageBox.Yes:
+                logger.info("Génération annulée (écrasement refusé)")
+                return
+
         # --- Génération ---
         selected = dialog.selected_strategies()
         try:
             build_bilan_odt(patient, scores, output_path, selected)
-            logger.info("✓ Bilan ODT généré : %s", output_path, extra={"status": True})
+            logger.info("✓ Bilan ODT généré : %s", output_path.parent, extra={"status": True})
         except Exception:  # noqa: BLE001
             logger.exception("Erreur génération bilan ODT")
             QMessageBox.critical(
@@ -742,7 +778,8 @@ class ReportViewer(QMainWindow):
         Ouvre la fenêtre de configuration.
         Placeholder en attendant le dialogue Qt complet.
         """
-        dialog = SettingsDialog(self)
+        dialog = SettingsDialog(self) # ouvrir la fenêtre de configuration
+
         if dialog.exec():
             logger.info("Configuration mise à jour", extra={"status": True})
             reload_reports()  # optionnel : si le workspace a changé

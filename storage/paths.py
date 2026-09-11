@@ -105,7 +105,8 @@ class Paths:
         """
         Dossier de configuration.
         """
-        return self.resource_dir / "config"
+        # return self.resource_dir / "config"
+        return self.app_dir / "config"
 
     @property
     def runtime_json(self) -> Path:

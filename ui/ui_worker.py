@@ -1,4 +1,4 @@
-# ui_worker.py
+# ui\ui_worker.py
 """
 Exécute le pipeline (récupération Tally + traitement) dans un thread séparé.
 

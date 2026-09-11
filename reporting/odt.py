@@ -11,6 +11,25 @@ from utils.privacy import anonymize_patient
 
 logger = get_logger(__name__)
 
+def find_libreoffice() -> str | None:
+    """Trouve l'exécutable LibreOffice."""
+    # Chemins possibles sur Windows
+    windows_paths = [
+        r"C:\Program Files\LibreOffice\program\soffice.exe",
+        r"C:\Program Files (x86)\LibreOffice\program\soffice.exe",
+    ]
+
+    for path in windows_paths:
+        if Path(path).exists():
+            return path
+
+    # Recherche dans le PATH
+    return shutil.which("soffice") or shutil.which("libreoffice")
+
+def is_locked(path: Path) -> bool:
+    """Détecte si un fichier ODT est actuellement ouvert dans LibreOffice."""
+    lock_file = path.parent / f".~lock.{path.name}#"
+    return lock_file.exists()
 
 def generate_bilan(filename: str) -> dict:
     """
@@ -51,7 +70,6 @@ def generate_bilan(filename: str) -> dict:
     except Exception as e:  # noqa: BLE001
         return {"status": "error", "file": None, "error": str(e)}
 
-
 def export_odt(patient: dict, output_dir: str | Path = paths.bilan_dir) -> Path | None:
     """
     Exporte un ODT à partir des données patient.
@@ -71,23 +89,6 @@ def export_odt(patient: dict, output_dir: str | Path = paths.bilan_dir) -> Path 
         "Chemin complet ODT (%s) : %s", anonymize_patient(patient), output_path
     )
     return output_path
-
-
-def find_libreoffice() -> str | None:
-    """Trouve l'exécutable LibreOffice."""
-    # Chemins possibles sur Windows
-    windows_paths = [
-        r"C:\Program Files\LibreOffice\program\soffice.exe",
-        r"C:\Program Files (x86)\LibreOffice\program\soffice.exe",
-    ]
-
-    for path in windows_paths:
-        if Path(path).exists():
-            return path
-
-    # Recherche dans le PATH
-    return shutil.which("soffice") or shutil.which("libreoffice")
-
 
 def open_odt(path: Path) -> bool:
     """

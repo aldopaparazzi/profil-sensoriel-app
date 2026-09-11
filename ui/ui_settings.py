@@ -49,18 +49,21 @@ from pathlib import Path
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
+    QApplication,
     QCheckBox,
     QDialog,
     QDialogButtonBox,
     QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
+    QFrame,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QSpinBox,
     QTabWidget,
     QVBoxLayout,
@@ -78,13 +81,39 @@ from reporting.chart_style import (
     TABLE_TOTAL_WIDTH_MAX_CM,
     TABLE_TOTAL_WIDTH_MIN_CM,
 )
-from reporting.preview import generate_preview_png
 from storage.init import load_runtime, save_runtime
 from storage.paths import paths
+from ui import APP_BUILD, APP_NAME, APP_VERSION
 from utils.logger import logger
 
 LEGACY_CHART_KEYS = ("show_x_axis",)
+SPINBOX_WIDTH = 130
+HAUTEUR_APERCU = 180
 
+def _make_spinbox(cls, value, minimum, maximum, step=1, suffix="", decimals=None, tooltip=None):
+    """Crée un QSpinBox/QDoubleSpinBox pré-configuré (largeur, alignement, valeurs)."""
+    box = cls()
+    box.setFixedWidth(SPINBOX_WIDTH)
+    box.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+    box.setRange(minimum, maximum)
+    box.setSingleStep(step)
+    if decimals is not None:
+        box.setDecimals(decimals)
+    if suffix:
+        box.setSuffix(suffix)
+    if tooltip:
+        box.setToolTip(tooltip)
+    box.setValue(value)
+    return box
+
+def _right_aligned(widget):
+    """Enveloppe un widget pour le coller à droite dans une QFormLayout row."""
+    container = QWidget()
+    box = QHBoxLayout(container)
+    box.setContentsMargins(0, 0, 0, 0)
+    box.addStretch()
+    box.addWidget(widget)
+    return container
 
 class PreviewWorker(QThread):
     finished_ok = Signal(object)
@@ -122,6 +151,8 @@ class SettingsDialog(QDialog):
 
         self.setWindowTitle("Configuration")
         self.setMinimumWidth(750)
+        self._preview_worker = None
+        self._appearance_preview_generated = False
 
         # ----------------------------------------------------
         # Chargement du runtime actuel
@@ -135,8 +166,8 @@ class SettingsDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        tabs = QTabWidget()
-        layout.addWidget(tabs)
+        self.tabs = QTabWidget()
+        layout.addWidget(self.tabs)
 
         # ====================================================
         # ONGLET GÉNÉRAL
@@ -145,7 +176,7 @@ class SettingsDialog(QDialog):
         general_tab = QWidget()
         general_layout = QVBoxLayout(general_tab)
 
-        tabs.addTab(general_tab, "Général")
+        self.tabs.addTab(general_tab, "Général")
 
         # ----------------------------------------------------
         # Formulaire général
@@ -299,11 +330,8 @@ class SettingsDialog(QDialog):
         )
 
         options_layout.addWidget(self.chk_html)
-
         options_layout.addWidget(self.chk_odt)
-
         options_layout.addWidget(self.chk_debug)
-
         general_layout.addWidget(options_group)
 
         # ====================================================
@@ -311,10 +339,10 @@ class SettingsDialog(QDialog):
         # ====================================================
 
         strategy_group = QGroupBox("Aménagements à mettre en place")
-
         strategy_form = QFormLayout(strategy_group)
 
         self.threshold_field = QDoubleSpinBox()
+        self.threshold_field.setFixedWidth(SPINBOX_WIDTH)
 
         self.threshold_field.setRange(
             0.5,
@@ -322,9 +350,7 @@ class SettingsDialog(QDialog):
         )
 
         self.threshold_field.setSingleStep(0.1)
-
         self.threshold_field.setDecimals(1)
-
         self.threshold_field.setValue(
             float(
                 self.runtime.get(
@@ -340,18 +366,30 @@ class SettingsDialog(QDialog):
         )
 
         general_layout.addWidget(strategy_group)
-
         general_layout.addStretch()
 
         # ====================================================
         # ONGLET APPARENCE
         # ====================================================
 
-        appearance_tab = self._build_appearance_tab()
+        self.appearance_tab = self._build_appearance_tab()
 
-        tabs.addTab(
-            appearance_tab,
+        self.tabs.addTab(
+            self.appearance_tab,
             "Apparence",
+        )
+        self.tabs.currentChanged.connect(self._on_tab_changed) # Détection du changement d'onglet
+
+
+        # ====================================================
+        # ONGLET À PROPOS
+        # ====================================================
+
+        about_tab = self._build_about_tab()
+
+        self.tabs.addTab(
+            about_tab,
+            "À propos",
         )
 
         # ====================================================
@@ -359,20 +397,42 @@ class SettingsDialog(QDialog):
         # ====================================================
 
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
-
         buttons.button(QDialogButtonBox.Save).setText("Enregistrer")
-
         buttons.button(QDialogButtonBox.Cancel).setText("Annuler")
-
         buttons.accepted.connect(self._save_and_close)
-
         buttons.rejected.connect(self.reject)
-
         layout.addWidget(buttons)
 
     # ============================================================
     # HELPERS UI
     # ============================================================
+
+    def _stop_preview_worker(self):
+        """
+        Attend la fin du worker de prévisualisation avant
+        de détruire la fenêtre de configuration.
+        """
+        worker = self._preview_worker
+        if worker is not None and worker.isRunning():
+            logger.warning("Veuillez patienter, La fenêtre se fermera à la fin de l'opération...")
+            QApplication.processEvents()
+            worker.wait()
+            logger.debug("Preview terminé.")
+
+        self._preview_worker = None
+
+    def closeEvent(self, event):
+        self._stop_preview_worker()
+        super().closeEvent(event)
+        
+    def reject(self):
+        self._stop_preview_worker()
+        super().reject()
+
+    def accept(self):
+        self._stop_preview_worker()
+        super().accept()
+
 
     def _path_row(
         self,
@@ -488,9 +548,7 @@ class SettingsDialog(QDialog):
         """
 
         tab = QWidget()
-
         layout = QVBoxLayout(tab)
-
         charts = self._chart_settings()
 
         # ====================================================
@@ -498,7 +556,6 @@ class SettingsDialog(QDialog):
         # ====================================================
 
         display_group = QGroupBox("Éléments affichés")
-
         display_layout = QVBoxLayout(display_group)
 
         # ----------------------------------------------------
@@ -539,78 +596,75 @@ class SettingsDialog(QDialog):
                 DEFAULT_CHART_SETTINGS["show_zero_line"],
             )
         )
-
         display_layout.addWidget(self.chk_chart_show_values)
-
         display_layout.addWidget(self.chk_chart_show_marker)
-
         display_layout.addWidget(self.chk_chart_show_zero_line)
-
         layout.addWidget(display_group)
 
-        # ====================================================
-        # GROUPE : TEXTE
-        # ====================================================
-
-        text_group = QGroupBox("Texte")
-
-        text_form = QFormLayout(text_group)
-
-        # ----------------------------------------------------
-        # Taille des labels
-        # ----------------------------------------------------
-
-        self.label_font_size = QSpinBox()
-
-        self.label_font_size.setRange(
-            12,
-            32,
-        )
-
-        self.label_font_size.setSingleStep(1)
-
-        self.label_font_size.setSuffix(" px")
-
-        self.label_font_size.setValue(
-            charts.get(
-                "label_font_size",
-                DEFAULT_CHART_SETTINGS["label_font_size"],
-            )
-        )
-
-        # ----------------------------------------------------
-        # Taille des valeurs
-        # ----------------------------------------------------
-
-        self.value_font_size = QSpinBox()
-
-        self.value_font_size.setRange(
-            10,
-            28,
-        )
-
-        self.value_font_size.setSingleStep(1)
-
-        self.value_font_size.setSuffix(" px")
-
-        self.value_font_size.setValue(
-            charts.get(
-                "value_font_size",
-                DEFAULT_CHART_SETTINGS["value_font_size"],
-            )
-        )
-
-        text_form.addRow(
-            "Taille des libellés :",
-            self.label_font_size,
-        )
-
-        text_form.addRow(
-            "Taille des valeurs :",
-            self.value_font_size,
-        )
-
-        layout.addWidget(text_group)
+#        # ====================================================
+#        # GROUPE : TEXTE
+#        # ====================================================
+#
+#        text_group = QGroupBox("Texte")
+#        text_form = QFormLayout(text_group)
+#
+#        # ----------------------------------------------------
+#        # Taille des labels
+#        # ----------------------------------------------------
+#
+#        self.label_font_size = QSpinBox()
+#        self.label_font_size.setFixedWidth(SPINBOX_WIDTH)
+#
+#        self.label_font_size.setRange(
+#            12,
+#            32,
+#        )
+#
+#        self.label_font_size.setSingleStep(1)
+#
+#        self.label_font_size.setSuffix(" px")
+#
+#        self.label_font_size.setValue(
+#            charts.get(
+#                "label_font_size",
+#                DEFAULT_CHART_SETTINGS["label_font_size"],
+#            )
+#        )
+#
+#        # ----------------------------------------------------
+#        # Taille des valeurs
+#        # ----------------------------------------------------
+#
+#        self.value_font_size = QSpinBox()
+#        self.value_font_size.setFixedWidth(SPINBOX_WIDTH)
+#
+#        self.value_font_size.setRange(
+#            10,
+#            28,
+#        )
+#
+#        self.value_font_size.setSingleStep(1)
+#
+#        self.value_font_size.setSuffix(" px")
+#
+#        self.value_font_size.setValue(
+#            charts.get(
+#                "value_font_size",
+#                DEFAULT_CHART_SETTINGS["value_font_size"],
+#            )
+#        )
+#
+#        text_form.addRow(
+#            "Taille des libellés :",
+#            self.label_font_size,
+#        )
+#
+#        text_form.addRow(
+#            "Taille des valeurs :",
+#            self.value_font_size,
+#        )
+#
+#        layout.addWidget(text_group)
 
         # ====================================================
         # GROUPE : Tableau
@@ -623,72 +677,38 @@ class SettingsDialog(QDialog):
         # Bordures du tableau
         # ----------------------------------------------------
 
-        self.border_width = QDoubleSpinBox()
-        self.border_width.setRange(0.0, 3.0)
-        self.border_width.setSingleStep(0.5)
-        self.border_width.setDecimals(1)
-        self.border_width.setSuffix(" pt")
-        self.border_width.setToolTip(
-            "Épaisseur de la bordure du tableau. 0 = pas de bordure."
-        )
-        self.border_width.setValue(
-            charts.get("border_width_pt", DEFAULT_CHART_SETTINGS["border_width_pt"])
+        self.border_width = _make_spinbox(
+            QDoubleSpinBox,
+            charts.get("border_width_pt", DEFAULT_CHART_SETTINGS["border_width_pt"]),
+            0.0, 3.0, step=0.5, decimals=1, suffix=" pt",
+            tooltip="Épaisseur de la bordure du tableau. 0 = pas de bordure.",
         )
 
-        table_form.addRow(
-            "Épaisseur de la bordure :",
-            self.border_width,
-        )
-        self.table_total_width = QDoubleSpinBox()
-
-        self.table_total_width.setRange(
-            TABLE_TOTAL_WIDTH_MIN_CM, TABLE_TOTAL_WIDTH_MAX_CM
-        )
-        self.table_total_width.setSingleStep(0.5)
-        self.table_total_width.setSuffix(" cm")
-        self.table_total_width.setValue(
-            charts.get(
-                "table_total_width_cm", DEFAULT_CHART_SETTINGS["table_total_width_cm"]
-            )
+        table_form.addRow("Épaisseur de la bordure :", _right_aligned(self.border_width))
+        # ----------------------------------------------------
+        self.table_total_width = _make_spinbox(
+            QDoubleSpinBox,
+            charts.get("table_total_width_cm", DEFAULT_CHART_SETTINGS["table_total_width_cm"]),
+            TABLE_TOTAL_WIDTH_MIN_CM, TABLE_TOTAL_WIDTH_MAX_CM, step=0.5, suffix=" cm",
         )
 
-        self.label_col_width = QDoubleSpinBox()
-        self.label_col_width.setRange(LABEL_COL_MIN_CM, 10.0)
-        self.label_col_width.setSingleStep(0.1)
-        self.label_col_width.setSuffix(" cm")
-        self.label_col_width.setValue(
-            charts.get(
-                "label_col_width_cm", DEFAULT_CHART_SETTINGS["label_col_width_cm"]
-            )
+        self.label_col_width = _make_spinbox(
+            QDoubleSpinBox,
+            charts.get("label_col_width_cm", DEFAULT_CHART_SETTINGS["label_col_width_cm"]),
+            LABEL_COL_MIN_CM, 10.0, step=0.1, suffix=" cm",
         )
 
-        self.score_col_width = QDoubleSpinBox()
-        self.score_col_width.setRange(SCORE_COL_MIN_CM, 5.0)
-        self.score_col_width.setSingleStep(0.1)
-        self.score_col_width.setSuffix(" cm")
-        self.score_col_width.setValue(
-            charts.get(
-                "score_col_width_cm", DEFAULT_CHART_SETTINGS["score_col_width_cm"]
-            )
+        self.score_col_width = _make_spinbox(
+            QDoubleSpinBox,
+            charts.get("score_col_width_cm", DEFAULT_CHART_SETTINGS["score_col_width_cm"]),
+            SCORE_COL_MIN_CM, 5.0, step=0.1, suffix=" cm",
         )
 
         self.graph_col_width_preview = QLabel()  # lecture seule, calculé
 
-        table_form.addRow(
-            "Largeur totale du tableau :",
-            self.table_total_width,
-        )
-
-        table_form.addRow(
-            "Largeur colonne Libellé :",
-            self.label_col_width,
-        )
-
-        table_form.addRow(
-            "Largeur colonne Score :",
-            self.score_col_width,
-        )
-
+        table_form.addRow("Largeur totale du tableau :", _right_aligned(self.table_total_width))
+        table_form.addRow("Largeur colonne Libellé :", _right_aligned(self.label_col_width))
+        table_form.addRow("Largeur colonne Score :", _right_aligned(self.score_col_width))
         table_form.addRow(
             "Largeur colonne Graphique (calculée) :",
             self.graph_col_width_preview,
@@ -707,137 +727,63 @@ class SettingsDialog(QDialog):
         # Hauteur de la cellule contenant chaque graphique.
         # ----------------------------------------------------
 
-        self.chart_cell_height = QDoubleSpinBox()
-        self.chart_cell_height.setRange(0.8, 3.0)
-        self.chart_cell_height.setSingleStep(0.1)
-        self.chart_cell_height.setDecimals(1)
-        self.chart_cell_height.setSuffix(" cm")
-        self.chart_cell_height.setToolTip(
-            "Hauteur de la cellule contenant chaque graphique.\n"
-            "Sous 0,8 cm, le texte des autres colonnes devient trop serré."
-        )
-        self.chart_cell_height.setValue(
-            charts.get(
-                "chart_cell_height_cm", DEFAULT_CHART_SETTINGS["chart_cell_height_cm"]
-            )
+        self.chart_cell_height = _make_spinbox(
+            QDoubleSpinBox,
+            charts.get("chart_cell_height_cm", DEFAULT_CHART_SETTINGS["chart_cell_height_cm"]),
+            0.8, 3.0, step=0.1, decimals=1, suffix=" cm",
+            tooltip=(
+                "Hauteur de la cellule contenant chaque graphique.\n"
+                "Sous 0,8 cm, le texte des autres colonnes devient trop serré."
+            ),
         )
         # ----------------------------------------------------
         # Piste grise
         # ----------------------------------------------------
 
-        self.bar_height = QSpinBox()
-
-        self.bar_height.setRange(
-            4,
-            24,
-        )
-
-        self.bar_height.setSingleStep(1)
-
-        self.bar_height.setSuffix(" px")
-
-        self.bar_height.setToolTip("Épaisseur de la piste grise.")
-
-        self.bar_height.setValue(
-            charts.get(
-                "bar_height",
-                DEFAULT_CHART_SETTINGS["bar_height"],
-            )
+        self.bar_height = _make_spinbox(
+            QSpinBox,
+            charts.get("bar_height", DEFAULT_CHART_SETTINGS["bar_height"]),
+            4, 24, suffix=" px",
+            tooltip="Épaisseur de la piste grise.",
         )
 
         # ----------------------------------------------------
         # Barre colorée
         # ----------------------------------------------------
 
-        self.fill_height = QSpinBox()
-
-        self.fill_height.setRange(
-            2,
-            20,
+        self.fill_height = _make_spinbox(
+            QSpinBox,
+            charts.get("fill_height", DEFAULT_CHART_SETTINGS["fill_height"]),
+            2, 20, suffix=" px",
+            tooltip="Épaisseur de la barre colorée.",
         )
-
-        self.fill_height.setSingleStep(1)
-
-        self.fill_height.setSuffix(" px")
-
-        self.fill_height.setToolTip("Épaisseur de la barre colorée.")
-
-        self.fill_height.setValue(
-            charts.get(
-                "fill_height",
-                DEFAULT_CHART_SETTINGS["fill_height"],
-            )
-        )
-
         # ----------------------------------------------------
         # Ligne zéro
         # ----------------------------------------------------
 
-        self.zero_line_height = QSpinBox()
-
-        self.zero_line_height.setRange(
-            10,
-            35,
-        )
-
-        self.zero_line_height.setSingleStep(1)
-
-        self.zero_line_height.setSuffix(" px")
-
-        self.zero_line_height.setToolTip("Hauteur de la ligne centrale.")
-
-        self.zero_line_height.setValue(
-            charts.get(
-                "zero_line_height",
-                DEFAULT_CHART_SETTINGS["zero_line_height"],
-            )
+        self.zero_line_height = _make_spinbox(
+            QSpinBox,
+            charts.get("zero_line_height", DEFAULT_CHART_SETTINGS["zero_line_height"]),
+            10, 35, suffix=" px",
+            tooltip="Hauteur de la ligne centrale.",
         )
 
         # ----------------------------------------------------
         # Marqueur
         # ----------------------------------------------------
 
-        self.marker_size = QSpinBox()
-
-        self.marker_size.setRange(
-            8,
-            24,
+        self.marker_size = _make_spinbox(
+            QSpinBox,
+            charts.get("marker_size", DEFAULT_CHART_SETTINGS["marker_size"]),
+            8, 24, suffix=" px",
+            tooltip="Diamètre du marqueur.",
         )
 
-        self.marker_size.setSingleStep(1)
-
-        self.marker_size.setSuffix(" px")
-
-        self.marker_size.setToolTip("Diamètre du marqueur.")
-
-        self.marker_size.setValue(
-            charts.get(
-                "marker_size",
-                DEFAULT_CHART_SETTINGS["marker_size"],
-            )
-        )
-
-        bars_form.addRow("Hauteur de cellule graphique :", self.chart_cell_height)
-
-        bars_form.addRow(
-            "Épaisseur de la piste :",
-            self.bar_height,
-        )
-
-        bars_form.addRow(
-            "Épaisseur de la barre :",
-            self.fill_height,
-        )
-
-        bars_form.addRow(
-            "Hauteur de la ligne centrale :",
-            self.zero_line_height,
-        )
-
-        bars_form.addRow(
-            "Taille du marqueur :",
-            self.marker_size,
-        )
+        bars_form.addRow("Espace vertical :", _right_aligned(self.chart_cell_height))
+        bars_form.addRow("Épaisseur de la piste :", _right_aligned(self.bar_height))
+        bars_form.addRow("Épaisseur de la barre :", _right_aligned(self.fill_height))
+        bars_form.addRow("Hauteur de la ligne centrale :", _right_aligned(self.zero_line_height))
+        bars_form.addRow("Taille du marqueur :", _right_aligned(self.marker_size))
 
         layout.addWidget(bars_group)
 
@@ -846,9 +792,7 @@ class SettingsDialog(QDialog):
         # ====================================================
 
         preview_group = QGroupBox("Aperçu")
-
         preview_layout = QVBoxLayout(preview_group)
-
         self.preview_container = QWidget()
         self.preview_container.setStyleSheet(
             """
@@ -859,27 +803,22 @@ class SettingsDialog(QDialog):
             }
             """
         )
-        self.preview_container.setMinimumHeight(180)
+        self.preview_container.setFixedHeight(HAUTEUR_APERCU)
 
         self.preview_container_layout = QVBoxLayout(self.preview_container)
 
         self.btn_generate_preview = QPushButton("🔄 Générer l'aperçu")
         self.btn_generate_preview.clicked.connect(self._generate_real_preview)
         preview_layout.addWidget(self.btn_generate_preview)
-
         preview_layout.addWidget(self.preview_container)
-
-        layout.addWidget(preview_group)
 
         # ====================================================
         # RESTAURATION DES VALEURS PAR DÉFAUT
         # ====================================================
 
         self.btn_restore_defaults = QPushButton("Restaurer les valeurs par défaut")
-
         self.btn_restore_defaults.clicked.connect(self._restore_chart_defaults)
-
-        layout.addWidget(self.btn_restore_defaults)
+        preview_layout.addWidget(self.btn_restore_defaults)
 
         # ====================================================
         # CONNEXIONS POUR L'APERÇU
@@ -893,7 +832,106 @@ class SettingsDialog(QDialog):
             widget.valueChanged.connect(self._update_column_preview)
 
         self._update_column_preview()
-        self._generate_real_preview()
+        #self._generate_real_preview()
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(tab)
+
+        outer = QWidget()
+        outer_layout = QVBoxLayout(outer)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.addWidget(scroll)
+        outer_layout.addWidget(preview_group)
+
+        return outer
+
+    def _on_tab_changed(self, index: int):
+        """
+        Génère l'aperçu Apparence uniquement lors de sa première ouverture.
+        """
+        if self.tabs.widget(index) is self.appearance_tab and not self._appearance_preview_generated:
+                self._generate_real_preview()
+                self._appearance_preview_generated = True
+
+    # ============================================================
+    # ONGLET "À propos"
+    # ============================================================
+
+    def _build_about_tab(self) -> QWidget:
+        tab = QWidget()
+
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(15)
+
+        # ------------------------------------------------
+        # Bandeau / logo de l'application
+        # ------------------------------------------------
+
+        banner = QFrame()
+        banner.setFixedHeight(180)
+        banner.setStyleSheet("""
+            QFrame {
+                background-color: #2c3e50;
+                border-radius: 10px;
+            }
+        """)
+
+        banner_layout = QVBoxLayout(banner)
+        banner_layout.setContentsMargins(20, 20, 20, 15)
+
+        title = QLabel(APP_NAME)
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 36px;
+                font-weight: bold;
+            }
+        """)
+
+        subtitle = QLabel("Application de gestion de rapports de bilans sensoriel Dunn2.")
+        subtitle.setAlignment(Qt.AlignCenter)
+        subtitle.setStyleSheet("""
+            QLabel {
+                color: #ecf0f1;
+                font-size: 16px;
+            }
+        """)
+
+        version = QLabel(
+            f"Version {APP_VERSION} • Build {APP_BUILD}"
+        )
+        version.setAlignment(Qt.AlignRight | Qt.AlignBottom)
+        version.setStyleSheet("""
+            QLabel {
+                color: #95a5a6;
+                font-size: 12px;
+            }
+        """)
+
+        banner_layout.addStretch()
+        banner_layout.addWidget(title)
+        banner_layout.addWidget(subtitle)
+        banner_layout.addStretch()
+        banner_layout.addWidget(version)
+
+        layout.addWidget(banner)
+
+        # ------------------------------------------------
+        # Informations
+        # ------------------------------------------------
+
+        info = QLabel(
+            "© 2026 Alex"
+        )
+
+        info.setAlignment(Qt.AlignCenter)
+        info.setWordWrap(True)
+
+        layout.addWidget(info)
+        layout.addStretch()
 
         return tab
 
@@ -912,9 +950,8 @@ class SettingsDialog(QDialog):
             DEFAULT_CHART_SETTINGS["show_zero_line"]
         )
 
-        self.label_font_size.setValue(DEFAULT_CHART_SETTINGS["label_font_size"])
-
-        self.value_font_size.setValue(DEFAULT_CHART_SETTINGS["value_font_size"])
+#        self.label_font_size.setValue(DEFAULT_CHART_SETTINGS["label_font_size"])
+#        self.value_font_size.setValue(DEFAULT_CHART_SETTINGS["value_font_size"])
 
         self.bar_height.setValue(DEFAULT_CHART_SETTINGS["bar_height"])
 
@@ -970,8 +1007,8 @@ class SettingsDialog(QDialog):
             "show_values": self.chk_chart_show_values.isChecked(),
             "show_marker": self.chk_chart_show_marker.isChecked(),
             "show_zero_line": self.chk_chart_show_zero_line.isChecked(),
-            "label_font_size": self.label_font_size.value(),
-            "value_font_size": self.value_font_size.value(),
+#            "label_font_size": self.label_font_size.value(),
+#            "value_font_size": self.value_font_size.value(),
             "bar_height": self.bar_height.value(),
             "fill_height": self.fill_height.value(),
             "zero_line_height": self.zero_line_height.value(),
@@ -994,6 +1031,7 @@ class SettingsDialog(QDialog):
 
         self.btn_generate_preview.setEnabled(False)
         self.btn_generate_preview.setText("⏳ Génération en cours…")
+        logger.info("Génération en cours...  patientez...", extra={"status": True})
 
         while self.preview_container_layout.count():
             item = self.preview_container_layout.takeAt(0)
@@ -1107,8 +1145,8 @@ class SettingsDialog(QDialog):
         # Texte
         # ----------------------------------------------------
 
-        charts["label_font_size"] = self.label_font_size.value()
-        charts["value_font_size"] = self.value_font_size.value()
+#        charts["label_font_size"] = self.label_font_size.value()
+#        charts["value_font_size"] = self.value_font_size.value()
 
         # ----------------------------------------------------
         # Géométrie

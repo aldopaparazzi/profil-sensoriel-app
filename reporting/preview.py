@@ -1,3 +1,4 @@
+import os
 import subprocess
 import uuid
 from pathlib import Path
@@ -56,6 +57,11 @@ def generate_preview_png(
 
     logger.debug("LibreOffice returncode: %s", result.returncode)
     if result.stderr:
-        logger.warning("LibreOffice stderr: %s", result.stderr.decode(errors="replace"))
+        stderr = result.stderr.decode(errors="replace").strip()
+
+        if result.returncode != 0:
+            logger.error("LibreOffice stderr: %s", stderr)
+        else:
+            logger.debug("LibreOffice stderr: %s", stderr)
 
     return png_path if png_path.exists() else None
