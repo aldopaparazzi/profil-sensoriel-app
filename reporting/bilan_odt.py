@@ -234,7 +234,8 @@ def _add_strategy_quadrant(
             )
         )
     for domaine, items in domains.items():
-        doc.text.addElement(P(text=_get_domain_label(domaine)))
+        if show_group_names:
+            doc.text.addElement(P(text=_get_domain_label(domaine)))
         strategy_list = List()
         for item in items:
             list_item = ListItem()

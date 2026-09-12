@@ -27,6 +27,8 @@ QUADRANT_LABELS = {
     "evitement": "Évitement",
     "sensibilite": "Sensibilité",
     "enregistrement": "Enregistrement",
+    "general": "Général",
+
 }
 
 QUADRANT_ORDER = [
@@ -48,6 +50,7 @@ DOMAIN_LABELS = {
     "socio_emotionnel": "Socio-émotionnel",
     "attentionnel": "Attentionnel",
     "traitement_global": "Traitement global",
+    "general": "Général",
 }
 
 COMPOSANTE_LABELS = {

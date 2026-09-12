@@ -98,51 +98,92 @@ def main(force_refresh: bool = False, request_token=None, use_cached=True):
 
         except TallyAPIError as e:
             if e.status_code == 401:
-                logger.warning("🔑 Token invalide ou expiré.")
+                logger.warning("🔑 Token Tally invalide ou expiré.")
+
                 success = False
                 max_attempts = 3
                 attempts = 0
 
                 while not success and attempts < max_attempts:
+                    attempts += 1
+
                     token = replace_tally_token(request_token)
+
                     if token is None:
-                        logger.error(
-                            "❌ Aucun token fourni. Abandon pour ce formulaire."
+                        logger.error("❌ Aucun token valide fourni.")
+                        context["errors"].append(
+                            f"Token Tally invalide ou absent pour {form_name}"
                         )
-                        context["errors"].append(f"Token manquant pour {form_name}")
                         break
 
-                    attempts += 1
                     try:
-                        raw = fetch_all_submissions_with_pagination(form_id, token)
-                        save_raw_json(raw, form_name, full_refresh=True)
+                        raw = fetch_all_submissions_with_pagination(
+                            form_id,
+                            token,
+                        )
+
+                        save_raw_json(
+                            raw,
+                            form_name,
+                            full_refresh=True,
+                        )
+
                         context["raw"][form_name] = raw
-                        logger.info("✔ %s (après renouvellement token)", form_name)
+
+                        logger.info(
+                            "✔ %s (après renouvellement token)",
+                            form_name,
+                        )
+
                         success = True
+
                     except TallyAPIError as e2:
                         if e2.status_code == 401:
                             logger.warning(
-                                "❌ Token toujours invalide (tentative %d/%d).",
+                                "❌ Token toujours invalide "
+                                "(tentative %d/%d).",
                                 attempts,
                                 max_attempts,
                             )
                         else:
+                            logger.error(
+                                "✗ %s",
+                                e2,
+                            )
                             context["errors"].append(str(e2))
-                            logger.error("✗ Erreur pour %s: %s", form_name, e2)
                             break
 
-                if not success and attempts >= max_attempts:
+                if not success:
                     logger.error(
-                        "⛔ Abandon après %d tentatives pour %s.",
-                        max_attempts,
+                        "⛔ Impossible de récupérer %s avec un token valide.",
                         form_name,
                     )
-                    context["errors"].append(
-                        f"Échec authentification {form_name} après {max_attempts} tentatives"
-                    )
+
+            elif e.error_type == "network":
+                logger.error(
+                    "🌐 Connexion Internet impossible : %s",
+                    e,
+                )
+                context["errors"].append(
+                    f"Connexion Internet impossible : {e}"
+                )
+
+            elif e.error_type == "server":
+                logger.error(
+                    "☁️ Serveur Tally indisponible : %s",
+                    e,
+                )
+                context["errors"].append(
+                    f"Serveur Tally indisponible : {e}"
+                )
+
             else:
+                logger.error(
+                    "✗ Erreur API Tally pour %s : %s",
+                    form_name,
+                    e,
+                )
                 context["errors"].append(str(e))
-                logger.error("✗ Erreur pour %s: %s", form_name, e)
 
     if not context["raw"]:
         logger.warning("⛔ aucun data à traiter")

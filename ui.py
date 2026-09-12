@@ -564,7 +564,7 @@ class ReportViewer(QMainWindow):
         # --------------------------------------------------
         self.progress_dialog = ProgressDialog(self)
         self.progress_dialog.setWindowModality(Qt.NonModal)
-#
+
         self.status_logger.set_progress_dialog(self.progress_dialog)
         self.progress_dialog.open()
 
@@ -587,6 +587,7 @@ class ReportViewer(QMainWindow):
 
 
     def _on_fetch_done(self, count):
+        """Fonction de callback pour le worker en cas de succès"""
         logger.info("%s formulaire(s) récupéré(s)", count, extra={"status": True})
         if self.progress_dialog:
             self.progress_dialog.accept()
@@ -595,31 +596,47 @@ class ReportViewer(QMainWindow):
         self.progress_bar.setVisible(False)
         reload_reports()
 
-    # Fonction de callback pour le worker en cas d'erreur
     def _on_fetch_error(self, message):
+        """Fonction de callback pour le worker en cas d'erreur"""
         logger.error("Erreur lors de l'import Tally : %s", message)
         if self.progress_dialog:
             self.progress_dialog.reject()
             self.status_logger.set_progress_dialog(None)  # débranche
         self.btn_fetch.setEnabled(True)
         self.progress_bar.setVisible(False)
-
-    # fonction de saisir un token
-    def ask_tally_token(self):
-        """Demande à l'utilisateur de saisir un token Tally."""
-        token, ok = QInputDialog.getText(
+        QMessageBox.critical(
             self,
-            "Token Tally",
-            "Nouveau token :",
-            QLineEdit.EchoMode.Password,
+            "Erreur lors de l'import Tally",
+            message,
         )
 
-        if not ok:
-            return ""
-
-        token = token.strip()
-
-        return token
+    def ask_tally_token(self):
+        """Demande à l'utilisateur de saisir un token Tally valide."""
+        while True:
+            token, ok = QInputDialog.getText(
+                self,
+                "Token Tally",
+                "Nouveau token :",
+                QLineEdit.EchoMode.Password,
+            )
+            if not ok:
+                return ""
+            if not token:
+                QMessageBox.warning(
+                    self,
+                    "Token Tally",
+                    "Aucun token n'a été saisi.",
+                )
+                continue
+            if any(char.isspace() for char in token):
+                QMessageBox.warning(
+                    self,
+                    "Token Tally invalide",
+                    "Le token contient des espaces ou des retours à la ligne.\n\n"
+                    "Veuillez copier uniquement la clé Tally.",
+                )
+                continue
+            return token
 
     def _request_tally_token(self):
         """Demande un nouveau token dans le thread UI."""
@@ -639,10 +656,7 @@ class ReportViewer(QMainWindow):
 
     # Fonction pour créer le bandeau de boutons
     def create_toolbar(self):
-        """
-        Crée le bandeau des boutons métier.
-        """
-
+        """Crée le bandeau des boutons métier."""
         toolbar = QHBoxLayout()
         self.btn_fetch = QPushButton("📥 Récupérer formulaires")
         self.btn_refresh = QPushButton("🔄 Actualiser liste")
@@ -664,7 +678,6 @@ class ReportViewer(QMainWindow):
         toolbar.addWidget(self.btn_settings)
         return toolbar
 
-    # Fonction pour créer la barre de progression
     def _setup_progress_bar(self):
         """Barre de progression indéterminée, dans la status bar."""
         self.progress_bar = QProgressBar()
@@ -674,11 +687,8 @@ class ReportViewer(QMainWindow):
         self.progress_bar.setVisible(False)
         self.status_logger.status_bar.addPermanentWidget(self.progress_bar)
 
-    # Fonction pour créer la barre de filtre
     def create_filterbar(self):
-        """
-        Crée la barre de filtre avec le champ de recherche et le bouton d'effacement.
-        """
+        """Crée la barre de filtre avec le champ de recherche et le bouton d'effacement."""
         filter_bar = QHBoxLayout()  # Crée un layout horizontal pour la barre de filtre
         self.search = QLineEdit()  # Crée un champ de saisie texte pour la recherche
         self.search.setPlaceholderText("🔎 Rechercher un patient...")
@@ -689,9 +699,7 @@ class ReportViewer(QMainWindow):
         return filter_bar
 
     def generate_odt(self):
-        """
-        Génère et/ou ouvre le bilan ODT, selon le choix du praticien.
-        """
+        """Génère et/ou ouvre le bilan ODT, selon le choix du praticien."""
         item = self.report_list.currentItem()
         if not item:
             logger.warning("Aucun rapport sélectionné")
@@ -818,10 +826,7 @@ class ReportViewer(QMainWindow):
 
     # Fonction du bouton "Configuration"
     def open_settings(self):
-        """
-        Ouvre la fenêtre de configuration.
-        Placeholder en attendant le dialogue Qt complet.
-        """
+        """Ouvre la fenêtre de configuration."""
         dialog = SettingsDialog(self) # ouvrir la fenêtre de configuration
 
         if dialog.exec():
@@ -830,7 +835,7 @@ class ReportViewer(QMainWindow):
 
         logger.info("Ouverture des paramètres", extra={"status": True})
 
-# Point d'entrée classique d'un programme Python
+# Point d'entrée classique d'un programme Python, permet de lancer l'application directement depuis ce fichier.
 if __name__ == "__main__":
     logger.info("Début du programme")
     # Création de l'application Qt, QApplication doit exister avant tous les widgets
