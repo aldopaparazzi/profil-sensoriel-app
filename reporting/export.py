@@ -14,11 +14,8 @@ from utils.privacy import anonymize_patient
 logger = get_logger(__name__)
 
 
-def export_json(
-    report: dict[str, Any],
-    patient: dict[str, Any],
-    output_dir: str | Path = paths.json_dir,
-) -> Path:
+def export_json(report, patient, output_dir: str | Path | None = None) -> Path:
+    output_dir = Path(output_dir) if output_dir is not None else paths.json_dir
     """
     Exporte le rapport en JSON.
     """
@@ -37,11 +34,8 @@ def export_json(
     return output_path
 
 
-def export_html(
-    report: dict[str, Any],
-    patient: dict[str, Any],
-    output_dir: str | Path = paths.html_dir,
-) -> Path | None:
+def export_html(report, patient, output_dir: str | Path | None = None) -> Path | None:
+    output_dir = Path(output_dir) if output_dir is not None else paths.html_dir
     """
     Exporte le rapport en HTML.
     """
@@ -63,9 +57,8 @@ def export_html(
         return None
 
 
-def export_odt_report(
-    patient: dict[str, Any], output_dir: str | Path = paths.bilan_dir
-) -> Path | None:
+def export_odt_report(patient, output_dir: str | Path | None = None) -> Path | None:
+    output_dir = Path(output_dir) if output_dir is not None else paths.bilan_dir
     """
     Exporte le rapport en ODT.
     """

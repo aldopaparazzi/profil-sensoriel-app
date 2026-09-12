@@ -22,12 +22,17 @@ def ensure_env():
             encoding="utf-8",
         )
 
-
 def load_runtime() -> dict:
     try:
         return json.loads(paths.runtime_json.read_text(encoding="utf-8"))
     except FileNotFoundError:
-        return {}
+        try:
+            defaults = json.loads(paths.default_runtime_json.read_text(encoding="utf-8"))
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            defaults = {}
+        defaults.pop("workspace", None)  # jamais hérité : toujours demandé à l'utilisateur
+        save_runtime(defaults)
+        return defaults
     except (json.JSONDecodeError, OSError) as e:
         logger.warning("Impossible de charger runtime.json : %s", e)
         return {}

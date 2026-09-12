@@ -56,6 +56,11 @@ class Paths:
     # --------------------------------------------------------
 
     @property
+    def default_runtime_json(self) -> Path:
+        """runtime.json embarqué avec l'app (valeurs par défaut, lecture seule)."""
+        return self.resource_dir / "config" / "runtime.json"
+
+    @property
     def runtime(self) -> dict:
         """
         Charge runtime.json.
@@ -104,9 +109,16 @@ class Paths:
     @property
     def config_dir(self) -> Path:
         """
-        Dossier de configuration embarqué.
+        Dossier de configuration (persistant, writable sans droits admin).
+        Même emplacement que le token Tally (.env).
         """
-        return self.resource_dir / "config"
+        local_app_data = Path(
+            os.environ.get(
+                "LOCALAPPDATA",
+                Path.home() / "AppData" / "Local",
+            )
+        )
+        return local_app_data / "Profil Sensoriel"
 
 
     @property

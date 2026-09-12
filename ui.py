@@ -175,9 +175,6 @@ class ReportViewer(QMainWindow):
         # Configure la barre de progression dans la barre d'état.
         self._setup_progress_bar()
 
-        # Vérifie qu'un espace de travail utilisateur existe.
-        self.ensure_workspace()
-
         self.current_report = None
 
         self.setWindowTitle("Profil Sensoriel")
@@ -853,4 +850,5 @@ if __name__ == "__main__":
     window.showMaximized()
     # Lance la boucle événementielle Qt, L'application reste active jusqu'à fermeture de la fenêtre
     splash.finish(window)  # ferme le splash dès que la fenêtre principale est prête
+    window.ensure_workspace() # Vérifie qu'un espace de travail utilisateur existe.
     sys.exit(app.exec())
